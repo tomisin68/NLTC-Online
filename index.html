@@ -6,854 +6,753 @@
 <title>Next Level Tutorial College — Nigeria's #1 Exam Prep Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@400;500;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-  :root {
-    --navy: #0D1F4E;
-    --navy-mid: #1A2F6B;
-    --navy-light: #2B4494;
-    --navy-pale: #E8EDF8;
-    --gold: #F4C430;
-    --gold-deep: #D4A017;
-    --gold-bright: #FFD700;
-    --gold-pale: #FFF8DC;
-    --white: #FFFFFF;
-    --off-white: #F9F8F4;
-    --text-dark: #0D1F4E;
-    --text-mid: #3D4F7C;
-    --text-light: #6B7A99;
-    --success: #12B76A;
-    --border: rgba(13,31,78,0.1);
-    --shadow-sm: 0 2px 12px rgba(13,31,78,0.08);
-    --shadow-md: 0 8px 40px rgba(13,31,78,0.14);
-    --shadow-lg: 0 24px 80px rgba(13,31,78,0.2);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    color: var(--text-dark);
-    background: var(--white);
-    overflow-x: hidden;
-  }
-
-  /* =================== NAV =================== */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    padding: 0 5%;
-    display: flex; align-items: center; justify-content: space-between;
-    height: 72px;
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(13,31,78,0.06);
-    transition: box-shadow 0.3s;
-  }
-  nav.scrolled { box-shadow: var(--shadow-sm); }
-
-  .nav-logo {
-    display: flex; align-items: center; gap: 10px;
-    font-family: 'Clash Display', sans-serif;
-    font-size: 1.25rem; font-weight: 700; color: var(--navy);
-    text-decoration: none;
-  }
-  .nav-logo-icon {
-    width: 38px; height: 38px;
-    background: var(--navy);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .nav-logo-icon svg { width: 22px; height: 22px; }
-
-  .nav-links { display: flex; gap: 36px; list-style: none; }
-  .nav-links a {
-    font-size: 0.875rem; font-weight: 500; color: var(--text-mid);
-    text-decoration: none; transition: color 0.2s;
-  }
-  .nav-links a:hover { color: var(--navy); }
-
-  .nav-cta {
-    display: flex; gap: 12px; align-items: center;
-  }
-  .btn-outline-nav {
-    padding: 9px 20px; border: 1.5px solid var(--navy);
-    border-radius: 10px; font-size: 0.875rem; font-weight: 600;
-    color: var(--navy); background: transparent; cursor: pointer;
-    transition: all 0.2s; font-family: 'DM Sans', sans-serif;
-    text-decoration: none;
-  }
-  .btn-outline-nav:hover { background: var(--navy); color: white; }
-  .btn-solid-nav {
-    padding: 9px 20px; border: none;
-    border-radius: 10px; font-size: 0.875rem; font-weight: 600;
-    color: var(--navy); background: var(--gold); cursor: pointer;
-    transition: all 0.2s; font-family: 'DM Sans', sans-serif;
-    text-decoration: none;
-  }
-  .btn-solid-nav:hover { background: var(--gold-deep); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(244,196,48,0.5); }
-
-  /* =================== HERO =================== */
-  .hero {
-    min-height: 100vh;
-    background: var(--navy);
-    position: relative; overflow: hidden;
-    display: flex; flex-direction: column;
-    padding-top: 72px;
-  }
-
-  .hero-bg-pattern {
-    position: absolute; inset: 0; z-index: 0;
-    background-image:
-      radial-gradient(circle at 20% 50%, rgba(244,196,48,0.08) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(43,68,148,0.6) 0%, transparent 50%),
-      radial-gradient(circle at 60% 80%, rgba(244,196,48,0.05) 0%, transparent 40%);
-  }
-
-  .hero-grid-lines {
-    position: absolute; inset: 0; z-index: 0; opacity: 0.04;
-    background-image:
-      linear-gradient(rgba(255,255,255,1) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px);
-    background-size: 80px 80px;
-  }
-
-  .hero-content {
-    position: relative; z-index: 2;
-    flex: 1; display: flex; align-items: center;
-    padding: 5% 5% 0;
-    gap: 60px;
-  }
-
-  .hero-left { flex: 1; max-width: 600px; }
-
-  .hero-badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(244,196,48,0.15);
-    border: 1px solid rgba(244,196,48,0.3);
-    border-radius: 100px; padding: 6px 16px;
-    font-size: 0.8rem; font-weight: 600; color: var(--gold);
-    margin-bottom: 28px; letter-spacing: 0.05em; text-transform: uppercase;
-  }
-  .hero-badge-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--gold); animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.3); }
-  }
-
-  .hero-h1 {
-    font-family: 'Clash Display', sans-serif;
-    font-size: clamp(2.6rem, 5vw, 4.2rem);
-    font-weight: 700; line-height: 1.1;
-    color: white; margin-bottom: 24px;
-  }
-  .hero-h1 .highlight {
-    color: var(--gold);
-    position: relative; display: inline-block;
-  }
-  .hero-h1 .highlight::after {
-    content: '';
-    position: absolute; bottom: -4px; left: 0; right: 0; height: 4px;
-    background: var(--gold); border-radius: 2px; opacity: 0.4;
-  }
-
-  .hero-subtext {
-    font-size: 1.125rem; line-height: 1.75;
-    color: rgba(255,255,255,0.65); margin-bottom: 40px;
-    max-width: 480px;
-  }
-
-  .hero-actions {
-    display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 48px;
-  }
-
-  .btn-hero-primary {
-    padding: 16px 32px; background: var(--gold);
-    color: var(--navy); border: none; border-radius: 14px;
-    font-size: 1rem; font-weight: 700; cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    display: flex; align-items: center; gap: 10px;
-    transition: all 0.25s; text-decoration: none;
-    box-shadow: 0 8px 32px rgba(244,196,48,0.4);
-  }
-  .btn-hero-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 16px 48px rgba(244,196,48,0.5);
-  }
-
-  .btn-hero-secondary {
-    padding: 16px 32px;
-    background: rgba(255,255,255,0.08);
-    color: white; border: 1.5px solid rgba(255,255,255,0.2);
-    border-radius: 14px; font-size: 1rem; font-weight: 600; cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    display: flex; align-items: center; gap: 10px;
-    transition: all 0.25s; text-decoration: none;
-    backdrop-filter: blur(8px);
-  }
-  .btn-hero-secondary:hover {
-    background: rgba(255,255,255,0.15);
-    border-color: rgba(255,255,255,0.4);
-  }
-
-  .hero-stats {
-    display: flex; gap: 40px; flex-wrap: wrap;
-  }
-  .hero-stat-item {}
-  .hero-stat-num {
-    font-family: 'Clash Display', sans-serif;
-    font-size: 2rem; font-weight: 700; color: white;
-    display: flex; align-items: baseline; gap: 2px;
-  }
-  .hero-stat-num span { font-size: 1.2rem; color: var(--gold); }
-  .hero-stat-label { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 2px; }
-
-  .hero-right {
-    flex: 1; max-width: 520px;
-    position: relative; display: flex; justify-content: center; align-items: center;
-  }
-
-  .hero-mockup-wrap {
-    position: relative; width: 100%;
-    animation: floatY 6s ease-in-out infinite;
-  }
-  @keyframes floatY {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-16px); }
-  }
-
-  .hero-phone-img {
-    width: 100%;
-    border-radius: 24px;
-    box-shadow: 0 40px 100px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
-    display: block;
-  }
-
-  .hero-floating-card {
-    position: absolute;
-    background: white; border-radius: 16px;
-    padding: 14px 18px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    display: flex; align-items: center; gap: 12px;
-  }
-  .hero-floating-card.card-1 { top: 12%; left: -40px; }
-  .hero-floating-card.card-2 { bottom: 18%; right: -30px; }
-
-  .fc-icon {
-    width: 42px; height: 42px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem; flex-shrink: 0;
-  }
-  .fc-icon.gold { background: var(--gold-pale); color: var(--gold-deep); }
-  .fc-icon.blue { background: var(--navy-pale); color: var(--navy); }
-
-  .fc-label { font-size: 0.7rem; color: var(--text-light); font-weight: 500; }
-  .fc-val { font-size: 1rem; font-weight: 700; color: var(--navy); font-family: 'Clash Display', sans-serif; }
-
-  /* Hero bottom image strip */
-  .hero-bottom {
-    position: relative; z-index: 2;
-    overflow: hidden; margin-top: auto;
-    height: 160px;
-  }
-  .hero-bottom img {
-    width: 100%; height: 100%; object-fit: cover;
-    opacity: 0.25;
-    mask-image: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
-    -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
-  }
-
-  /* wave divider */
-  .wave-divider { display: block; width: 100%; margin-bottom: -2px; }
-
-  /* =================== TRUST STRIP =================== */
-  .trust-strip {
-    background: var(--off-white);
-    padding: 24px 5%;
-    display: flex; align-items: center; justify-content: center;
-    gap: 60px; flex-wrap: wrap;
-    border-bottom: 1px solid var(--border);
-  }
-  .trust-item {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 0.875rem; font-weight: 600; color: var(--text-mid);
-  }
-  .trust-icon { font-size: 1.2rem; color: var(--navy); }
-
-  /* =================== SECTIONS SHARED =================== */
-  section { padding: 100px 5%; }
-
-  .section-tag {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: var(--navy-pale); border-radius: 100px;
-    padding: 5px 14px; font-size: 0.75rem; font-weight: 700;
-    color: var(--navy); letter-spacing: 0.08em; text-transform: uppercase;
-    margin-bottom: 16px;
-  }
-  .section-tag i { font-size: 0.7rem; }
-
-  .section-h2 {
-    font-family: 'Clash Display', sans-serif;
-    font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 700;
-    line-height: 1.15; color: var(--navy); margin-bottom: 16px;
-  }
-  .section-h2 .accent { color: var(--gold-deep); }
-
-  .section-sub {
-    font-size: 1.0625rem; line-height: 1.75;
-    color: var(--text-light); max-width: 560px;
-  }
-
-  /* =================== FEATURES =================== */
-  .features { background: white; }
-  .features-header { text-align: center; margin-bottom: 64px; }
-  .features-header .section-sub { margin: 0 auto; }
-
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 28px;
-  }
-
-  .feature-card {
-    background: var(--off-white);
-    border: 1px solid var(--border);
-    border-radius: 20px; padding: 32px;
-    transition: all 0.3s; position: relative; overflow: hidden;
-  }
-  .feature-card::before {
-    content: ''; position: absolute;
-    top: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, var(--navy), var(--gold));
-    transform: scaleX(0); transform-origin: left;
-    transition: transform 0.3s;
-  }
-  .feature-card:hover::before { transform: scaleX(1); }
-  .feature-card:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--shadow-md);
-    border-color: transparent;
-    background: white;
-  }
-
-  .feature-icon-wrap {
-    width: 56px; height: 56px; border-radius: 16px;
-    background: var(--navy); display: flex; align-items: center;
-    justify-content: center; margin-bottom: 20px;
-    font-size: 1.4rem; color: var(--gold);
-  }
-
-  .feature-title {
-    font-family: 'Cabinet Grotesk', sans-serif;
-    font-size: 1.1rem; font-weight: 700; color: var(--navy);
-    margin-bottom: 10px;
-  }
-
-  .feature-desc {
-    font-size: 0.9rem; line-height: 1.7; color: var(--text-light);
-  }
-
-  /* =================== EXAMS SECTION =================== */
-  .exams-section {
-    background: var(--navy);
-    padding: 100px 5%;
-    position: relative; overflow: hidden;
-  }
-  .exams-section::before {
-    content: ''; position: absolute;
-    top: -200px; right: -200px;
-    width: 600px; height: 600px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(244,196,48,0.06) 0%, transparent 70%);
-  }
-
-  .exams-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px; margin-top: 56px;
-  }
-  @media(max-width: 900px) { .exams-grid { grid-template-columns: repeat(2,1fr); } }
-
-  .exam-card {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 20px; padding: 32px 24px; text-align: center;
-    transition: all 0.3s; position: relative; overflow: hidden;
-  }
-  .exam-card:hover {
-    background: rgba(244,196,48,0.1);
-    border-color: rgba(244,196,48,0.3);
-    transform: translateY(-4px);
-  }
-  .exam-badge {
-    font-family: 'Clash Display', sans-serif;
-    font-size: 1.8rem; font-weight: 700;
-    color: var(--gold); margin-bottom: 8px;
-  }
-  .exam-name {
-    font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.5);
-    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px;
-  }
-  .exam-fullname {
-    font-size: 0.85rem; color: rgba(255,255,255,0.7); line-height: 1.5; margin-bottom: 20px;
-  }
-  .exam-subjects {
-    font-size: 0.8rem; color: var(--gold);
-    font-weight: 600;
-  }
-
-  /* =================== HOW IT WORKS =================== */
-  .how-section { background: var(--off-white); }
-  .steps-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 0; margin-top: 60px; position: relative;
-  }
-
-  .step-item {
-    display: flex; flex-direction: column; align-items: center;
-    text-align: center; padding: 32px 24px; position: relative;
-  }
-
-  .step-num {
-    width: 64px; height: 64px; border-radius: 20px;
-    background: var(--navy); color: white;
-    font-family: 'Clash Display', sans-serif;
-    font-size: 1.5rem; font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 20px; position: relative; z-index: 2;
-    box-shadow: 0 8px 32px rgba(13,31,78,0.25);
-  }
-  .step-num.gold-step { background: var(--gold); color: var(--navy); box-shadow: 0 8px 32px rgba(244,196,48,0.4); }
-
-  .step-title {
-    font-family: 'Cabinet Grotesk', sans-serif;
-    font-size: 1.05rem; font-weight: 700; color: var(--navy);
-    margin-bottom: 10px;
-  }
-  .step-desc { font-size: 0.875rem; line-height: 1.7; color: var(--text-light); }
-
-  .steps-connector {
-    position: absolute; top: 54px; left: 75%; right: -25%;
-    height: 2px; background: linear-gradient(90deg, var(--navy), var(--gold));
-    opacity: 0.25; z-index: 1;
-  }
-
-  /* =================== PRICING =================== */
-  .pricing-section { background: white; }
-  .pricing-header { text-align: center; margin-bottom: 56px; }
-  .pricing-header .section-sub { margin: 0 auto; }
-
-  .pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px; align-items: start;
-    max-width: 960px; margin: 0 auto;
-  }
-
-  .plan-card {
-    border-radius: 24px; padding: 36px;
-    border: 1.5px solid var(--border);
-    background: white; transition: all 0.3s;
-    position: relative; overflow: hidden;
-  }
-  .plan-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); }
-
-  .plan-card.popular {
-    background: var(--navy);
-    border-color: var(--navy);
-    transform: scale(1.03);
-  }
-  .plan-card.popular:hover { transform: scale(1.03) translateY(-6px); }
-
-  .popular-badge {
-    position: absolute; top: 20px; right: 20px;
-    background: var(--gold); color: var(--navy);
-    font-size: 0.7rem; font-weight: 800;
-    padding: 4px 12px; border-radius: 100px;
-    text-transform: uppercase; letter-spacing: 0.05em;
-  }
-
-  .plan-name {
-    font-family: 'Clash Display', sans-serif;
-    font-size: 1rem; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.1em;
-    color: var(--text-light); margin-bottom: 12px;
-  }
-  .plan-card.popular .plan-name { color: rgba(255,255,255,0.6); }
-
-  .plan-price {
-    font-family: 'Clash Display', sans-serif;
-    font-size: 2.8rem; font-weight: 700; color: var(--navy);
-    line-height: 1; margin-bottom: 4px;
-  }
-  .plan-card.popular .plan-price { color: var(--gold); }
-
-  .plan-period { font-size: 0.85rem; color: var(--text-light); margin-bottom: 24px; }
-  .plan-card.popular .plan-period { color: rgba(255,255,255,0.5); }
-
-  .plan-divider {
-    height: 1px; background: var(--border); margin-bottom: 24px;
-  }
-  .plan-card.popular .plan-divider { background: rgba(255,255,255,0.12); }
-
-  .plan-features { list-style: none; margin-bottom: 32px; }
-  .plan-features li {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 0.9rem; color: var(--text-mid); padding: 7px 0;
-  }
-  .plan-card.popular .plan-features li { color: rgba(255,255,255,0.85); }
-  .plan-features li i {
-    color: var(--success); font-size: 0.8rem; flex-shrink: 0;
-  }
-  .plan-card.popular .plan-features li i { color: var(--gold); }
-
-  .plan-btn {
-    width: 100%; padding: 15px; border-radius: 14px;
-    font-size: 0.95rem; font-weight: 700; cursor: pointer;
-    font-family: 'DM Sans', sans-serif; border: none;
-    transition: all 0.25s;
-  }
-  .plan-btn-outline {
-    background: transparent; border: 1.5px solid var(--navy);
-    color: var(--navy);
-  }
-  .plan-btn-outline:hover { background: var(--navy); color: white; }
-  .plan-btn-solid { background: var(--gold); color: var(--navy); }
-  .plan-btn-solid:hover { background: var(--gold-deep); box-shadow: 0 6px 24px rgba(244,196,48,0.4); }
-
-  /* =================== TESTIMONIALS =================== */
-  .testimonials-section { background: var(--navy-pale); }
-  .testimonials-header { text-align: center; margin-bottom: 56px; }
-  .testimonials-header .section-sub { margin: 0 auto; }
-
-  .testimonials-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 24px;
-  }
-
-  .testimonial-card {
-    background: white; border-radius: 20px;
-    padding: 28px; box-shadow: var(--shadow-sm);
-    transition: transform 0.3s;
-  }
-  .testimonial-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
-
-  .t-stars { color: var(--gold); font-size: 0.9rem; margin-bottom: 14px; letter-spacing: 2px; }
-
-  .t-quote {
-    font-size: 0.9375rem; line-height: 1.75; color: var(--text-mid);
-    font-style: italic; margin-bottom: 20px;
-  }
-  .t-quote::before { content: '"'; font-size: 2rem; color: var(--gold); line-height: 0; vertical-align: -0.4em; margin-right: 4px; }
-
-  .t-person { display: flex; align-items: center; gap: 12px; }
-  .t-avatar {
-    width: 44px; height: 44px; border-radius: 50%;
-    object-fit: cover; border: 2px solid var(--gold);
-  }
-  .t-avatar-placeholder {
-    width: 44px; height: 44px; border-radius: 50%;
-    background: var(--navy); display: flex; align-items: center; justify-content: center;
-    font-weight: 700; color: white; font-size: 1rem; flex-shrink: 0;
-    border: 2px solid var(--gold);
-  }
-  .t-name { font-weight: 700; font-size: 0.9rem; color: var(--navy); }
-  .t-detail { font-size: 0.78rem; color: var(--text-light); }
-
-  /* =================== GAMIFICATION PREVIEW =================== */
-  .gamification-section {
-    background: white; padding: 100px 5%;
-    overflow: hidden;
-  }
-  .gamification-inner {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 80px; align-items: center;
-  }
-  @media(max-width:900px) { .gamification-inner { grid-template-columns:1fr; } }
-
-  .gamification-visual {
-    background: var(--navy);
-    border-radius: 28px; padding: 36px;
-    position: relative; overflow: hidden;
-    box-shadow: var(--shadow-lg);
-  }
-  .gamification-visual::before {
-    content: ''; position: absolute;
-    top: -80px; right: -80px;
-    width: 280px; height: 280px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(244,196,48,0.12) 0%, transparent 70%);
-  }
-
-  .xp-bar-wrap { margin-bottom: 24px; }
-  .xp-label {
-    display: flex; justify-content: space-between;
-    font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 8px;
-  }
-  .xp-bar-bg {
-    height: 10px; background: rgba(255,255,255,0.1);
-    border-radius: 100px; overflow: hidden;
-  }
-  .xp-bar-fill {
-    height: 100%; border-radius: 100px;
-    background: linear-gradient(90deg, var(--gold), #FFD700);
-    width: 68%; box-shadow: 0 0 16px rgba(244,196,48,0.5);
-  }
-
-  .achievements-row {
-    display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;
-  }
-  .achievement-badge {
-    width: 52px; height: 52px; border-radius: 14px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.12);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    font-size: 1.2rem; transition: all 0.2s;
-    cursor: pointer;
-  }
-  .achievement-badge:hover { background: rgba(244,196,48,0.15); border-color: rgba(244,196,48,0.4); }
-  .achievement-badge.locked { opacity: 0.3; filter: grayscale(1); }
-
-  .leaderboard-preview {}
-  .lb-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
-  .lb-rank {
-    width: 24px; font-size: 0.85rem; font-weight: 700; color: var(--gold);
-    text-align: center;
-  }
-  .lb-avatar {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: rgba(255,255,255,0.15);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.75rem; font-weight: 700; color: white;
-  }
-  .lb-name { flex: 1; font-size: 0.875rem; color: rgba(255,255,255,0.85); }
-  .lb-xp { font-size: 0.8rem; color: var(--gold); font-weight: 700; }
-
-  /* =================== STATS =================== */
-  .stats-section {
-    background: var(--gold);
-    padding: 80px 5%;
-  }
-  .stats-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 20px; text-align: center;
-  }
-  @media(max-width:800px) { .stats-grid { grid-template-columns: repeat(2,1fr); } }
-
-  .stat-num {
-    font-family: 'Clash Display', sans-serif;
-    font-size: clamp(2.2rem, 4vw, 3.5rem); font-weight: 700;
-    color: var(--navy); line-height: 1;
-  }
-  .stat-label {
-    font-size: 0.875rem; font-weight: 600; color: rgba(13,31,78,0.65);
-    margin-top: 8px;
-  }
-
-  /* =================== FAQ =================== */
-  .faq-section { background: white; }
-  .faq-inner {
-    display: grid; grid-template-columns: 1fr 1.4fr;
-    gap: 80px; align-items: start;
-  }
-  @media(max-width:900px) { .faq-inner { grid-template-columns:1fr; } }
-
-  .faq-list { margin-top: 8px; }
-  .faq-item {
-    border-bottom: 1px solid var(--border); overflow: hidden;
-  }
-  .faq-question {
-    width: 100%; background: none; border: none; cursor: pointer;
-    padding: 20px 0; display: flex; justify-content: space-between; align-items: center;
-    font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600;
-    color: var(--navy); text-align: left; gap: 16px;
-  }
-  .faq-question i { color: var(--gold-deep); transition: transform 0.3s; flex-shrink: 0; }
-  .faq-item.open .faq-question i { transform: rotate(180deg); }
-  .faq-answer {
-    font-size: 0.9rem; line-height: 1.75; color: var(--text-light);
-    max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s;
-  }
-  .faq-item.open .faq-answer { max-height: 200px; padding-bottom: 20px; }
-
-  /* =================== CTA SECTION =================== */
-  .cta-section {
-    background: var(--navy);
-    padding: 100px 5%; text-align: center;
-    position: relative; overflow: hidden;
-  }
-  .cta-section::before {
-    content: ''; position: absolute; inset: 0;
-    background: radial-gradient(circle at 50% 50%, rgba(244,196,48,0.08) 0%, transparent 60%);
-  }
-
-  .cta-h2 {
-    font-family: 'Clash Display', sans-serif;
-    font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 700;
-    color: white; max-width: 700px; margin: 0 auto 20px;
-    position: relative; z-index: 1;
-  }
-  .cta-sub {
-    font-size: 1.0625rem; color: rgba(255,255,255,0.6);
-    max-width: 520px; margin: 0 auto 40px; line-height: 1.7;
-    position: relative; z-index: 1;
-  }
-  .cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1; }
-
-  .btn-cta-primary {
-    padding: 16px 40px; background: var(--gold);
-    color: var(--navy); border: none; border-radius: 14px;
-    font-size: 1rem; font-weight: 700; cursor: pointer;
-    font-family: 'DM Sans', sans-serif; transition: all 0.25s;
-    box-shadow: 0 8px 32px rgba(244,196,48,0.35); text-decoration: none;
-  }
-  .btn-cta-primary:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(244,196,48,0.5); }
-
-  .btn-cta-outline {
-    padding: 16px 40px; background: transparent;
-    color: white; border: 1.5px solid rgba(255,255,255,0.25);
-    border-radius: 14px; font-size: 1rem; font-weight: 600; cursor: pointer;
-    font-family: 'DM Sans', sans-serif; transition: all 0.25s; text-decoration: none;
-  }
-  .btn-cta-outline:hover { border-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.05); }
-
-  /* =================== FOOTER =================== */
-  footer {
-    background: #050E28;
-    padding: 72px 5% 40px;
-    color: rgba(255,255,255,0.5);
-  }
-  .footer-grid {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 1fr;
-    gap: 48px; margin-bottom: 56px;
-  }
-  @media(max-width:900px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
-
-  .footer-brand {}
-  .footer-logo {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 16px;
-  }
-  .footer-logo-icon {
-    width: 36px; height: 36px; border-radius: 9px;
-    background: var(--navy-light); display: flex; align-items: center; justify-content: center;
-  }
-  .footer-logo-name {
-    font-family: 'Clash Display', sans-serif;
-    font-size: 1.1rem; font-weight: 700; color: white;
-  }
-  .footer-brand-desc {
-    font-size: 0.85rem; line-height: 1.75; max-width: 220px;
-    color: rgba(255,255,255,0.4);
-  }
-
-  .footer-social {
-    display: flex; gap: 10px; margin-top: 20px;
-  }
-  .social-btn {
-    width: 36px; height: 36px; border-radius: 10px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.08);
-    display: flex; align-items: center; justify-content: center;
-    color: rgba(255,255,255,0.5); font-size: 0.85rem;
-    transition: all 0.2s; text-decoration: none;
-  }
-  .social-btn:hover { background: var(--navy-mid); color: var(--gold); border-color: transparent; }
-
-  .footer-col-title {
-    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.1em; color: rgba(255,255,255,0.3);
-    margin-bottom: 20px;
-  }
-  .footer-links { list-style: none; }
-  .footer-links li { margin-bottom: 10px; }
-  .footer-links a {
-    font-size: 0.875rem; color: rgba(255,255,255,0.5);
-    text-decoration: none; transition: color 0.2s;
-  }
-  .footer-links a:hover { color: var(--gold); }
-
-  .footer-bottom {
-    border-top: 1px solid rgba(255,255,255,0.06);
-    padding-top: 28px; display: flex; justify-content: space-between;
-    align-items: center; flex-wrap: gap;
-    font-size: 0.8rem;
-  }
-  .footer-bottom-links { display: flex; gap: 24px; }
-  .footer-bottom-links a { color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.2s; }
-  .footer-bottom-links a:hover { color: white; }
-
-  /* =================== ANIMATIONS =================== */
-  .fade-in {
-    opacity: 0; transform: translateY(30px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-  .fade-in.visible { opacity: 1; transform: none; }
-
-  .slide-left {
-    opacity: 0; transform: translateX(-40px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-  .slide-left.visible { opacity: 1; transform: none; }
-
-  .slide-right {
-    opacity: 0; transform: translateX(40px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-  .slide-right.visible { opacity: 1; transform: none; }
-
-  /* =================== RESPONSIVE =================== */
-  @media(max-width: 768px) {
-    nav { padding: 0 4%; }
-    .nav-links, .nav-cta { display: none; }
-    .hero-content { flex-direction: column; padding: 5% 4% 0; gap: 40px; }
-    .hero-right { width: 100%; max-width: 100%; }
-    .hero-bottom { height: 80px; }
-    section { padding: 72px 4%; }
-    .exams-grid { grid-template-columns: repeat(2,1fr); }
-    .stats-grid { grid-template-columns: repeat(2,1fr); }
-    .gamification-inner { gap: 40px; }
-    .faq-inner { gap: 40px; }
-    .footer-grid { grid-template-columns: 1fr; gap: 32px; }
-    .hero-floating-card { display: none; }
-  }
-
-  /* Number counter */
-  .count-up { display: inline; }
-
-  /* Scroll progress */
-  .scroll-progress {
-    position: fixed; top: 0; left: 0; height: 3px;
-    background: linear-gradient(90deg, var(--navy), var(--gold));
-    z-index: 9999; width: 0%; transition: width 0.1s linear;
-  }
+:root {
+  --navy: #0A1628;
+  --navy-2: #112040;
+  --navy-3: #1a3260;
+  --navy-4: #1e3f7a;
+  --gold: #F5C518;
+  --gold-2: #E8B000;
+  --gold-3: #FFD740;
+  --gold-pale: #FFF9E0;
+  --white: #FFFFFF;
+  --off-white: #F7F8FC;
+  --text-dark: #0A1628;
+  --text-mid: #3A4F7A;
+  --text-light: #7A8BAA;
+  --success: #10B981;
+  --border: rgba(10,22,40,0.09);
+  --sh-sm: 0 2px 16px rgba(10,22,40,0.07);
+  --sh-md: 0 8px 48px rgba(10,22,40,0.13);
+  --sh-lg: 0 24px 96px rgba(10,22,40,0.22);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;color:var(--text-dark);background:var(--white);overflow-x:hidden;}
+
+/* ===== SCROLL PROGRESS ===== */
+#sp{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--navy),var(--gold));z-index:9999;width:0;transition:width .1s linear;}
+
+/* ===== NAV ===== */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  height:72px;padding:0 5%;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,0.97);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(10,22,40,0.06);
+  transition:box-shadow .3s;
+}
+nav.scrolled{box-shadow:var(--sh-sm);}
+
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo img{height:44px;width:auto;display:block;}
+.nav-logo-name{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:800;color:var(--navy);letter-spacing:-.01em;}
+
+.nav-links{display:flex;gap:32px;list-style:none;}
+.nav-links a{font-size:.875rem;font-weight:500;color:var(--text-mid);text-decoration:none;transition:color .2s;position:relative;padding-bottom:2px;}
+.nav-links a::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--gold);transform:scaleX(0);transition:transform .25s;}
+.nav-links a:hover{color:var(--navy);}
+.nav-links a:hover::after{transform:scaleX(1);}
+
+.nav-cta{display:flex;gap:12px;align-items:center;}
+.btn-nav-ghost{padding:9px 20px;border:1.5px solid var(--navy);border-radius:10px;font-size:.875rem;font-weight:600;color:var(--navy);background:transparent;cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif;text-decoration:none;}
+.btn-nav-ghost:hover{background:var(--navy);color:white;}
+.btn-nav-solid{padding:9px 20px;border:none;border-radius:10px;font-size:.875rem;font-weight:700;color:var(--navy);background:var(--gold);cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif;text-decoration:none;}
+.btn-nav-solid:hover{background:var(--gold-2);transform:translateY(-1px);box-shadow:0 4px 20px rgba(245,197,24,.4);}
+
+/* Hamburger */
+.hamburger{display:none;flex-direction:column;justify-content:center;align-items:center;width:42px;height:42px;cursor:pointer;border:none;background:transparent;gap:5px;border-radius:10px;transition:background .2s;}
+.hamburger:hover{background:rgba(10,22,40,.05);}
+.hamburger span{display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;transition:all .35s cubic-bezier(.4,0,.2,1);}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0);}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+/* Mobile menu */
+.mobile-menu{
+  position:fixed;top:72px;left:0;right:0;bottom:0;
+  background:rgba(10,22,40,.97);
+  backdrop-filter:blur(20px);
+  z-index:499;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;
+  transform:translateX(100%);
+  transition:transform .4s cubic-bezier(.4,0,.2,1);
+  padding:40px 5%;
+}
+.mobile-menu.open{transform:translateX(0);}
+.mobile-menu a{
+  display:block;width:100%;max-width:320px;
+  font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;
+  color:rgba(255,255,255,.85);text-decoration:none;
+  padding:16px 24px;border-radius:16px;text-align:center;
+  transition:all .25s;
+  border:1px solid rgba(255,255,255,.06);
+}
+.mobile-menu a:hover{background:rgba(245,197,24,.12);color:var(--gold);border-color:rgba(245,197,24,.25);}
+.mob-cta-row{display:flex;gap:12px;margin-top:24px;width:100%;max-width:320px;}
+.mob-cta-row a{font-size:1rem!important;padding:15px 24px!important;}
+.mob-cta-row .mob-ghost{background:transparent;border-color:rgba(255,255,255,.25)!important;color:rgba(255,255,255,.8)!important;}
+.mob-cta-row .mob-solid{background:var(--gold)!important;color:var(--navy)!important;border-color:var(--gold)!important;}
+
+/* ===== HERO ===== */
+.hero{
+  min-height:100vh;padding-top:72px;
+  background:var(--navy);
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;
+}
+
+#particleCanvas{
+  position:absolute;inset:0;z-index:0;
+  pointer-events:none;
+}
+
+.hero-glow-1{
+  position:absolute;top:-200px;left:-200px;
+  width:700px;height:700px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,197,24,.07) 0%,transparent 70%);
+  z-index:1;
+}
+.hero-glow-2{
+  position:absolute;bottom:-100px;right:-100px;
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(30,63,122,.7) 0%,transparent 70%);
+  z-index:1;
+}
+
+.hero-content{
+  position:relative;z-index:2;
+  flex:1;display:flex;align-items:center;
+  padding:60px 5% 0;gap:60px;
+}
+
+.hero-left{flex:1;max-width:580px;}
+
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(245,197,24,.12);
+  border:1px solid rgba(245,197,24,.28);
+  border-radius:100px;padding:7px 18px;
+  font-size:.75rem;font-weight:700;color:var(--gold);
+  margin-bottom:28px;letter-spacing:.07em;text-transform:uppercase;
+}
+.badge-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.4);}}
+
+.hero-h1{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(2.8rem,5.5vw,4.6rem);
+  font-weight:800;line-height:1.05;
+  color:white;margin-bottom:24px;letter-spacing:-.02em;
+}
+.hero-h1 .hl{
+  color:var(--gold);
+  background:linear-gradient(135deg,var(--gold) 0%,var(--gold-3) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+
+.hero-sub{
+  font-size:1.0625rem;line-height:1.8;
+  color:rgba(255,255,255,.6);margin-bottom:40px;max-width:460px;
+}
+
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:52px;}
+
+.btn-hp{
+  padding:16px 32px;background:var(--gold);
+  color:var(--navy);border:none;border-radius:14px;
+  font-size:.975rem;font-weight:700;cursor:pointer;
+  font-family:'Outfit',sans-serif;
+  display:flex;align-items:center;gap:10px;
+  transition:all .3s;text-decoration:none;
+  box-shadow:0 8px 36px rgba(245,197,24,.38);
+  position:relative;overflow:hidden;
+}
+.btn-hp::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.btn-hp:hover{transform:translateY(-3px);box-shadow:0 16px 56px rgba(245,197,24,.5);}
+.btn-hp:hover::after{opacity:1;}
+
+.btn-hs{
+  padding:16px 32px;
+  background:rgba(255,255,255,.07);
+  color:white;border:1.5px solid rgba(255,255,255,.18);
+  border-radius:14px;font-size:.975rem;font-weight:600;cursor:pointer;
+  font-family:'Outfit',sans-serif;
+  display:flex;align-items:center;gap:10px;
+  transition:all .25s;text-decoration:none;
+  backdrop-filter:blur(8px);
+}
+.btn-hs:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.35);}
+
+.hero-stats{display:flex;gap:44px;flex-wrap:wrap;}
+.hst-num{
+  font-family:'Syne',sans-serif;
+  font-size:2.1rem;font-weight:800;color:white;
+  display:flex;align-items:baseline;gap:3px;
+}
+.hst-num sup{font-size:1.1rem;color:var(--gold);}
+.hst-label{font-size:.78rem;color:rgba(255,255,255,.45);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;}
+
+/* Hero Right — Visual Mosaic */
+.hero-right{
+  flex:1;max-width:540px;
+  position:relative;
+}
+
+.hero-img-mosaic{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:auto auto;
+  gap:12px;
+  animation:floatY 7s ease-in-out infinite;
+}
+@keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px);}}
+
+.mosaic-img{border-radius:20px;overflow:hidden;position:relative;}
+.mosaic-img img{width:100%;height:100%;object-fit:cover;display:block;}
+.mosaic-img.tall{grid-row:span 2;height:360px;}
+.mosaic-img.short{height:170px;}
+
+.hero-fc{
+  position:absolute;background:white;border-radius:16px;
+  padding:12px 16px;box-shadow:0 16px 56px rgba(0,0,0,.28);
+  display:flex;align-items:center;gap:11px;
+  animation:floatY 5s ease-in-out infinite;
+}
+.hero-fc.fc-1{top:8%;left:-50px;animation-delay:0s;}
+.hero-fc.fc-2{bottom:20%;right:-36px;animation-delay:1.5s;}
+.fc-ic{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.fc-ic.g{background:#FFF8DC;color:#C89400;}
+.fc-ic.b{background:#EBF0FA;color:#1a3260;}
+.fc-lbl{font-size:.65rem;color:#8A9BBC;font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
+.fc-val{font-size:.95rem;font-weight:800;color:var(--navy);font-family:'Syne',sans-serif;}
+
+/* wave */
+.wave-div{display:block;width:100%;margin-top:48px;flex-shrink:0;}
+
+/* ===== TRUST STRIP ===== */
+.trust{
+  background:var(--off-white);
+  padding:22px 5%;
+  display:flex;align-items:center;justify-content:center;
+  gap:52px;flex-wrap:wrap;
+  border-bottom:1px solid var(--border);
+}
+.ti{display:flex;align-items:center;gap:9px;font-size:.85rem;font-weight:600;color:var(--text-mid);}
+.ti i{font-size:1.1rem;color:var(--navy);}
+
+/* ===== SHARED SECTION ===== */
+section{padding:104px 5%;}
+
+.stag{
+  display:inline-flex;align-items:center;gap:6px;
+  background:#EBF0FA;border-radius:100px;
+  padding:5px 15px;font-size:.72rem;font-weight:700;
+  color:var(--navy);letter-spacing:.08em;text-transform:uppercase;
+  margin-bottom:18px;
+}
+.sh2{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(2rem,3.5vw,3rem);font-weight:800;
+  line-height:1.1;color:var(--navy);margin-bottom:16px;letter-spacing:-.02em;
+}
+.sh2 .ac{color:var(--gold-2);}
+.ssub{font-size:1rem;line-height:1.8;color:var(--text-light);max-width:540px;}
+
+/* ===== FEATURES ===== */
+.feats{background:white;}
+.feats-hd{text-align:center;margin-bottom:68px;}
+.feats-hd .ssub{margin:0 auto;}
+
+.feat-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:24px;
+}
+@media(max-width:900px){.feat-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.feat-grid{grid-template-columns:1fr;}}
+
+.fc-card{
+  background:var(--off-white);
+  border:1px solid var(--border);
+  border-radius:22px;padding:34px;
+  transition:all .35s;position:relative;overflow:hidden;
+}
+.fc-card::before{
+  content:'';position:absolute;
+  bottom:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--navy),var(--gold));
+  transform:scaleX(0);transform-origin:left;transition:transform .35s;
+}
+.fc-card:hover::before{transform:scaleX(1);}
+.fc-card:hover{transform:translateY(-8px);box-shadow:var(--sh-md);background:white;border-color:transparent;}
+
+.fc-icon{
+  width:58px;height:58px;border-radius:17px;
+  background:var(--navy);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:22px;font-size:1.35rem;color:var(--gold);
+}
+.fc-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;color:var(--navy);margin-bottom:10px;}
+.fc-desc{font-size:.88rem;line-height:1.75;color:var(--text-light);}
+
+/* ===== IMAGE SHOWCASE (new section) ===== */
+.showcase{background:var(--navy);padding:100px 5%;position:relative;overflow:hidden;}
+.showcase::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 20% 50%,rgba(245,197,24,.06) 0%,transparent 50%),
+    radial-gradient(circle at 80% 30%,rgba(26,50,96,.8) 0%,transparent 50%);
+}
+.showcase-inner{
+  position:relative;z-index:2;
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;
+}
+@media(max-width:900px){.showcase-inner{grid-template-columns:1fr;gap:48px;}}
+.showcase-text{}
+.showcase-imgs{
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;
+}
+.sc-img{border-radius:18px;overflow:hidden;position:relative;}
+.sc-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s;}
+.sc-img:hover img{transform:scale(1.05);}
+.sc-img.tall{height:260px;}
+.sc-img.short{height:120px;}
+.sc-img-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(10,22,40,.7),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.sc-img:hover .sc-img-overlay{opacity:1;}
+.sc-img-tag{
+  position:absolute;bottom:12px;left:12px;
+  background:var(--gold);color:var(--navy);
+  font-size:.65rem;font-weight:800;
+  padding:4px 10px;border-radius:100px;
+  letter-spacing:.05em;text-transform:uppercase;
+  opacity:0;transform:translateY(6px);transition:all .3s;
+}
+.sc-img:hover .sc-img-tag{opacity:1;transform:translateY(0);}
+
+/* ===== EXAMS ===== */
+.exams{background:var(--navy);padding:100px 5%;position:relative;overflow:hidden;}
+.exams::after{
+  content:'';position:absolute;
+  top:-300px;right:-300px;
+  width:700px;height:700px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,197,24,.05) 0%,transparent 70%);
+}
+
+.exams-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:20px;margin-top:56px;
+}
+@media(max-width:900px){.exams-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:480px){.exams-grid{grid-template-columns:1fr;}}
+
+.ex-card{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:22px;padding:36px 24px;text-align:center;
+  transition:all .35s;position:relative;overflow:hidden;
+}
+.ex-card::before{
+  content:'';position:absolute;
+  top:0;left:50%;transform:translateX(-50%);
+  width:60%;height:2px;background:var(--gold);
+  opacity:0;transition:opacity .3s;
+}
+.ex-card:hover{background:rgba(245,197,24,.08);border-color:rgba(245,197,24,.25);transform:translateY(-6px);}
+.ex-card:hover::before{opacity:1;}
+.ex-badge{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--gold);margin-bottom:8px;}
+.ex-name{font-size:.72rem;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.09em;margin-bottom:14px;}
+.ex-full{font-size:.82rem;color:rgba(255,255,255,.65);line-height:1.55;margin-bottom:20px;}
+.ex-subs{font-size:.78rem;color:var(--gold);font-weight:700;}
+
+/* ===== HOW IT WORKS ===== */
+.how{background:var(--off-white);}
+.steps{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:0;margin-top:64px;position:relative;
+}
+@media(max-width:900px){.steps{grid-template-columns:repeat(2,1fr);gap:24px;}}
+@media(max-width:480px){.steps{grid-template-columns:1fr;}}
+
+.step{
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;padding:32px 20px;position:relative;
+}
+.step:not(:last-child)::after{
+  content:'';position:absolute;
+  top:52px;left:62%;right:-38%;
+  height:2px;
+  background:linear-gradient(90deg,var(--navy),var(--gold));
+  opacity:.18;z-index:1;
+}
+@media(max-width:900px){.step::after{display:none!important;}}
+
+.snum{
+  width:64px;height:64px;border-radius:20px;
+  background:var(--navy);color:white;
+  font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:22px;z-index:2;position:relative;
+  box-shadow:0 8px 32px rgba(10,22,40,.22);
+}
+.snum.gold{background:var(--gold);color:var(--navy);box-shadow:0 8px 32px rgba(245,197,24,.38);}
+.step-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:10px;}
+.step-desc{font-size:.86rem;line-height:1.75;color:var(--text-light);}
+
+/* ===== GAMIFICATION ===== */
+.gamif{background:white;padding:100px 5%;overflow:hidden;}
+.gamif-inner{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:80px;align-items:center;
+}
+@media(max-width:900px){.gamif-inner{grid-template-columns:1fr;gap:48px;}}
+
+.gamif-visual{
+  background:var(--navy);border-radius:28px;padding:36px;
+  position:relative;overflow:hidden;box-shadow:var(--sh-lg);
+}
+.gamif-visual::before{
+  content:'';position:absolute;
+  top:-80px;right:-80px;
+  width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,197,24,.1) 0%,transparent 70%);
+}
+
+.xp-label{display:flex;justify-content:space-between;font-size:.78rem;color:rgba(255,255,255,.5);margin-bottom:8px;}
+.xp-bg{height:10px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden;}
+.xp-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--gold),var(--gold-3));width:68%;box-shadow:0 0 18px rgba(245,197,24,.45);}
+
+.ach-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;}
+.ach-bdg{
+  width:50px;height:50px;border-radius:13px;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.15rem;transition:all .2s;cursor:pointer;
+}
+.ach-bdg:hover{background:rgba(245,197,24,.15);border-color:rgba(245,197,24,.35);}
+.ach-bdg.locked{opacity:.25;filter:grayscale(1);}
+
+.lb-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.lb-rank{width:22px;font-size:.83rem;font-weight:700;color:var(--gold);text-align:center;}
+.lb-av{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:.73rem;font-weight:700;color:white;}
+.lb-nm{flex:1;font-size:.85rem;color:rgba(255,255,255,.82);}
+.lb-xp{font-size:.78rem;color:var(--gold);font-weight:700;}
+.lb-me{border-color:rgba(245,197,24,.2)!important;background:rgba(245,197,24,.05)!important;}
+
+.gamif-point{display:flex;gap:14px;align-items:flex-start;margin-bottom:20px;}
+.gp-ic{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+.gp-ic.n{background:#EBF0FA;color:var(--navy);}
+.gp-ic.g{background:var(--gold-pale);color:var(--gold-2);}
+.gp-title{font-size:.9rem;font-weight:700;color:var(--navy);margin-bottom:3px;}
+.gp-desc{font-size:.84rem;color:var(--text-light);line-height:1.6;}
+
+/* ===== STATS BAND ===== */
+.stats-band{background:var(--gold);padding:80px 5%;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;text-align:center;}
+@media(max-width:700px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+.stn{font-family:'Syne',sans-serif;font-size:clamp(2.2rem,4vw,3.4rem);font-weight:800;color:var(--navy);line-height:1;}
+.stl{font-size:.85rem;font-weight:600;color:rgba(10,22,40,.6);margin-top:8px;}
+
+/* ===== PRICING ===== */
+.pricing{background:white;}
+.pricing-hd{text-align:center;margin-bottom:56px;}
+.pricing-hd .ssub{margin:0 auto;}
+
+.pricing-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:24px;align-items:start;max-width:1000px;margin:0 auto;
+}
+@media(max-width:860px){.pricing-grid{grid-template-columns:1fr;max-width:420px;}}
+
+.plan{
+  border-radius:26px;padding:38px;
+  border:1.5px solid var(--border);
+  background:white;transition:all .35s;position:relative;overflow:hidden;
+}
+.plan:hover{transform:translateY(-8px);box-shadow:var(--sh-md);}
+.plan.pop{
+  background:var(--navy);border-color:var(--navy);
+  transform:scale(1.04);
+}
+.plan.pop:hover{transform:scale(1.04) translateY(-8px);}
+
+.pop-tag{
+  position:absolute;top:22px;right:22px;
+  background:var(--gold);color:var(--navy);
+  font-size:.68rem;font-weight:800;
+  padding:4px 12px;border-radius:100px;
+  text-transform:uppercase;letter-spacing:.05em;
+}
+.plan-name{
+  font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.12em;
+  color:var(--text-light);margin-bottom:14px;
+}
+.plan.pop .plan-name{color:rgba(255,255,255,.55);}
+.plan-price{
+  font-family:'Syne',sans-serif;font-size:2.8rem;font-weight:800;
+  color:var(--navy);line-height:1;margin-bottom:5px;
+}
+.plan.pop .plan-price{color:var(--gold);}
+.plan-period{font-size:.83rem;color:var(--text-light);margin-bottom:26px;}
+.plan.pop .plan-period{color:rgba(255,255,255,.45);}
+.plan-div{height:1px;background:var(--border);margin-bottom:24px;}
+.plan.pop .plan-div{background:rgba(255,255,255,.1);}
+.plan-feats{list-style:none;margin-bottom:32px;}
+.plan-feats li{display:flex;align-items:center;gap:10px;font-size:.88rem;color:var(--text-mid);padding:7px 0;}
+.plan.pop .plan-feats li{color:rgba(255,255,255,.83);}
+.plan-feats li i{color:var(--success);font-size:.78rem;flex-shrink:0;}
+.plan.pop .plan-feats li i{color:var(--gold);}
+.plan-btn{
+  width:100%;padding:15px;border-radius:14px;
+  font-size:.93rem;font-weight:700;cursor:pointer;
+  font-family:'Outfit',sans-serif;border:none;transition:all .25s;
+}
+.pb-ghost{background:transparent;border:1.5px solid var(--navy);color:var(--navy);}
+.pb-ghost:hover{background:var(--navy);color:white;}
+.pb-solid{background:var(--gold);color:var(--navy);}
+.pb-solid:hover{background:var(--gold-2);box-shadow:0 6px 24px rgba(245,197,24,.4);}
+
+/* ===== TESTIMONIALS ===== */
+.testi{background:#EBF0FA;}
+.testi-hd{text-align:center;margin-bottom:56px;}
+.testi-hd .ssub{margin:0 auto;}
+
+.testi-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:24px;
+}
+@media(max-width:960px){.testi-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.testi-grid{grid-template-columns:1fr;}}
+
+.tc{
+  background:white;border-radius:22px;
+  overflow:hidden;
+  box-shadow:var(--sh-sm);
+  transition:transform .35s;
+  display:flex;flex-direction:column;
+}
+.tc:hover{transform:translateY(-6px);box-shadow:var(--sh-md);}
+
+.tc-img-wrap{
+  width:100%;height:200px;overflow:hidden;position:relative;
+}
+.tc-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s;}
+.tc:hover .tc-img-wrap img{transform:scale(1.06);}
+.tc-img-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(10,22,40,.85) 0%,rgba(10,22,40,.2) 60%,transparent 100%);
+}
+.tc-name-over{
+  position:absolute;bottom:14px;left:16px;
+}
+.tc-name-over .tc-name{color:white;font-weight:700;font-size:.92rem;font-family:'Syne',sans-serif;}
+.tc-name-over .tc-det{color:rgba(255,255,255,.65);font-size:.73rem;margin-top:2px;}
+
+.tc-body{padding:22px 22px 24px;flex:1;display:flex;flex-direction:column;}
+.tc-stars{color:var(--gold);font-size:.85rem;letter-spacing:3px;margin-bottom:12px;}
+.tc-quote{
+  font-size:.9rem;line-height:1.75;color:var(--text-mid);
+  font-style:italic;flex:1;
+}
+.tc-quote::before{content:'\201C';font-size:1.8rem;color:var(--gold);line-height:0;vertical-align:-.35em;margin-right:4px;}
+.tc-score{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--off-white);border-radius:100px;
+  padding:5px 12px;font-size:.75rem;font-weight:700;color:var(--navy);
+  margin-top:14px;align-self:flex-start;
+}
+
+/* ===== FAQ ===== */
+.faq-section{background:white;}
+.faq-inner{
+  display:grid;grid-template-columns:1fr 1.5fr;
+  gap:80px;align-items:start;
+}
+@media(max-width:900px){.faq-inner{grid-template-columns:1fr;gap:48px;}}
+
+.faq-item{border-bottom:1px solid var(--border);overflow:hidden;}
+.faq-q{
+  width:100%;background:none;border:none;cursor:pointer;
+  padding:20px 0;display:flex;justify-content:space-between;align-items:center;
+  font-family:'Outfit',sans-serif;font-size:.93rem;font-weight:600;
+  color:var(--navy);text-align:left;gap:16px;
+}
+.faq-q i{color:var(--gold-2);transition:transform .35s;flex-shrink:0;}
+.faq-item.open .faq-q i{transform:rotate(180deg);}
+.faq-a{
+  font-size:.88rem;line-height:1.8;color:var(--text-light);
+  max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s;
+}
+.faq-item.open .faq-a{max-height:220px;padding-bottom:20px;}
+
+/* ===== COMMUNITY (new section) ===== */
+.community{
+  background:var(--navy);padding:100px 5%;
+  position:relative;overflow:hidden;
+}
+.community::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(245,197,24,.07) 0%,transparent 60%);
+}
+.comm-inner{
+  position:relative;z-index:2;
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;
+}
+@media(max-width:900px){.comm-inner{grid-template-columns:1fr;gap:48px;}}
+.comm-imgs{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  grid-template-rows:auto auto;gap:10px;
+}
+.ci{border-radius:14px;overflow:hidden;}
+.ci img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s;}
+.ci:hover img{transform:scale(1.06);}
+.ci.tall{height:180px;grid-row:span 2;}
+.ci.short{height:85px;}
+
+/* ===== CTA ===== */
+.cta-s{
+  background:var(--navy);
+  padding:100px 5%;text-align:center;
+  position:relative;overflow:hidden;
+}
+.cta-s::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 50%,rgba(245,197,24,.07) 0%,transparent 60%);
+}
+.cta-h2{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(2rem,4vw,3.2rem);font-weight:800;
+  color:white;max-width:680px;margin:0 auto 20px;
+  position:relative;z-index:1;letter-spacing:-.02em;
+}
+.cta-sub{
+  font-size:1rem;color:rgba(255,255,255,.55);
+  max-width:500px;margin:0 auto 44px;line-height:1.8;
+  position:relative;z-index:1;
+}
+.cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;}
+.btn-cta-p{
+  padding:16px 42px;background:var(--gold);
+  color:var(--navy);border:none;border-radius:14px;
+  font-size:.975rem;font-weight:700;cursor:pointer;
+  font-family:'Outfit',sans-serif;transition:all .25s;
+  box-shadow:0 8px 32px rgba(245,197,24,.32);text-decoration:none;
+}
+.btn-cta-p:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(245,197,24,.48);}
+.btn-cta-g{
+  padding:16px 42px;background:transparent;
+  color:white;border:1.5px solid rgba(255,255,255,.22);
+  border-radius:14px;font-size:.975rem;font-weight:600;cursor:pointer;
+  font-family:'Outfit',sans-serif;transition:all .25s;text-decoration:none;
+}
+.btn-cta-g:hover{border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.05);}
+.cta-checks{
+  margin-top:52px;display:flex;align-items:center;justify-content:center;
+  gap:36px;flex-wrap:wrap;position:relative;z-index:1;
+}
+.cta-ck{display:flex;align-items:center;gap:7px;font-size:.83rem;color:rgba(255,255,255,.45);}
+.cta-ck i{color:var(--gold);}
+
+/* ===== FOOTER ===== */
+footer{background:#050C1E;padding:72px 5% 40px;color:rgba(255,255,255,.45);}
+.footer-grid{
+  display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;
+  gap:48px;margin-bottom:56px;
+}
+@media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){.footer-grid{grid-template-columns:1fr;}}
+
+.fl-logo{display:flex;align-items:center;gap:10px;margin-bottom:16px;text-decoration:none;}
+.fl-logo img{height:40px;width:auto;}
+.fl-logo-name{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:white;}
+.fl-desc{font-size:.83rem;line-height:1.8;max-width:210px;color:rgba(255,255,255,.38);}
+.fl-social{display:flex;gap:9px;margin-top:20px;}
+.soc-btn{
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,.45);font-size:.83rem;
+  transition:all .2s;text-decoration:none;
+}
+.soc-btn:hover{background:var(--navy-3);color:var(--gold);border-color:transparent;}
+.fc-title-foot{
+  font-size:.72rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.11em;color:rgba(255,255,255,.28);margin-bottom:20px;
+}
+.fl-links{list-style:none;}
+.fl-links li{margin-bottom:10px;}
+.fl-links a{
+  font-size:.85rem;color:rgba(255,255,255,.45);
+  text-decoration:none;transition:color .2s;
+}
+.fl-links a:hover{color:var(--gold);}
+.footer-bot{
+  border-top:1px solid rgba(255,255,255,.05);
+  padding-top:28px;display:flex;justify-content:space-between;
+  align-items:center;flex-wrap:wrap;gap:12px;font-size:.78rem;
+}
+.fb-links{display:flex;gap:22px;}
+.fb-links a{color:rgba(255,255,255,.3);text-decoration:none;transition:color .2s;}
+.fb-links a:hover{color:white;}
+
+/* ===== ANIMATIONS ===== */
+.fade-in{opacity:0;transform:translateY(32px);transition:opacity .75s ease,transform .75s ease;}
+.fade-in.visible{opacity:1;transform:none;}
+.slide-l{opacity:0;transform:translateX(-44px);transition:opacity .75s ease,transform .75s ease;}
+.slide-l.visible{opacity:1;transform:none;}
+.slide-r{opacity:0;transform:translateX(44px);transition:opacity .75s ease,transform .75s ease;}
+.slide-r.visible{opacity:1;transform:none;}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  nav{padding:0 4%;}
+  .nav-links,.nav-cta{display:none;}
+  .hamburger{display:flex;}
+  .hero-content{flex-direction:column;padding:48px 4% 0;gap:36px;}
+  .hero-right{width:100%;max-width:100%;}
+  .hero-fc{display:none;}
+  .hero-img-mosaic{max-width:100%;}
+  section{padding:72px 4%;}
+  .trust{gap:28px;padding:20px 4%;}
+  .ti span{display:none;}
+}
+@media(max-width:480px){
+  .hero-stats{gap:28px;}
+  .hst-num{font-size:1.7rem;}
+  .mosaic-img.tall{height:240px;}
+  .mosaic-img.short{height:120px;}
+  .trust{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .ti{justify-content:center;}
+  .ti span{display:inline;}
+}
 </style>
 </head>
 <body>
 
-<!-- Scroll progress bar -->
-<div class="scroll-progress" id="scrollProgress"></div>
+<div id="sp"></div>
 
-<!-- =================== NAV =================== -->
-<nav id="mainNav">
+<!-- ===== NAV ===== -->
+<nav id="nav">
   <a href="#" class="nav-logo">
-    <div class="nav-logo-icon">
-      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 30 Q12 14 20 10 Q28 14 32 30" stroke="#F4C430" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-        <path d="M20 10 L20 30" stroke="#F4C430" stroke-width="2" opacity="0.5"/>
-        <path d="M6 30 L34 30" stroke="#F4C430" stroke-width="2.5" stroke-linecap="round"/>
-      </svg>
-    </div>
-    <span>NLTC</span>
+    <img src="NLTC.png" alt="NLTC Logo">
+    <span class="nav-logo-name">Next Level TC</span>
   </a>
 
   <ul class="nav-links">
@@ -865,404 +764,412 @@
   </ul>
 
   <div class="nav-cta">
-    <a href="#" class="btn-outline-nav">Sign In</a>
-    <a href="#pricing" class="btn-solid-nav">Get Started Free</a>
+    <a href="#" class="btn-nav-ghost">Sign In</a>
+    <a href="#pricing" class="btn-nav-solid">Get Started Free</a>
   </div>
+
+  <button class="hamburger" id="hamBtn" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
-<!-- =================== HERO =================== -->
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#features" class="mm-link">Features</a>
+  <a href="#exams" class="mm-link">Exams</a>
+  <a href="#pricing" class="mm-link">Pricing</a>
+  <a href="#testimonials" class="mm-link">Success Stories</a>
+  <a href="#faq" class="mm-link">FAQ</a>
+  <div class="mob-cta-row">
+    <a href="#" class="mob-ghost mm-link" style="flex:1;">Sign In</a>
+    <a href="#pricing" class="mob-solid mm-link" style="flex:1;">Get Started</a>
+  </div>
+</div>
+
+<!-- ===== HERO ===== -->
 <section class="hero" id="hero">
-  <div class="hero-bg-pattern"></div>
-  <div class="hero-grid-lines"></div>
+  <canvas id="particleCanvas"></canvas>
+  <div class="hero-glow-1"></div>
+  <div class="hero-glow-2"></div>
 
   <div class="hero-content">
     <div class="hero-left">
       <div class="hero-badge">
-        <div class="hero-badge-dot"></div>
-        Nigeria's Leading Exam Prep Platform
+        <div class="badge-dot"></div>
+        Nigeria's #1 Exam Prep Platform
       </div>
 
       <h1 class="hero-h1">
         Pass JAMB, WAEC<br>
         & More with<br>
-        <span class="highlight">Next Level</span><br>
+        <span class="hl">Next Level</span><br>
         Confidence
       </h1>
 
-      <p class="hero-subtext">
-        Join over 15,000 Nigerian students accessing live classes, CBT practice, gamified learning,
-        and real-time exam news — all from your phone or laptop.
+      <p class="hero-sub">
+        Join over 15,000 Nigerian students accessing live classes, CBT practice,
+        gamified learning, and real-time exam news — all from your phone or laptop.
       </p>
 
-      <div class="hero-actions">
-        <a href="#pricing" class="btn-hero-primary">
+      <div class="hero-btns">
+        <a href="#pricing" class="btn-hp">
           <i class="fas fa-rocket"></i>
           Start Learning Free
         </a>
-        <a href="#features" class="btn-hero-secondary">
+        <a href="#features" class="btn-hs">
           <i class="fas fa-play-circle"></i>
           See How It Works
         </a>
       </div>
 
       <div class="hero-stats">
-        <div class="hero-stat-item">
-          <div class="hero-stat-num"><span class="count-up" data-target="15000">15,000</span><span>+</span></div>
-          <div class="hero-stat-label">Active Students</div>
+        <div>
+          <div class="hst-num">15,000<sup>+</sup></div>
+          <div class="hst-label">Active Students</div>
         </div>
-        <div class="hero-stat-item">
-          <div class="hero-stat-num"><span class="count-up" data-target="94">94</span><span>%</span></div>
-          <div class="hero-stat-label">Pass Rate</div>
+        <div>
+          <div class="hst-num">94<sup>%</sup></div>
+          <div class="hst-label">Pass Rate</div>
         </div>
-        <div class="hero-stat-item">
-          <div class="hero-stat-num"><span class="count-up" data-target="200">200</span><span>+</span></div>
-          <div class="hero-stat-label">Courses Available</div>
+        <div>
+          <div class="hst-num">200<sup>+</sup></div>
+          <div class="hst-label">Courses</div>
         </div>
       </div>
     </div>
 
     <div class="hero-right">
-      <div class="hero-mockup-wrap">
-        <img class="hero-phone-img"
-          src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&q=80"
-          alt="Students studying">
-
-        <!-- Floating cards -->
-        <div class="hero-floating-card card-1">
-          <div class="fc-icon gold"><i class="fas fa-trophy"></i></div>
-          <div>
-            <div class="fc-label">Today's Rank</div>
-            <div class="fc-val">#3 Nationwide</div>
-          </div>
+      <div class="hero-img-mosaic">
+        <div class="mosaic-img tall">
+          <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&q=80" alt="Students studying together">
         </div>
+        <div class="mosaic-img short">
+          <img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&q=80" alt="Student studying">
+        </div>
+        <div class="mosaic-img short">
+          <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=400&q=80" alt="Classroom learning">
+        </div>
+      </div>
 
-        <div class="hero-floating-card card-2">
-          <div class="fc-icon blue"><i class="fas fa-fire"></i></div>
-          <div>
-            <div class="fc-label">Study Streak</div>
-            <div class="fc-val">21 Days 🔥</div>
-          </div>
+      <div class="hero-fc fc-1">
+        <div class="fc-ic g"><i class="fas fa-trophy"></i></div>
+        <div>
+          <div class="fc-lbl">Today's Rank</div>
+          <div class="fc-val">#3 Nationwide</div>
+        </div>
+      </div>
+      <div class="hero-fc fc-2">
+        <div class="fc-ic b"><i class="fas fa-fire"></i></div>
+        <div>
+          <div class="fc-lbl">Study Streak</div>
+          <div class="fc-val">21 Days 🔥</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Wave bottom -->
-  <svg class="wave-divider" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" style="margin-top:60px; flex-shrink:0;">
+  <svg class="wave-div" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80">
     <path fill="white" d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z"/>
   </svg>
 </section>
 
-<!-- =================== TRUST STRIP =================== -->
-<div class="trust-strip">
-  <div class="trust-item">
-    <i class="fas fa-shield-alt trust-icon"></i>
-    <span>Secure & Trusted Platform</span>
-  </div>
-  <div class="trust-item">
-    <i class="fas fa-mobile-alt trust-icon"></i>
-    <span>iOS & Android App</span>
-  </div>
-  <div class="trust-item">
-    <i class="fas fa-wifi trust-icon"></i>
-    <span>Works on 3G/4G</span>
-  </div>
-  <div class="trust-item">
-    <i class="fas fa-lock trust-icon"></i>
-    <span>Paystack Secure Payments</span>
-  </div>
-  <div class="trust-item">
-    <i class="fas fa-headset trust-icon"></i>
-    <span>24/7 Student Support</span>
-  </div>
+<!-- ===== TRUST STRIP ===== -->
+<div class="trust">
+  <div class="ti"><i class="fas fa-shield-alt"></i><span>Secure & Trusted</span></div>
+  <div class="ti"><i class="fas fa-mobile-alt"></i><span>iOS & Android App</span></div>
+  <div class="ti"><i class="fas fa-wifi"></i><span>Works on 3G/4G</span></div>
+  <div class="ti"><i class="fas fa-lock"></i><span>Paystack Payments</span></div>
+  <div class="ti"><i class="fas fa-headset"></i><span>24/7 Support</span></div>
 </div>
 
-<!-- =================== FEATURES =================== -->
-<section class="features" id="features">
-  <div class="features-header fade-in">
-    <div class="section-tag"><i class="fas fa-star"></i> Platform Features</div>
-    <h2 class="section-h2">Everything You Need to <span class="accent">Ace Your Exams</span></h2>
-    <p class="section-sub">A complete digital learning ecosystem built specifically for Nigerian students preparing for JAMB, WAEC, NECO, and GCE.</p>
+<!-- ===== FEATURES ===== -->
+<section class="feats" id="features">
+  <div class="feats-hd fade-in">
+    <div class="stag"><i class="fas fa-star"></i> Platform Features</div>
+    <h2 class="sh2">Everything You Need to <span class="ac">Ace Your Exams</span></h2>
+    <p class="ssub">A complete digital learning ecosystem built specifically for Nigerian students preparing for JAMB, WAEC, NECO, and GCE.</p>
   </div>
-
-  <div class="features-grid">
-    <div class="feature-card fade-in">
-      <div class="feature-icon-wrap"><i class="fas fa-video"></i></div>
-      <div class="feature-title">Live Interactive Classes</div>
-      <p class="feature-desc">Join real-time classes with top tutors. Ask questions, get instant answers, and study alongside thousands of motivated students nationwide.</p>
+  <div class="feat-grid">
+    <div class="fc-card fade-in">
+      <div class="fc-icon"><i class="fas fa-video"></i></div>
+      <div class="fc-title">Live Interactive Classes</div>
+      <p class="fc-desc">Join real-time classes with top tutors. Ask questions, get instant answers, and study alongside thousands of motivated students nationwide.</p>
     </div>
-
-    <div class="feature-card fade-in">
-      <div class="feature-icon-wrap"><i class="fas fa-play-circle"></i></div>
-      <div class="feature-title">Recorded Lesson Library</div>
-      <p class="feature-desc">Access hundreds of high-quality recorded lessons anytime. Download for offline viewing and study at your own pace, anywhere in Nigeria.</p>
+    <div class="fc-card fade-in">
+      <div class="fc-icon"><i class="fas fa-play-circle"></i></div>
+      <div class="fc-title">Recorded Lesson Library</div>
+      <p class="fc-desc">Access hundreds of high-quality recorded lessons anytime. Download for offline viewing and study at your own pace, anywhere in Nigeria.</p>
     </div>
-
-    <div class="feature-card fade-in">
-      <div class="feature-icon-wrap"><i class="fas fa-laptop-code"></i></div>
-      <div class="feature-title">CBT Practice Engine</div>
-      <p class="feature-desc">Simulate the real exam experience with our advanced Computer-Based Test system. Past questions, timed sessions, and instant score analysis.</p>
+    <div class="fc-card fade-in">
+      <div class="fc-icon"><i class="fas fa-laptop-code"></i></div>
+      <div class="fc-title">CBT Practice Engine</div>
+      <p class="fc-desc">Simulate the real exam experience with our advanced Computer-Based Test system. Past questions, timed sessions, and instant score analysis.</p>
     </div>
-
-    <div class="feature-card fade-in">
-      <div class="feature-icon-wrap"><i class="fas fa-gamepad"></i></div>
-      <div class="feature-title">Gamified Learning</div>
-      <p class="feature-desc">Earn XP points, unlock achievements, climb the national leaderboard, and maintain study streaks that keep you motivated every single day.</p>
+    <div class="fc-card fade-in">
+      <div class="fc-icon"><i class="fas fa-gamepad"></i></div>
+      <div class="fc-title">Gamified Learning</div>
+      <p class="fc-desc">Earn XP points, unlock achievements, climb the national leaderboard, and maintain study streaks that keep you motivated every single day.</p>
     </div>
-
-    <div class="feature-card fade-in">
-      <div class="feature-icon-wrap"><i class="fas fa-bell"></i></div>
-      <div class="feature-title">Real-Time Exam News</div>
-      <p class="feature-desc">Never miss a JAMB, WAEC, NECO, or GCE update. Receive instant SMS and push notifications for result releases, registration deadlines, and more.</p>
+    <div class="fc-card fade-in">
+      <div class="fc-icon"><i class="fas fa-bell"></i></div>
+      <div class="fc-title">Real-Time Exam News</div>
+      <p class="fc-desc">Never miss a JAMB, WAEC, NECO, or GCE update. Receive instant SMS and push notifications for result releases, registration deadlines, and more.</p>
     </div>
-
-    <div class="feature-card fade-in">
-      <div class="feature-icon-wrap"><i class="fas fa-chart-line"></i></div>
-      <div class="feature-title">Progress Analytics</div>
-      <p class="feature-desc">Track your improvement across every subject with detailed performance insights, weak-area detection, and personalized study recommendations.</p>
+    <div class="fc-card fade-in">
+      <div class="fc-icon"><i class="fas fa-chart-line"></i></div>
+      <div class="fc-title">Progress Analytics</div>
+      <p class="fc-desc">Track your improvement across every subject with detailed performance insights, weak-area detection, and personalized study recommendations.</p>
     </div>
   </div>
 </section>
 
-<!-- =================== EXAMS =================== -->
-<section class="exams-section" id="exams">
+<!-- ===== IMAGE SHOWCASE ===== -->
+<section class="showcase">
+  <div class="showcase-inner">
+    <div class="slide-l">
+      <div class="stag" style="background:rgba(245,197,24,.15);color:var(--gold);"><i class="fas fa-users"></i> Our Learning Environment</div>
+      <h2 class="sh2" style="color:white;">Where Nigeria's <span style="color:var(--gold);">Best Students</span> Come to Learn</h2>
+      <p class="ssub" style="color:rgba(255,255,255,.55);margin-bottom:32px;">
+        From Kano to Lagos, thousands of students are transforming their academic journeys on NLTC. Our platform brings world-class tutors and resources directly to your fingertips.
+      </p>
+      <a href="#pricing" class="btn-hp" style="display:inline-flex;max-width:280px;">
+        <i class="fas fa-arrow-right"></i> Start Your Journey
+      </a>
+    </div>
+    <div class="slide-r">
+      <div class="showcase-imgs">
+        <div class="sc-img tall">
+          <img src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=500&q=80" alt="Students in classroom">
+          <div class="sc-img-overlay"></div>
+          <div class="sc-img-tag">Live Classes</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="sc-img short">
+            <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&q=80" alt="Student studying at desk">
+            <div class="sc-img-overlay"></div>
+            <div class="sc-img-tag">Self-Paced Study</div>
+          </div>
+          <div class="sc-img short">
+            <img src="https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=400&q=80" alt="Students collaborating">
+            <div class="sc-img-overlay"></div>
+            <div class="sc-img-tag">CBT Practice</div>
+          </div>
+          <div class="sc-img short">
+            <img src="https://images.unsplash.com/photo-1588072432836-e10032774350?w=400&q=80" alt="Online learning">
+            <div class="sc-img-overlay"></div>
+            <div class="sc-img-tag">Mobile Learning</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== EXAMS ===== -->
+<section class="exams" id="exams">
   <div class="fade-in">
-    <div class="section-tag" style="background:rgba(244,196,48,0.15); color:var(--gold);">
-      <i class="fas fa-graduation-cap"></i> Exam Coverage
-    </div>
-    <h2 class="section-h2" style="color:white;">We Cover <span style="color:var(--gold);">All Major</span><br>Nigerian Examinations</h2>
-    <p class="section-sub" style="color:rgba(255,255,255,0.55);">Comprehensive preparation materials and expert tutors for every major examination in Nigeria.</p>
+    <div class="stag" style="background:rgba(245,197,24,.15);color:var(--gold);"><i class="fas fa-graduation-cap"></i> Exam Coverage</div>
+    <h2 class="sh2" style="color:white;">We Cover <span style="color:var(--gold);">All Major</span><br>Nigerian Examinations</h2>
+    <p class="ssub" style="color:rgba(255,255,255,.5);">Comprehensive preparation materials and expert tutors for every major examination in Nigeria.</p>
   </div>
-
   <div class="exams-grid">
-    <div class="exam-card fade-in">
-      <div class="exam-badge">JAMB</div>
-      <div class="exam-name">UTME</div>
-      <div class="exam-fullname">Joint Admissions and Matriculation Board — University Entry</div>
-      <div class="exam-subjects"><i class="fas fa-book-open" style="margin-right:5px;"></i> 4 Core Subjects</div>
+    <div class="ex-card fade-in">
+      <div class="ex-badge">JAMB</div>
+      <div class="ex-name">UTME</div>
+      <div class="ex-full">Joint Admissions and Matriculation Board — University Entry</div>
+      <div class="ex-subs"><i class="fas fa-book-open" style="margin-right:5px;"></i> 4 Core Subjects</div>
     </div>
-    <div class="exam-card fade-in">
-      <div class="exam-badge">WAEC</div>
-      <div class="exam-name">SSCE</div>
-      <div class="exam-fullname">West African Examinations Council — Senior School Certificate</div>
-      <div class="exam-subjects"><i class="fas fa-book-open" style="margin-right:5px;"></i> 9 Subjects</div>
+    <div class="ex-card fade-in">
+      <div class="ex-badge">WAEC</div>
+      <div class="ex-name">SSCE</div>
+      <div class="ex-full">West African Examinations Council — Senior School Certificate</div>
+      <div class="ex-subs"><i class="fas fa-book-open" style="margin-right:5px;"></i> 9 Subjects</div>
     </div>
-    <div class="exam-card fade-in">
-      <div class="exam-badge">NECO</div>
-      <div class="exam-name">BECE</div>
-      <div class="exam-fullname">National Examinations Council — Secondary Education</div>
-      <div class="exam-subjects"><i class="fas fa-book-open" style="margin-right:5px;"></i> 9 Subjects</div>
+    <div class="ex-card fade-in">
+      <div class="ex-badge">NECO</div>
+      <div class="ex-name">BECE</div>
+      <div class="ex-full">National Examinations Council — Secondary Education</div>
+      <div class="ex-subs"><i class="fas fa-book-open" style="margin-right:5px;"></i> 9 Subjects</div>
     </div>
-    <div class="exam-card fade-in">
-      <div class="exam-badge">GCE</div>
-      <div class="exam-name">O-Level</div>
-      <div class="exam-fullname">General Certificate of Education — Ordinary Level</div>
-      <div class="exam-subjects"><i class="fas fa-book-open" style="margin-right:5px;"></i> 8 Subjects</div>
+    <div class="ex-card fade-in">
+      <div class="ex-badge">GCE</div>
+      <div class="ex-name">O-Level</div>
+      <div class="ex-full">General Certificate of Education — Ordinary Level</div>
+      <div class="ex-subs"><i class="fas fa-book-open" style="margin-right:5px;"></i> 8 Subjects</div>
     </div>
   </div>
 </section>
 
-<!-- =================== HOW IT WORKS =================== -->
-<section class="how-section" id="how">
-  <div class="features-header fade-in">
-    <div class="section-tag"><i class="fas fa-map-signs"></i> How It Works</div>
-    <h2 class="section-h2">Your Journey to <span class="accent">Exam Excellence</span></h2>
-    <p class="section-sub" style="margin:0 auto;">Getting started takes less than 2 minutes. Here's how thousands of Nigerian students are already winning.</p>
+<!-- ===== HOW IT WORKS ===== -->
+<section class="how" id="how">
+  <div class="feats-hd fade-in">
+    <div class="stag"><i class="fas fa-map-signs"></i> How It Works</div>
+    <h2 class="sh2">Your Journey to <span class="ac">Exam Excellence</span></h2>
+    <p class="ssub" style="margin:0 auto;">Getting started takes less than 2 minutes. Here's how thousands of Nigerian students are already winning.</p>
   </div>
-
-  <div class="steps-grid">
-    <div class="step-item fade-in">
-      <div class="step-num">1</div>
+  <div class="steps">
+    <div class="step fade-in">
+      <div class="snum">1</div>
       <div class="step-title">Create Your Free Account</div>
       <p class="step-desc">Sign up in seconds with your phone number or email. Choose your target exam and subjects during onboarding.</p>
     </div>
-    <div class="step-item fade-in">
-      <div class="step-num gold-step">2</div>
+    <div class="step fade-in">
+      <div class="snum gold">2</div>
       <div class="step-title">Choose Your Study Plan</div>
-      <p class="step-desc">Select a plan that fits your budget. Start with our free tier or unlock unlimited access with a premium subscription via Paystack.</p>
+      <p class="step-desc">Select a plan that fits your budget. Start free or unlock unlimited access with a premium subscription via Paystack.</p>
     </div>
-    <div class="step-item fade-in">
-      <div class="step-num">3</div>
+    <div class="step fade-in">
+      <div class="snum">3</div>
       <div class="step-title">Learn, Practice & Compete</div>
       <p class="step-desc">Attend live classes, tackle CBT questions, earn XP, and track your progress as your scores climb week after week.</p>
     </div>
-    <div class="step-item fade-in">
-      <div class="step-num gold-step">4</div>
+    <div class="step fade-in">
+      <div class="snum gold">4</div>
       <div class="step-title">Ace Your Examinations</div>
       <p class="step-desc">Walk into your exam room with confidence backed by data-driven preparation and next-level mastery of your subjects.</p>
     </div>
   </div>
 </section>
 
-<!-- =================== GAMIFICATION =================== -->
-<section class="gamification-section" id="gamification">
-  <div class="gamification-inner">
-    <div class="slide-left">
-      <div class="section-tag"><i class="fas fa-trophy"></i> Gamification</div>
-      <h2 class="section-h2">Learning That<br>Feels Like a <span class="accent">Game</span></h2>
-      <p class="section-sub" style="margin-bottom:28px;">
-        We've gamified the entire learning journey so staying motivated feels effortless. Compete nationally, earn badges, and watch your XP grow every day.
-      </p>
-      <ul style="list-style:none; display:flex; flex-direction:column; gap:14px;">
-        <li style="display:flex; gap:12px; align-items:flex-start;">
-          <div style="width:36px; height:36px; border-radius:10px; background:var(--navy-pale); display:flex; align-items:center; justify-content:center; color:var(--navy); flex-shrink:0; font-size:0.9rem;"><i class="fas fa-fire"></i></div>
-          <div>
-            <strong style="font-size:0.9rem; color:var(--navy);">Daily Streaks</strong>
-            <p style="font-size:0.85rem; color:var(--text-light); margin-top:2px;">Log in every day to maintain your streak and earn bonus XP rewards</p>
-          </div>
-        </li>
-        <li style="display:flex; gap:12px; align-items:flex-start;">
-          <div style="width:36px; height:36px; border-radius:10px; background:var(--gold-pale); display:flex; align-items:center; justify-content:center; color:var(--gold-deep); flex-shrink:0; font-size:0.9rem;"><i class="fas fa-medal"></i></div>
-          <div>
-            <strong style="font-size:0.9rem; color:var(--navy);">Achievement Badges</strong>
-            <p style="font-size:0.85rem; color:var(--text-light); margin-top:2px;">Unlock over 50 unique badges as you master subjects and hit milestones</p>
-          </div>
-        </li>
-        <li style="display:flex; gap:12px; align-items:flex-start;">
-          <div style="width:36px; height:36px; border-radius:10px; background:var(--navy-pale); display:flex; align-items:center; justify-content:center; color:var(--navy); flex-shrink:0; font-size:0.9rem;"><i class="fas fa-chart-bar"></i></div>
-          <div>
-            <strong style="font-size:0.9rem; color:var(--navy);">National Leaderboard</strong>
-            <p style="font-size:0.85rem; color:var(--text-light); margin-top:2px;">Compete against students across Nigeria and see your weekly ranking</p>
-          </div>
-        </li>
-      </ul>
+<!-- ===== GAMIFICATION ===== -->
+<section class="gamif" id="gamification">
+  <div class="gamif-inner">
+    <div class="slide-l">
+      <div class="stag"><i class="fas fa-trophy"></i> Gamification</div>
+      <h2 class="sh2">Learning That<br>Feels Like a <span class="ac">Game</span></h2>
+      <p class="ssub" style="margin-bottom:28px;">We've gamified the entire learning journey so staying motivated feels effortless. Compete nationally, earn badges, and watch your XP grow every day.</p>
+
+      <div class="gamif-point">
+        <div class="gp-ic n"><i class="fas fa-fire"></i></div>
+        <div>
+          <div class="gp-title">Daily Streaks</div>
+          <div class="gp-desc">Log in every day to maintain your streak and earn bonus XP rewards</div>
+        </div>
+      </div>
+      <div class="gamif-point">
+        <div class="gp-ic g"><i class="fas fa-medal"></i></div>
+        <div>
+          <div class="gp-title">Achievement Badges</div>
+          <div class="gp-desc">Unlock over 50 unique badges as you master subjects and hit milestones</div>
+        </div>
+      </div>
+      <div class="gamif-point">
+        <div class="gp-ic n"><i class="fas fa-chart-bar"></i></div>
+        <div>
+          <div class="gp-title">National Leaderboard</div>
+          <div class="gp-desc">Compete against students across Nigeria and see your weekly ranking</div>
+        </div>
+      </div>
     </div>
 
-    <div class="gamification-visual slide-right">
-      <!-- XP Level -->
-      <div style="display:flex; align-items:center; gap:14px; margin-bottom:24px;">
-        <div style="width:54px; height:54px; border-radius:15px; background:var(--gold); display:flex; align-items:center; justify-content:center; font-size:1.5rem;">🎓</div>
+    <div class="gamif-visual slide-r">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;">
+        <div style="width:52px;height:52px;border-radius:15px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.4rem;">🎓</div>
         <div>
-          <div style="font-family:'Clash Display',sans-serif; font-size:1.1rem; font-weight:700; color:white;">Chukwuemeka A.</div>
-          <div style="font-size:0.75rem; color:rgba(255,255,255,0.5); margin-top:2px;">Level 12 — JAMB Scholar</div>
+          <div style="font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;color:white;">Chukwuemeka A.</div>
+          <div style="font-size:.73rem;color:rgba(255,255,255,.45);margin-top:2px;">Level 12 — JAMB Scholar</div>
         </div>
-        <div style="margin-left:auto; background:rgba(244,196,48,0.15); border:1px solid rgba(244,196,48,0.3); border-radius:8px; padding:6px 12px; text-align:center;">
-          <div style="font-size:1rem; font-weight:700; color:var(--gold);">4,820</div>
-          <div style="font-size:0.65rem; color:rgba(255,255,255,0.4);">XP Total</div>
+        <div style="margin-left:auto;background:rgba(245,197,24,.14);border:1px solid rgba(245,197,24,.28);border-radius:10px;padding:7px 14px;text-align:center;">
+          <div style="font-size:1rem;font-weight:800;color:var(--gold);font-family:'Syne',sans-serif;">4,820</div>
+          <div style="font-size:.63rem;color:rgba(255,255,255,.38);">XP Total</div>
         </div>
       </div>
 
-      <div class="xp-bar-wrap">
+      <div style="margin-bottom:22px;">
         <div class="xp-label"><span>Level 12</span><span>4,820 / 7,000 XP</span></div>
-        <div class="xp-bar-bg"><div class="xp-bar-fill"></div></div>
+        <div class="xp-bg"><div class="xp-fill"></div></div>
       </div>
 
-      <!-- Badges -->
-      <div style="font-size:0.75rem; color:rgba(255,255,255,0.4); font-weight:600; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px;">Recent Achievements</div>
-      <div class="achievements-row">
-        <div class="achievement-badge" title="7-Day Streak">🔥</div>
-        <div class="achievement-badge" title="CBT Champion">🏆</div>
-        <div class="achievement-badge" title="Math Master">📐</div>
-        <div class="achievement-badge" title="Perfect Score">⭐</div>
-        <div class="achievement-badge locked">🎯</div>
-        <div class="achievement-badge locked">💎</div>
+      <div style="font-size:.72rem;color:rgba(255,255,255,.35);font-weight:700;text-transform:uppercase;letter-spacing:.09em;margin-bottom:10px;">Recent Achievements</div>
+      <div class="ach-row">
+        <div class="ach-bdg" title="7-Day Streak">🔥</div>
+        <div class="ach-bdg" title="CBT Champion">🏆</div>
+        <div class="ach-bdg" title="Math Master">📐</div>
+        <div class="ach-bdg" title="Perfect Score">⭐</div>
+        <div class="ach-bdg locked">🎯</div>
+        <div class="ach-bdg locked">💎</div>
       </div>
 
-      <!-- Leaderboard -->
-      <div style="font-size:0.75rem; color:rgba(255,255,255,0.4); font-weight:600; text-transform:uppercase; letter-spacing:0.08em; margin:16px 0 4px;">This Week's Top 5</div>
-      <div class="leaderboard-preview">
-        <div class="lb-row">
-          <div class="lb-rank">🥇</div>
-          <div class="lb-avatar">FA</div>
-          <div class="lb-name">Fatima A.</div>
-          <div class="lb-xp">1,240 XP</div>
-        </div>
-        <div class="lb-row">
-          <div class="lb-rank">🥈</div>
-          <div class="lb-avatar">EO</div>
-          <div class="lb-name">Emeka O.</div>
-          <div class="lb-xp">1,180 XP</div>
-        </div>
-        <div class="lb-row" style="border-color:rgba(244,196,48,0.2); background:rgba(244,196,48,0.05);">
-          <div class="lb-rank" style="color:white;">3</div>
-          <div class="lb-avatar" style="background:var(--gold); color:var(--navy);">CA</div>
-          <div class="lb-name" style="color:var(--gold); font-weight:600;">Chukwuemeka A. (You)</div>
-          <div class="lb-xp">1,040 XP</div>
-        </div>
-        <div class="lb-row">
-          <div class="lb-rank">4</div>
-          <div class="lb-avatar">AK</div>
-          <div class="lb-name">Amina K.</div>
-          <div class="lb-xp">980 XP</div>
-        </div>
+      <div style="font-size:.72rem;color:rgba(255,255,255,.35);font-weight:700;text-transform:uppercase;letter-spacing:.09em;margin:16px 0 4px;">This Week's Top 5</div>
+      <div>
+        <div class="lb-row"><div class="lb-rank">🥇</div><div class="lb-av">FA</div><div class="lb-nm">Fatima A.</div><div class="lb-xp">1,240 XP</div></div>
+        <div class="lb-row"><div class="lb-rank">🥈</div><div class="lb-av">EO</div><div class="lb-nm">Emeka O.</div><div class="lb-xp">1,180 XP</div></div>
+        <div class="lb-row lb-me"><div class="lb-rank" style="color:white;">3</div><div class="lb-av" style="background:var(--gold);color:var(--navy);">CA</div><div class="lb-nm" style="color:var(--gold);font-weight:700;">Chukwuemeka A. (You)</div><div class="lb-xp">1,040 XP</div></div>
+        <div class="lb-row"><div class="lb-rank">4</div><div class="lb-av">AK</div><div class="lb-nm">Amina K.</div><div class="lb-xp">980 XP</div></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- =================== STATS =================== -->
-<section class="stats-section">
+<!-- ===== STATS BAND ===== -->
+<section class="stats-band">
   <div class="stats-grid">
     <div class="fade-in">
-      <div class="stat-num" data-target="15000">15,000+</div>
-      <div class="stat-label">Students Enrolled</div>
+      <div class="stn">15,000+</div>
+      <div class="stl">Students Enrolled</div>
     </div>
     <div class="fade-in">
-      <div class="stat-num">94%</div>
-      <div class="stat-label">Average Pass Rate</div>
+      <div class="stn">94%</div>
+      <div class="stl">Average Pass Rate</div>
     </div>
     <div class="fade-in">
-      <div class="stat-num">200+</div>
-      <div class="stat-label">Courses & Subjects</div>
+      <div class="stn">200+</div>
+      <div class="stl">Courses & Subjects</div>
     </div>
     <div class="fade-in">
-      <div class="stat-num">36</div>
-      <div class="stat-label">States Covered</div>
+      <div class="stn">36</div>
+      <div class="stl">States Covered</div>
     </div>
   </div>
 </section>
 
-<!-- =================== PRICING =================== -->
-<section class="pricing-section" id="pricing">
-  <div class="pricing-header fade-in">
-    <div class="section-tag"><i class="fas fa-tag"></i> Pricing Plans</div>
-    <h2 class="section-h2">Simple, Transparent <span class="accent">Pricing</span></h2>
-    <p class="section-sub">Start free today. No credit card required. Upgrade anytime to unlock the full power of the NLTC platform.</p>
+<!-- ===== PRICING ===== -->
+<section class="pricing" id="pricing">
+  <div class="pricing-hd fade-in">
+    <div class="stag"><i class="fas fa-tag"></i> Pricing Plans</div>
+    <h2 class="sh2">Simple, Transparent <span class="ac">Pricing</span></h2>
+    <p class="ssub">Start free today. No credit card required. Upgrade anytime to unlock the full power of the NLTC platform.</p>
   </div>
-
   <div class="pricing-grid">
-    <!-- Free Plan -->
-    <div class="plan-card fade-in">
+    <div class="plan fade-in">
       <div class="plan-name">Free Starter</div>
       <div class="plan-price">₦0</div>
       <div class="plan-period">Forever free — no card needed</div>
-      <div class="plan-divider"></div>
-      <ul class="plan-features">
+      <div class="plan-div"></div>
+      <ul class="plan-feats">
         <li><i class="fas fa-check-circle"></i> 5 recorded lessons/month</li>
         <li><i class="fas fa-check-circle"></i> 20 CBT practice questions</li>
         <li><i class="fas fa-check-circle"></i> Exam news feed</li>
         <li><i class="fas fa-check-circle"></i> Basic progress tracking</li>
         <li><i class="fas fa-check-circle"></i> Community access</li>
       </ul>
-      <button class="plan-btn plan-btn-outline">Get Started Free</button>
+      <button class="plan-btn pb-ghost">Get Started Free</button>
     </div>
 
-    <!-- Pro Plan (Popular) -->
-    <div class="plan-card popular fade-in">
-      <div class="popular-badge">Most Popular</div>
+    <div class="plan pop fade-in">
+      <div class="pop-tag">Most Popular</div>
       <div class="plan-name">Pro Scholar</div>
       <div class="plan-price">₦5,000</div>
       <div class="plan-period">per month — billed monthly</div>
-      <div class="plan-divider"></div>
-      <ul class="plan-features">
+      <div class="plan-div"></div>
+      <ul class="plan-feats">
         <li><i class="fas fa-check-circle"></i> Unlimited recorded lessons</li>
         <li><i class="fas fa-check-circle"></i> Full CBT practice engine</li>
         <li><i class="fas fa-check-circle"></i> All live classes + replays</li>
         <li><i class="fas fa-check-circle"></i> Gamification + Leaderboard</li>
-        <li><i class="fas fa-check-circle"></i> SMS exam alerts via Twilio</li>
+        <li><i class="fas fa-check-circle"></i> SMS exam alerts</li>
         <li><i class="fas fa-check-circle"></i> AI-driven study recommendations</li>
         <li><i class="fas fa-check-circle"></i> Mobile app (iOS & Android)</li>
       </ul>
-      <button class="plan-btn plan-btn-solid">Subscribe with Paystack</button>
+      <button class="plan-btn pb-solid">Subscribe with Paystack</button>
     </div>
 
-    <!-- Elite Plan -->
-    <div class="plan-card fade-in">
+    <div class="plan fade-in">
       <div class="plan-name">Elite Bundle</div>
       <div class="plan-price">₦12,000</div>
       <div class="plan-period">per term — save 20%</div>
-      <div class="plan-divider"></div>
-      <ul class="plan-features">
+      <div class="plan-div"></div>
+      <ul class="plan-feats">
         <li><i class="fas fa-check-circle"></i> Everything in Pro Scholar</li>
         <li><i class="fas fa-check-circle"></i> 1-on-1 tutor sessions</li>
         <li><i class="fas fa-check-circle"></i> Personalized study timetable</li>
@@ -1270,220 +1177,248 @@
         <li><i class="fas fa-check-circle"></i> Offline content download</li>
         <li><i class="fas fa-check-circle"></i> Certificate of completion</li>
       </ul>
-      <button class="plan-btn plan-btn-outline">Choose Elite Bundle</button>
+      <button class="plan-btn pb-ghost">Choose Elite Bundle</button>
     </div>
   </div>
-
-  <p style="text-align:center; font-size:0.85rem; color:var(--text-light); margin-top:32px;">
-    <i class="fas fa-shield-alt" style="color:var(--success); margin-right:6px;"></i>
-    All payments are secured via <strong style="color:var(--navy);">Paystack</strong>. 7-day money-back guarantee on paid plans.
+  <p style="text-align:center;font-size:.83rem;color:var(--text-light);margin-top:32px;">
+    <i class="fas fa-shield-alt" style="color:var(--success);margin-right:6px;"></i>
+    All payments secured via <strong style="color:var(--navy);">Paystack</strong>. 7-day money-back guarantee on paid plans.
   </p>
 </section>
 
-<!-- =================== TESTIMONIALS =================== -->
-<section class="testimonials-section" id="testimonials">
-  <div class="testimonials-header fade-in">
-    <div class="section-tag"><i class="fas fa-quote-right"></i> Student Success</div>
-    <h2 class="section-h2">Real Results from <span class="accent">Real Students</span></h2>
-    <p class="section-sub">Thousands of Nigerian students have already transformed their exam scores with NLTC. Here's what they say.</p>
+<!-- ===== TESTIMONIALS ===== -->
+<section class="testi" id="testimonials">
+  <div class="testi-hd fade-in">
+    <div class="stag"><i class="fas fa-quote-right"></i> Student Success</div>
+    <h2 class="sh2">Real Results from <span class="ac">Real Students</span></h2>
+    <p class="ssub">Thousands of Nigerian students have already transformed their exam scores with NLTC.</p>
   </div>
 
-  <div class="testimonials-grid">
-    <div class="testimonial-card fade-in">
-      <div class="t-stars">★★★★★</div>
-      <p class="t-quote">I scored 312 in JAMB after just 3 months on NLTC. The CBT practice engine is exactly like the real exam. I went in completely confident.</p>
-      <div class="t-person">
-        <img class="t-avatar" src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=100&q=80" alt="Adaeze">
-        <div>
-          <div class="t-name">Adaeze Okonkwo</div>
-          <div class="t-detail">JAMB 2025 — 312/400 · University of Lagos</div>
+  <div class="testi-grid">
+    <div class="tc fade-in">
+      <div class="tc-img-wrap">
+        <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600&q=80" alt="Adaeze Okonkwo">
+        <div class="tc-img-overlay"></div>
+        <div class="tc-name-over">
+          <div class="tc-name">Adaeze Okonkwo</div>
+          <div class="tc-det">University of Lagos · Lagos State</div>
         </div>
+      </div>
+      <div class="tc-body">
+        <div class="tc-stars">★★★★★</div>
+        <p class="tc-quote">I scored 312 in JAMB after just 3 months on NLTC. The CBT practice engine is exactly like the real exam. I went in completely confident.</p>
+        <div class="tc-score"><i class="fas fa-trophy" style="color:var(--gold-2);"></i> JAMB 2025 — 312/400</div>
       </div>
     </div>
 
-    <div class="testimonial-card fade-in">
-      <div class="t-stars">★★★★★</div>
-      <p class="t-quote">The live classes are amazing. My tutor explains things so clearly and I could ask questions directly. I got 8 A's in WAEC — my parents couldn't believe it!</p>
-      <div class="t-person">
-        <img class="t-avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80" alt="Babatunde">
-        <div>
-          <div class="t-name">Babatunde Afolabi</div>
-          <div class="t-detail">WAEC 2025 — 8 A's · Lagos State</div>
+    <div class="tc fade-in">
+      <div class="tc-img-wrap">
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80" alt="Babatunde Afolabi">
+        <div class="tc-img-overlay"></div>
+        <div class="tc-name-over">
+          <div class="tc-name">Babatunde Afolabi</div>
+          <div class="tc-det">Lagos State</div>
         </div>
+      </div>
+      <div class="tc-body">
+        <div class="tc-stars">★★★★★</div>
+        <p class="tc-quote">The live classes are amazing. My tutor explains things so clearly and I could ask questions directly. I got 8 A's in WAEC — my parents couldn't believe it!</p>
+        <div class="tc-score"><i class="fas fa-star" style="color:var(--gold-2);"></i> WAEC 2025 — 8 A's</div>
       </div>
     </div>
 
-    <div class="testimonial-card fade-in">
-      <div class="t-stars">★★★★★</div>
-      <p class="t-quote">I'm from a small town in Kano without access to good tutors. NLTC gave me the same quality education as students in Lagos. I passed NECO with distinction!</p>
-      <div class="t-person">
-        <img class="t-avatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80" alt="Hauwa">
-        <div>
-          <div class="t-name">Hauwa Ibrahim</div>
-          <div class="t-detail">NECO 2025 — Distinction · Kano State</div>
+    <div class="tc fade-in">
+      <div class="tc-img-wrap">
+        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80" alt="Hauwa Ibrahim">
+        <div class="tc-img-overlay"></div>
+        <div class="tc-name-over">
+          <div class="tc-name">Hauwa Ibrahim</div>
+          <div class="tc-det">Kano State</div>
         </div>
+      </div>
+      <div class="tc-body">
+        <div class="tc-stars">★★★★★</div>
+        <p class="tc-quote">I'm from a small town in Kano without access to good tutors. NLTC gave me the same quality education as students in Lagos. I passed NECO with distinction!</p>
+        <div class="tc-score"><i class="fas fa-award" style="color:var(--gold-2);"></i> NECO 2025 — Distinction</div>
       </div>
     </div>
 
-    <div class="testimonial-card fade-in">
-      <div class="t-stars">★★★★★</div>
-      <p class="t-quote">The gamification kept me studying even when I felt lazy. Climbing the leaderboard became addictive! I scored 298 in JAMB — my family is so proud of me.</p>
-      <div class="t-person">
-        <img class="t-avatar" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80" alt="Chidera">
-        <div>
-          <div class="t-name">Chidera Ezenwachi</div>
-          <div class="t-detail">JAMB 2025 — 298/400 · Enugu State</div>
+    <div class="tc fade-in">
+      <div class="tc-img-wrap">
+        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&q=80" alt="Chidera Ezenwachi">
+        <div class="tc-img-overlay"></div>
+        <div class="tc-name-over">
+          <div class="tc-name">Chidera Ezenwachi</div>
+          <div class="tc-det">Enugu State</div>
         </div>
+      </div>
+      <div class="tc-body">
+        <div class="tc-stars">★★★★★</div>
+        <p class="tc-quote">The gamification kept me studying even when I felt lazy. Climbing the leaderboard became addictive! I scored 298 in JAMB — my family is so proud of me.</p>
+        <div class="tc-score"><i class="fas fa-trophy" style="color:var(--gold-2);"></i> JAMB 2025 — 298/400</div>
       </div>
     </div>
 
-    <div class="testimonial-card fade-in">
-      <div class="t-stars">★★★★★</div>
-      <p class="t-quote">I failed JAMB twice before discovering NLTC. After 4 months of consistent studying on the platform, I finally scored 276. This app changed my life.</p>
-      <div class="t-person">
-        <img class="t-avatar" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80" alt="Oluwaseun">
-        <div>
-          <div class="t-name">Oluwaseun Badmus</div>
-          <div class="t-detail">JAMB 2025 — 276/400 · Ogun State</div>
+    <div class="tc fade-in">
+      <div class="tc-img-wrap">
+        <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&q=80" alt="Oluwaseun Badmus">
+        <div class="tc-img-overlay"></div>
+        <div class="tc-name-over">
+          <div class="tc-name">Oluwaseun Badmus</div>
+          <div class="tc-det">Ogun State</div>
         </div>
+      </div>
+      <div class="tc-body">
+        <div class="tc-stars">★★★★★</div>
+        <p class="tc-quote">I failed JAMB twice before discovering NLTC. After 4 months of consistent studying on the platform, I finally scored 276. This app changed my life.</p>
+        <div class="tc-score"><i class="fas fa-trophy" style="color:var(--gold-2);"></i> JAMB 2025 — 276/400</div>
       </div>
     </div>
 
-    <div class="testimonial-card fade-in">
-      <div class="t-stars">★★★★★</div>
-      <p class="t-quote">My daughter used NLTC for her GCE preparation. The SMS notifications kept her on track and I could monitor her progress too. Incredible platform for Nigerian students.</p>
-      <div class="t-person">
-        <div class="t-avatar-placeholder">MO</div>
-        <div>
-          <div class="t-name">Mrs. Oluwafunke Adeyemi</div>
-          <div class="t-detail">Parent · GCE Student — Rivers State</div>
+    <div class="tc fade-in">
+      <div class="tc-img-wrap">
+        <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&q=80" alt="Mrs. Adeyemi">
+        <div class="tc-img-overlay"></div>
+        <div class="tc-name-over">
+          <div class="tc-name">Mrs. Oluwafunke Adeyemi</div>
+          <div class="tc-det">Parent · Rivers State</div>
+        </div>
+      </div>
+      <div class="tc-body">
+        <div class="tc-stars">★★★★★</div>
+        <p class="tc-quote">My daughter used NLTC for her GCE preparation. The SMS notifications kept her on track and I could monitor her progress too. Incredible platform for Nigerian students.</p>
+        <div class="tc-score"><i class="fas fa-heart" style="color:var(--gold-2);"></i> GCE 2025 — Passed</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== COMMUNITY ===== -->
+<section class="community">
+  <div class="comm-inner">
+    <div class="slide-l">
+      <div class="stag" style="background:rgba(245,197,24,.15);color:var(--gold);"><i class="fas fa-heart"></i> Our Community</div>
+      <h2 class="sh2" style="color:white;">36 States, One <span style="color:var(--gold);">Mission</span></h2>
+      <p class="ssub" style="color:rgba(255,255,255,.55);margin-bottom:32px;">
+        NLTC is more than a platform — it's a movement. From Sokoto to Calabar, students across every Nigerian state are coming together to achieve academic excellence.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:8px;">
+        <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:20px;text-align:center;">
+          <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--gold);">36</div>
+          <div style="font-size:.78rem;color:rgba(255,255,255,.45);margin-top:4px;">States Covered</div>
+        </div>
+        <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:20px;text-align:center;">
+          <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--gold);">50+</div>
+          <div style="font-size:.78rem;color:rgba(255,255,255,.45);margin-top:4px;">Expert Tutors</div>
+        </div>
+        <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:20px;text-align:center;">
+          <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--gold);">5,000+</div>
+          <div style="font-size:.78rem;color:rgba(255,255,255,.45);margin-top:4px;">Past Questions</div>
+        </div>
+        <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:20px;text-align:center;">
+          <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--gold);">4.9★</div>
+          <div style="font-size:.78rem;color:rgba(255,255,255,.45);margin-top:4px;">App Store Rating</div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-r">
+      <div class="comm-imgs">
+        <div class="ci tall">
+          <img src="https://images.unsplash.com/photo-1529390079861-591de354faf5?w=400&q=80" alt="Student community">
+        </div>
+        <div class="ci short">
+          <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=300&q=80" alt="Students">
+        </div>
+        <div class="ci short">
+          <img src="https://images.unsplash.com/photo-1604238376302-8b836c1baeb3?w=300&q=80" alt="Online learning">
+        </div>
+        <div class="ci short">
+          <img src="https://images.unsplash.com/photo-1588072432904-843af37f03ed?w=300&q=80" alt="Group study">
+        </div>
+        <div class="ci short">
+          <img src="https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=300&q=80" alt="Learning">
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- =================== FAQ =================== -->
+<!-- ===== FAQ ===== -->
 <section class="faq-section" id="faq">
   <div class="faq-inner">
-    <div class="slide-left">
-      <div class="section-tag"><i class="fas fa-question-circle"></i> FAQ</div>
-      <h2 class="section-h2">Got <span class="accent">Questions?</span><br>We've Got Answers.</h2>
-      <p class="section-sub" style="margin-bottom:32px;">Everything you need to know about NLTC. Can't find an answer? Reach out to our team.</p>
-      <a href="mailto:support@nltc.ng" style="display:inline-flex; align-items:center; gap:8px; background:var(--navy); color:white; padding:14px 28px; border-radius:12px; font-weight:600; font-size:0.9rem; text-decoration:none; transition:all 0.25s;">
+    <div class="slide-l">
+      <div class="stag"><i class="fas fa-question-circle"></i> FAQ</div>
+      <h2 class="sh2">Got <span class="ac">Questions?</span><br>We've Got Answers.</h2>
+      <p class="ssub" style="margin-bottom:32px;">Everything you need to know about NLTC. Can't find an answer? Reach out to our team.</p>
+      <a href="mailto:support@nltc.ng" style="display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:white;padding:14px 28px;border-radius:13px;font-weight:600;font-size:.9rem;text-decoration:none;transition:all .25s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
         <i class="fas fa-envelope"></i> Contact Support
       </a>
     </div>
-
-    <div class="faq-list slide-right">
+    <div class="slide-r">
       <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">
-          Is NLTC suitable for students with slow internet? <i class="fas fa-chevron-down"></i>
-        </button>
-        <div class="faq-answer">
-          Yes! Our platform is optimized for 3G/4G connections. The mobile app supports offline downloading of recorded lessons so you can study without internet after downloading. Live classes require a stable connection, but all sessions are recorded for later access.
-        </div>
+        <button class="faq-q" onclick="toggleFaq(this)">Is NLTC suitable for students with slow internet? <i class="fas fa-chevron-down"></i></button>
+        <div class="faq-a">Yes! Our platform is optimized for 3G/4G connections. The mobile app supports offline downloading of recorded lessons so you can study without internet after downloading. Live classes require a stable connection, but all sessions are recorded for later access.</div>
       </div>
-
       <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">
-          How does the CBT practice engine work? <i class="fas fa-chevron-down"></i>
-        </button>
-        <div class="faq-answer">
-          Our CBT engine mirrors the exact format of JAMB, WAEC, NECO, and GCE exams. You get timed sessions, randomized past questions, instant scoring, and detailed explanations for every answer. It tracks your performance over time so you can see exactly which topics need more work.
-        </div>
+        <button class="faq-q" onclick="toggleFaq(this)">How does the CBT practice engine work? <i class="fas fa-chevron-down"></i></button>
+        <div class="faq-a">Our CBT engine mirrors the exact format of JAMB, WAEC, NECO, and GCE exams. You get timed sessions, randomized past questions, instant scoring, and detailed explanations for every answer. It tracks your performance over time so you can see exactly which topics need more work.</div>
       </div>
-
       <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">
-          Can I access NLTC on both phone and laptop? <i class="fas fa-chevron-down"></i>
-        </button>
-        <div class="faq-answer">
-          Absolutely. NLTC works on any modern browser (Chrome, Firefox, Safari, Edge) on desktop, tablet, or mobile. We also have dedicated iOS and Android apps for the best mobile experience with offline support and push notifications.
-        </div>
+        <button class="faq-q" onclick="toggleFaq(this)">Can I access NLTC on both phone and laptop? <i class="fas fa-chevron-down"></i></button>
+        <div class="faq-a">Absolutely. NLTC works on any modern browser (Chrome, Firefox, Safari, Edge) on desktop, tablet, or mobile. We also have dedicated iOS and Android apps for the best mobile experience with offline support and push notifications.</div>
       </div>
-
       <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">
-          How do I pay for a subscription? <i class="fas fa-chevron-down"></i>
-        </button>
-        <div class="faq-answer">
-          All payments are processed securely through Paystack, Nigeria's most trusted payment gateway. You can pay with your debit card, bank transfer, or USSD — no international card required. We offer monthly and termly subscription plans.
-        </div>
+        <button class="faq-q" onclick="toggleFaq(this)">How do I pay for a subscription? <i class="fas fa-chevron-down"></i></button>
+        <div class="faq-a">All payments are processed securely through Paystack, Nigeria's most trusted payment gateway. You can pay with your debit card, bank transfer, or USSD — no international card required. We offer monthly and termly subscription plans.</div>
       </div>
-
       <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">
-          Is there a free trial available? <i class="fas fa-chevron-down"></i>
-        </button>
-        <div class="faq-answer">
-          Yes! Our Free Starter plan gives you permanent free access to 5 lessons per month, 20 CBT practice questions, exam news, and community features — no credit card required. You can upgrade to Pro Scholar at any time to unlock unlimited access.
-        </div>
+        <button class="faq-q" onclick="toggleFaq(this)">Is there a free trial available? <i class="fas fa-chevron-down"></i></button>
+        <div class="faq-a">Yes! Our Free Starter plan gives you permanent free access to 5 lessons per month, 20 CBT practice questions, exam news, and community features — no credit card required. You can upgrade to Pro Scholar at any time to unlock unlimited access.</div>
       </div>
-
       <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)">
-          Can I get a refund if I'm not satisfied? <i class="fas fa-chevron-down"></i>
-        </button>
-        <div class="faq-answer">
-          We offer a 7-day money-back guarantee on all paid plans. If you're not fully satisfied within the first 7 days, contact our support team and we'll process a full refund — no questions asked.
-        </div>
+        <button class="faq-q" onclick="toggleFaq(this)">Can I get a refund if I'm not satisfied? <i class="fas fa-chevron-down"></i></button>
+        <div class="faq-a">We offer a 7-day money-back guarantee on all paid plans. If you're not fully satisfied within the first 7 days, contact our support team and we'll process a full refund — no questions asked.</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- =================== CTA =================== -->
-<section class="cta-section">
-  <h2 class="cta-h2">Ready to Take Your Exams<br>to the <span style="color:var(--gold)">Next Level?</span></h2>
+<!-- ===== CTA ===== -->
+<section class="cta-s">
+  <h2 class="cta-h2">Ready to Take Your Exams<br>to the <span style="color:var(--gold);">Next Level?</span></h2>
   <p class="cta-sub">Join 15,000+ Nigerian students already on their path to exam excellence. It starts with a single step — sign up free today.</p>
-  <div class="cta-actions">
-    <a href="#" class="btn-cta-primary"><i class="fas fa-rocket" style="margin-right:8px;"></i> Start Free Today</a>
-    <a href="#pricing" class="btn-cta-outline">View All Plans</a>
+  <div class="cta-btns">
+    <a href="#" class="btn-cta-p"><i class="fas fa-rocket" style="margin-right:8px;"></i>Start Free Today</a>
+    <a href="#pricing" class="btn-cta-g">View All Plans</a>
   </div>
-
-  <div style="margin-top:56px; display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap;">
-    <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:rgba(255,255,255,0.5);">
-      <i class="fas fa-check" style="color:var(--gold);"></i> No credit card required
-    </div>
-    <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:rgba(255,255,255,0.5);">
-      <i class="fas fa-check" style="color:var(--gold);"></i> Free plan forever
-    </div>
-    <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:rgba(255,255,255,0.5);">
-      <i class="fas fa-check" style="color:var(--gold);"></i> 7-day money-back guarantee
-    </div>
-    <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:rgba(255,255,255,0.5);">
-      <i class="fas fa-check" style="color:var(--gold);"></i> Cancel anytime
-    </div>
+  <div class="cta-checks">
+    <div class="cta-ck"><i class="fas fa-check"></i> No credit card required</div>
+    <div class="cta-ck"><i class="fas fa-check"></i> Free plan forever</div>
+    <div class="cta-ck"><i class="fas fa-check"></i> 7-day money-back guarantee</div>
+    <div class="cta-ck"><i class="fas fa-check"></i> Cancel anytime</div>
   </div>
 </section>
 
-<!-- =================== FOOTER =================== -->
+<!-- ===== FOOTER ===== -->
 <footer>
   <div class="footer-grid">
-    <div class="footer-brand">
-      <div class="footer-logo">
-        <div class="footer-logo-icon">
-          <svg width="20" height="20" viewBox="0 0 40 40" fill="none">
-            <path d="M8 30 Q12 14 20 10 Q28 14 32 30" stroke="#F4C430" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-            <path d="M6 30 L34 30" stroke="#F4C430" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <div class="footer-logo-name">NLTC</div>
-      </div>
-      <p class="footer-brand-desc">Next Level Tutorial College — Nigeria's most trusted digital examination preparatory platform.</p>
-      <div class="footer-social">
-        <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i></a>
-        <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
-        <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
-        <a href="#" class="social-btn"><i class="fab fa-youtube"></i></a>
-        <a href="#" class="social-btn"><i class="fab fa-whatsapp"></i></a>
+    <div>
+      <a href="#" class="fl-logo">
+        <img src="NLTC.png" alt="NLTC Logo">
+        <div class="fl-logo-name">NLTC</div>
+      </a>
+      <p class="fl-desc">Next Level Tutorial College — Nigeria's most trusted digital examination preparatory platform.</p>
+      <div class="fl-social">
+        <a href="#" class="soc-btn"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="soc-btn"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="soc-btn"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="soc-btn"><i class="fab fa-youtube"></i></a>
+        <a href="#" class="soc-btn"><i class="fab fa-whatsapp"></i></a>
       </div>
     </div>
-
     <div>
-      <div class="footer-col-title">Platform</div>
-      <ul class="footer-links">
+      <div class="fc-title-foot">Platform</div>
+      <ul class="fl-links">
         <li><a href="#">Live Classes</a></li>
         <li><a href="#">Recorded Lessons</a></li>
         <li><a href="#">CBT Practice</a></li>
@@ -1492,10 +1427,9 @@
         <li><a href="#">Mobile App</a></li>
       </ul>
     </div>
-
     <div>
-      <div class="footer-col-title">Examinations</div>
-      <ul class="footer-links">
+      <div class="fc-title-foot">Examinations</div>
+      <ul class="fl-links">
         <li><a href="#">JAMB/UTME</a></li>
         <li><a href="#">WAEC SSCE</a></li>
         <li><a href="#">NECO</a></li>
@@ -1503,10 +1437,9 @@
         <li><a href="#">Post-UTME</a></li>
       </ul>
     </div>
-
     <div>
-      <div class="footer-col-title">Company</div>
-      <ul class="footer-links">
+      <div class="fc-title-foot">Company</div>
+      <ul class="fl-links">
         <li><a href="#">About NLTC</a></li>
         <li><a href="#">Our Tutors</a></li>
         <li><a href="#">Pricing</a></li>
@@ -1516,10 +1449,9 @@
       </ul>
     </div>
   </div>
-
-  <div class="footer-bottom">
+  <div class="footer-bot">
     <span>© 2026 Next Level Tutorial College. All rights reserved.</span>
-    <div class="footer-bottom-links">
+    <div class="fb-links">
       <a href="#">Privacy Policy</a>
       <a href="#">Terms of Service</a>
       <a href="#">Cookie Policy</a>
@@ -1528,50 +1460,182 @@
 </footer>
 
 <script>
-  // Nav scroll effect
-  const nav = document.getElementById('mainNav');
-  const scrollProgress = document.getElementById('scrollProgress');
+/* ===== PARTICLE PHYSICS ENGINE ===== */
+(function(){
+  const canvas = document.getElementById('particleCanvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, pts, lines;
+  const CFG = {
+    count: 90,
+    maxDist: 130,
+    speed: 0.45,
+    dotR: 1.6,
+    dotAlpha: 0.35,
+    lineAlpha: 0.12,
+    gold: '#F5C518',
+    white: 'rgba(255,255,255,'
+  };
 
-  window.addEventListener('scroll', () => {
-    const scrollPct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
-    scrollProgress.style.width = scrollPct + '%';
-    nav.classList.toggle('scrolled', window.scrollY > 20);
-  });
-
-  // Intersection Observer for animations
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-      }
-    });
-  }, { threshold: 0.12 });
-
-  document.querySelectorAll('.fade-in, .slide-left, .slide-right').forEach(el => observer.observe(el));
-
-  // Stagger feature cards
-  document.querySelectorAll('.feature-card, .testimonial-card, .exam-card, .step-item').forEach((el, i) => {
-    el.style.transitionDelay = (i * 0.08) + 's';
-  });
-
-  // FAQ toggle
-  function toggleFaq(btn) {
-    const item = btn.closest('.faq-item');
-    const isOpen = item.classList.contains('open');
-    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
-    if (!isOpen) item.classList.add('open');
+  function resize(){
+    W = canvas.width = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
   }
 
-  // Smooth scroll for anchor links
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', e => {
-      const target = document.querySelector(a.getAttribute('href'));
-      if (target) {
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  function rand(a,b){ return Math.random()*(b-a)+a; }
+
+  function initParticles(){
+    pts = Array.from({length: CFG.count}, ()=>({
+      x: rand(0,W), y: rand(0,H),
+      vx: rand(-CFG.speed,CFG.speed),
+      vy: rand(-CFG.speed,CFG.speed),
+      r: rand(.8, CFG.dotR+.6),
+      gold: Math.random() < .18
+    }));
+  }
+
+  function tick(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p=>{
+      p.x += p.vx; p.y += p.vy;
+      if(p.x<0) p.x=W; if(p.x>W) p.x=0;
+      if(p.y<0) p.y=H; if(p.y>H) p.y=0;
+    });
+    /* connections */
+    for(let i=0;i<pts.length;i++){
+      for(let j=i+1;j<pts.length;j++){
+        const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<CFG.maxDist){
+          const a=CFG.lineAlpha*(1-dist/CFG.maxDist);
+          const useGold = pts[i].gold || pts[j].gold;
+          ctx.strokeStyle = useGold
+            ? `rgba(245,197,24,${a*.7})`
+            : `rgba(255,255,255,${a})`;
+          ctx.lineWidth = .7;
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x,pts[i].y);
+          ctx.lineTo(pts[j].x,pts[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+    /* dots */
+    pts.forEach(p=>{
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle = p.gold
+        ? `rgba(245,197,24,${CFG.dotAlpha+.25})`
+        : `rgba(255,255,255,${CFG.dotAlpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(tick);
+  }
+
+  function init(){
+    resize();
+    initParticles();
+    tick();
+  }
+
+  window.addEventListener('resize', ()=>{ resize(); initParticles(); });
+
+  /* Wait for hero to have size */
+  setTimeout(init, 100);
+
+  /* Subtle mouse gravity */
+  let mx=-9999, my=-9999;
+  document.querySelector('.hero').addEventListener('mousemove', e=>{
+    const r = canvas.getBoundingClientRect();
+    mx = e.clientX - r.left;
+    my = e.clientY - r.top;
+  });
+  document.querySelector('.hero').addEventListener('mouseleave',()=>{ mx=-9999; my=-9999; });
+
+  setInterval(()=>{
+    if(mx===-9999) return;
+    pts.forEach(p=>{
+      const dx=mx-p.x, dy=my-p.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<100){
+        const force = (100-dist)/100*0.04;
+        p.vx += (dx/dist)*force;
+        p.vy += (dy/dist)*force;
+        const spd = Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+        if(spd>CFG.speed*3){ p.vx=(p.vx/spd)*CFG.speed*3; p.vy=(p.vy/spd)*CFG.speed*3; }
       }
     });
+  }, 30);
+})();
+
+/* ===== SCROLL PROGRESS ===== */
+const sp = document.getElementById('sp');
+const nav = document.getElementById('nav');
+window.addEventListener('scroll',()=>{
+  const pct = (window.scrollY/(document.body.scrollHeight-window.innerHeight))*100;
+  sp.style.width = pct+'%';
+  nav.classList.toggle('scrolled', window.scrollY>20);
+});
+
+/* ===== HAMBURGER MENU ===== */
+const ham = document.getElementById('hamBtn');
+const mob = document.getElementById('mobileMenu');
+
+ham.addEventListener('click',()=>{
+  ham.classList.toggle('open');
+  mob.classList.toggle('open');
+  document.body.style.overflow = mob.classList.contains('open') ? 'hidden' : '';
+});
+
+document.querySelectorAll('.mm-link').forEach(a=>{
+  a.addEventListener('click',()=>{
+    ham.classList.remove('open');
+    mob.classList.remove('open');
+    document.body.style.overflow = '';
   });
+});
+
+/* close on outside click */
+mob.addEventListener('click',(e)=>{
+  if(e.target === mob){
+    ham.classList.remove('open');
+    mob.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
+
+/* ===== SCROLL ANIMATIONS ===== */
+const obs = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+},{threshold:.1});
+
+document.querySelectorAll('.fade-in,.slide-l,.slide-r').forEach((el,i)=>{
+  el.style.transitionDelay = (i*0.06)+'s';
+  obs.observe(el);
+});
+
+/* Reset stagger for card groups to be more natural */
+document.querySelectorAll('.feat-grid .fc-card, .testi-grid .tc, .exams-grid .ex-card, .steps .step').forEach((el,i)=>{
+  el.style.transitionDelay = (i*0.08)+'s';
+});
+
+/* ===== FAQ ===== */
+function toggleFaq(btn){
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
+  if(!isOpen) item.classList.add('open');
+}
+
+/* ===== SMOOTH SCROLL ===== */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const t = a.getAttribute('href');
+    if(t && t !== '#'){
+      const el = document.querySelector(t);
+      if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth',block:'start'}); }
+    }
+  });
+});
 </script>
 </body>
 </html>
