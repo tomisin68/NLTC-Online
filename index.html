@@ -84,13 +84,14 @@ button { font-family: var(--font); }
   display: flex; align-items: center; gap: 10px;
   font-size: 1.1rem; font-weight: 800; color: var(--navy);
   flex-shrink: 0;
+  text-decoration: none;
 }
-.nav-logo-icon {
-  width: 38px; height: 38px; border-radius: 10px;
-  background: var(--navy);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; color: var(--gold); font-weight: 800;
-  letter-spacing: -0.03em;
+/* Logo image — sized to fit the 68px nav height with comfortable padding */
+.nav-logo img {
+  height: 44px;
+  width: auto;
+  display: block;
+  object-fit: contain;
 }
 .nav-links {
   display: flex; gap: 4px; list-style: none; margin-left: auto;
@@ -123,6 +124,8 @@ button { font-family: var(--font); }
   width: 40px; height: 40px; justify-content: center; align-items: center;
   border: none; background: none; cursor: pointer; border-radius: var(--r-sm);
   transition: background 0.2s; flex-shrink: 0;
+  /* Push hamburger to the far right on mobile */
+  margin-left: auto;
 }
 .hamburger:hover { background: var(--surface); }
 .hamburger span {
@@ -800,6 +803,28 @@ footer { background: #04101F; padding: 64px 24px 36px; }
 @media (max-width: 900px) {
   .nav-links, .nav-actions { display: none; }
   .hamburger { display: flex; }
+
+  /* ── Mobile nav: logo left, hamburger right with generous gap ── */
+  .nav-inner {
+    /* Remove the large gap that only suits desktop; let flex handle spacing */
+    gap: 0;
+    padding: 0 20px;
+  }
+  .nav-logo {
+    /* Logo takes its natural width, then flex pushes hamburger to the right */
+    flex: 0 0 auto;
+  }
+  /* Spacer that fills all available room between logo and hamburger */
+  .nav-inner::after {
+    content: '';
+    flex: 1;
+  }
+  .hamburger {
+    /* Ensure hamburger sits at the very end with no extra auto margin fighting */
+    margin-left: 0;
+    flex: 0 0 auto;
+  }
+
   .hero-body { grid-template-columns: 1fr; gap: 40px; padding: 48px 24px 40px; }
   .hero-visual { display: none; }
   .hero h1 { font-size: clamp(2.2rem, 7vw, 3rem); }
@@ -855,9 +880,9 @@ footer { background: #04101F; padding: 64px 24px 36px; }
      ============================================================ -->
 <header class="nav" id="nav">
   <div class="nav-inner">
+    <!-- Logo: image on desktop & mobile, falls back gracefully if PNG missing -->
     <a href="#" class="nav-logo">
-      <div class="nav-logo-icon">NL</div>
-      Next Level TC
+      <img src="NLTC.png" alt="Next Level Tutorial College" />
     </a>
     <ul class="nav-links">
       <li><a href="#features">Features</a></li>
@@ -867,7 +892,7 @@ footer { background: #04101F; padding: 64px 24px 36px; }
       <li><a href="#faq">FAQ</a></li>
     </ul>
     <div class="nav-actions">
-      <a href="#" class="btn-ghost">Sign In</a>
+      <a href="auth.html" class="btn-ghost">Sign In</a>
       <a href="#pricing" class="btn-primary">Get Started Free</a>
     </div>
     <button class="hamburger" id="hamburger" aria-label="Open menu">
@@ -886,7 +911,7 @@ footer { background: #04101F; padding: 64px 24px 36px; }
     <a href="#faq" class="mm-close">FAQ</a>
   </nav>
   <div class="mobile-menu-footer">
-    <a href="#" class="btn-ghost mm-close">Sign In</a>
+    <a href="auth.html" class="btn-ghost mm-close">Sign In</a>
     <a href="#pricing" class="btn-primary mm-close">Get Started Free</a>
   </div>
 </div>
