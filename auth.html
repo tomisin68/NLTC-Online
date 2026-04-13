@@ -3,22 +3,107 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NLTC — Sign In / Sign Up</title>
+<title>NLTC — Sign In</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.10/dist/dotlottie-wc.js" type="module"></script>
-<!-- Google Identity Services -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+  const firebaseConfig = {
+    apiKey: "AIzaSyA9vzT1TBpTdRJUfyYm51goS-5HfL3FcbU",
+    authDomain: "nltc-online.firebaseapp.com",
+    projectId: "nltc-online",
+    storageBucket: "nltc-online.firebasestorage.app",
+    messagingSenderId: "267993935158",
+    appId: "1:267993935158:web:723c13b2564b817fbc9797"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const gProvider = new GoogleAuthProvider();
+  gProvider.setCustomParameters({ prompt: 'select_account' });
+
+  window.__nltcAuth = auth;
+  window.__nltcDb = db;
+  window.__nltcGProvider = gProvider;
+
+  async function saveUser(user, extras = {}) {
+    const ref = doc(db, 'users', user.uid);
+    const snap = await getDoc(ref);
+    const payload = {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName || extras.displayName || '',
+      photoURL: user.photoURL || '',
+      lastLogin: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      ...extras
+    };
+    if (!snap.exists()) {
+      payload.createdAt = serverTimestamp();
+      payload.xp = 0;
+      payload.streak = 0;
+      payload.badges = [];
+    }
+    await setDoc(ref, payload, { merge: true });
+    const fresh = await getDoc(ref);
+    return fresh.data();
+  }
+
+  window.__nltcSaveUser = saveUser;
+
+  onAuthStateChanged(auth, (user) => {
+    if (user && window.__nltcAuthReady) {
+      window.__nltcAuthReady(user);
+    }
+  });
+
+  // Email/Password login
+  window.__nltcLogin = async function(email, password) {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const data = await saveUser(cred.user);
+    return { user: cred.user, data };
+  };
+
+  // Email/Password signup
+  window.__nltcSignup = async function(email, password, extras) {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(cred.user, { displayName: extras.displayName });
+    const data = await saveUser(cred.user, extras);
+    return { user: cred.user, data };
+  };
+
+  // Google sign in
+  window.__nltcGoogle = async function() {
+    const result = await signInWithPopup(auth, gProvider);
+    const isNew = result._tokenResponse?.isNewUser;
+    const extras = isNew ? {
+      role: 'student',
+      plan: 'free',
+      firstName: result.user.displayName?.split(' ')[0] || '',
+      lastName: result.user.displayName?.split(' ').slice(1).join(' ') || '',
+      targetExam: '',
+      state: '',
+    } : {};
+    const data = await saveUser(result.user, extras);
+    return { user: result.user, data, isNew };
+  };
+
+  // Password reset
+  window.__nltcReset = async function(email) {
+    await sendPasswordResetEmail(auth, email);
+  };
+</script>
 <style>
-/* ============================================================
-   DESIGN TOKENS (matching main site)
-   ============================================================ */
 :root {
   --navy:      #0B1D3A;
-  --navy-2:    #142952;
+  --navy-mid:  #142952;
   --navy-3:    #1D3A6F;
   --gold:      #F0A500;
   --gold-2:    #FFBE33;
@@ -32,1292 +117,1326 @@
   --success:   #12B76A;
   --error:     #F04438;
   --border:    rgba(11,29,58,0.10);
-  --r-sm:      10px;
-  --r-md:      16px;
-  --r-lg:      24px;
-  --r-xl:      32px;
-  --shadow-sm: 0 2px 12px rgba(11,29,58,0.06);
+  --border-focus: rgba(11,29,58,0.30);
+  --r-sm: 10px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px;
+  --shadow-sm: 0 2px 12px rgba(11,29,58,0.07);
   --shadow-md: 0 8px 40px rgba(11,29,58,0.12);
-  --shadow-lg: 0 24px 80px rgba(11,29,58,0.22);
-  --font: 'Plus Jakarta Sans', sans-serif;
+  --shadow-lg: 0 20px 70px rgba(11,29,58,0.22);
 }
 
-/* ============================================================
-   RESET & BASE
-   ============================================================ */
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; font-size: 16px; }
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { font-size:16px; }
 body {
-  font-family: var(--font);
-  color: var(--text-1);
+  font-family:'DM Sans', sans-serif;
   background: var(--navy);
+  color: var(--text-1);
+  min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
 }
 
-/* ============================================================
-   PARTICLE CANVAS
-   ============================================================ */
-#particles {
+/* ── CANVAS ── */
+#bg-canvas {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
 }
 
-/* ============================================================
-   LAYOUT WRAPPER
-   ============================================================ */
-.page-wrap {
+/* ── LAYOUT ── */
+.page {
   min-height: 100vh;
-  display: flex;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   position: relative;
   z-index: 1;
 }
 
-/* ============================================================
-   LEFT PANEL (Branding)
-   ============================================================ */
-.left-panel {
-  flex: 0 0 46%;
-  background: transparent;
+/* ── LEFT PANEL ── */
+.left {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 48px 56px;
   position: relative;
-}
-
-.left-panel::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(20,41,82,0.7) 0%, rgba(11,29,58,0.4) 100%);
-  border-right: 1px solid rgba(255,255,255,0.06);
-  z-index: 0;
-}
-
-.left-content {
-  position: relative; z-index: 1;
-  display: flex; flex-direction: column;
-  align-items: center; text-align: center;
-  max-width: 380px;
-}
-
-/* Logo */
-.brand-logo {
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 40px; text-decoration: none;
-}
-.brand-logo-icon {
-  width: 48px; height: 48px; border-radius: 14px;
-  background: linear-gradient(135deg, var(--gold), var(--gold-2));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.25rem; font-weight: 800; color: var(--navy);
-  box-shadow: 0 6px 20px rgba(240,165,0,0.35);
-  flex-shrink: 0;
-}
-.brand-logo-text {
-  font-size: 1.35rem; font-weight: 800; color: white; letter-spacing: -0.01em;
-}
-.brand-logo-text span { color: var(--gold); }
-
-/* Lottie container */
-.lottie-wrap {
-  width: 280px; height: 280px;
-  display: flex; align-items: center; justify-content: center;
-  position: relative;
-  margin-bottom: 28px;
-}
-.lottie-glow {
-  position: absolute; inset: -20px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(240,165,0,0.10) 0%, transparent 70%);
-}
-dotlottie-wc {
-  width: 280px; height: 280px;
-  position: relative; z-index: 1;
-}
-
-/* Brand tagline */
-.brand-tagline {
-  font-size: 1.5rem; font-weight: 800; color: white;
-  line-height: 1.25; margin-bottom: 14px; letter-spacing: -0.02em;
-}
-.brand-tagline .accent { color: var(--gold); }
-
-.brand-sub {
-  font-size: 0.875rem; color: rgba(255,255,255,0.45);
-  line-height: 1.75; margin-bottom: 36px;
-}
-
-/* Trust badges */
-.trust-badges {
-  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
-}
-.trust-badge {
-  display: flex; align-items: center; gap: 7px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.09);
-  border-radius: 100px; padding: 6px 14px;
-  font-size: 0.72rem; font-weight: 600; color: rgba(255,255,255,0.5);
-}
-.trust-badge i { color: var(--gold); font-size: 0.65rem; }
-
-/* ============================================================
-   RIGHT PANEL (Auth Form)
-   ============================================================ */
-.right-panel {
-  flex: 1;
-  display: flex; align-items: center; justify-content: center;
-  padding: 48px 32px;
-  background: var(--white);
-  position: relative;
   overflow: hidden;
 }
 
-/* Subtle decorative orb */
-.right-panel::before {
+.left::before {
   content: '';
-  position: absolute; top: -120px; right: -120px;
-  width: 360px; height: 360px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(240,165,0,0.05) 0%, transparent 70%);
+  position: absolute; inset: 0;
+  background: linear-gradient(155deg, rgba(20,41,82,0.55) 0%, rgba(11,29,58,0.30) 100%);
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+.left-inner {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column;
+  align-items: center; text-align: center;
+  max-width: 420px; gap: 0;
+}
+
+/* LOGO */
+.logo-wrap {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 36px;
+  text-decoration: none;
+}
+.logo-img {
+  width: 56px; height: 54px;
+  object-fit: contain;
+  border-radius: 12px;
+  filter: drop-shadow(0 4px 16px rgba(240,165,0,0.3));
+}
+.logo-wordmark {
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: 0;
+}
+.logo-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.6rem; font-weight: 800;
+  color: white; letter-spacing: -0.02em;
+  line-height: 1;
+}
+.logo-name em { color: var(--gold); font-style: normal; }
+.logo-tag {
+  font-size: 0.65rem; font-weight: 500;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  margin-top: 3px;
+}
+
+/* LOTTIE CONTAINER */
+.lottie-ring {
+  position: relative;
+  width: 290px; height: 290px;
+  margin: 0 auto 28px;
+  display: flex; align-items: center; justify-content: center;
+}
+.lottie-ring::before {
+  content: '';
+  position: absolute; inset: -16px;
+  border-radius: 50%;
+  background: conic-gradient(from 180deg, rgba(240,165,0,0.18), transparent 60%, rgba(240,165,0,0.12), transparent);
+  animation: spin-ring 12s linear infinite;
+}
+.lottie-ring::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(240,165,0,0.10) 0%, transparent 70%);
+}
+@keyframes spin-ring { to { transform: rotate(360deg); } }
+
+.lottie-ring dotlottie-wc,
+.lottie-ring .lottie-fallback {
+  width: 260px; height: 260px;
+  position: relative; z-index: 2;
+}
+.lottie-fallback {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7rem;
+}
+
+.left-headline {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.75rem; font-weight: 800;
+  color: white; line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+.left-headline em { color: var(--gold); font-style: normal; }
+
+.left-sub {
+  font-size: 0.875rem; color: rgba(255,255,255,0.42);
+  line-height: 1.75; margin-bottom: 32px; max-width: 340px;
+}
+
+/* TRUST PILLS */
+.trust-row {
+  display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+}
+.trust-pill {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 100px; padding: 7px 14px;
+  font-size: 0.71rem; font-weight: 500;
+  color: rgba(255,255,255,0.45);
+  backdrop-filter: blur(6px);
+}
+.trust-pill i { color: var(--gold); font-size: 0.65rem; }
+
+/* ── RIGHT PANEL ── */
+.right {
+  background: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px 32px;
+  position: relative;
+  overflow: hidden;
+}
+.right::before {
+  content: '';
+  position: absolute; top: -100px; right: -100px;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(240,165,0,0.06) 0%, transparent 70%);
   pointer-events: none;
 }
-.right-panel::after {
+.right::after {
   content: '';
   position: absolute; bottom: -80px; left: -80px;
-  width: 260px; height: 260px; border-radius: 50%;
+  width: 240px; height: 240px; border-radius: 50%;
   background: radial-gradient(circle, rgba(11,29,58,0.04) 0%, transparent 70%);
   pointer-events: none;
 }
 
-.auth-card {
+.card {
   width: 100%; max-width: 440px;
   position: relative; z-index: 1;
 }
 
-/* Tab switcher */
-.tab-switcher {
+/* ── ROLE SELECTOR ── */
+.role-selector {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 24px;
+}
+.role-btn {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 8px; padding: 16px 12px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--r-lg); cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.22s;
+  position: relative; overflow: hidden;
+}
+.role-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--navy), var(--navy-3));
+  opacity: 0; transition: opacity 0.22s;
+}
+.role-btn.active {
+  border-color: var(--navy);
+  box-shadow: 0 4px 20px rgba(11,29,58,0.18);
+}
+.role-btn.active::before { opacity: 1; }
+.role-btn-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  background: white;
+  position: relative; z-index: 1;
+  transition: all 0.22s;
+  box-shadow: var(--shadow-sm);
+}
+.role-btn.active .role-btn-icon {
+  background: rgba(240,165,0,0.15);
+}
+.role-btn-icon i { color: var(--navy); transition: color 0.22s; }
+.role-btn.active .role-btn-icon i { color: var(--gold); }
+.role-btn-label {
+  font-size: 0.8rem; font-weight: 600;
+  color: var(--text-3);
+  position: relative; z-index: 1;
+  transition: color 0.22s;
+}
+.role-btn.active .role-btn-label { color: white; }
+.role-btn-check {
+  position: absolute; top: 8px; right: 8px; z-index: 2;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.55rem; color: var(--navy);
+  opacity: 0; transform: scale(0.5);
+  transition: all 0.22s;
+}
+.role-btn.active .role-btn-check { opacity: 1; transform: scale(1); }
+
+/* ── TABS ── */
+.tabs {
   display: flex;
   background: var(--surface);
   border-radius: var(--r-md);
-  padding: 5px;
-  margin-bottom: 36px;
+  padding: 4px; margin-bottom: 28px;
   border: 1px solid var(--border);
 }
-.tab-btn {
-  flex: 1; padding: 10px 16px;
+.tab {
+  flex: 1; padding: 9px 14px;
   border: none; background: transparent;
-  border-radius: calc(var(--r-md) - 4px);
-  font-family: var(--font); font-size: 0.875rem; font-weight: 600;
+  border-radius: calc(var(--r-md) - 3px);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem; font-weight: 600;
   color: var(--text-3); cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  transition: all 0.22s;
 }
-.tab-btn.active {
+.tab.active {
   background: var(--navy); color: white;
-  box-shadow: 0 2px 12px rgba(11,29,58,0.2);
+  box-shadow: 0 2px 10px rgba(11,29,58,0.22);
 }
 
-/* Panel visibility */
-.form-panel { display: none; }
-.form-panel.active { display: block; }
+/* ── PANELS ── */
+.panel { display: none; }
+.panel.active { display: block; animation: panelIn 0.3s ease; }
+@keyframes panelIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
 
-/* Panel header */
-.form-title {
-  font-size: 1.6rem; font-weight: 800; color: var(--navy);
-  letter-spacing: -0.02em; margin-bottom: 8px;
+.panel-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.5rem; font-weight: 800;
+  color: var(--navy); letter-spacing: -0.02em;
+  margin-bottom: 6px;
 }
-.form-sub {
-  font-size: 0.875rem; color: var(--text-3); line-height: 1.6;
-  margin-bottom: 28px;
+.panel-sub {
+  font-size: 0.84rem; color: var(--text-3);
+  line-height: 1.65; margin-bottom: 22px;
 }
 
-/* Form fields */
-.field-group { margin-bottom: 18px; }
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-label {
-  display: block; font-size: 0.78rem; font-weight: 700;
-  color: var(--text-2); margin-bottom: 7px; letter-spacing: 0.01em;
-}
-.input-wrap {
-  position: relative;
-}
-.input-wrap i {
-  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-  color: var(--text-3); font-size: 0.85rem; pointer-events: none;
-  transition: color 0.2s;
-}
-input[type="text"],
-input[type="email"],
-input[type="password"],
-select {
-  width: 100%; height: 48px;
-  padding: 0 14px 0 40px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--r-sm);
-  font-family: var(--font); font-size: 0.875rem; color: var(--text-1);
+/* ── GOOGLE BTN ── */
+.g-btn {
+  width: 100%; height: 46px;
   background: var(--surface);
-  outline: none; transition: all 0.2s;
-  -webkit-appearance: none; appearance: none;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem; font-weight: 600;
+  cursor: pointer; color: var(--text-1);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: all 0.2s; margin-bottom: 16px;
 }
-select { padding-right: 38px; cursor: pointer; }
-.select-arrow {
-  position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
-  color: var(--text-3); font-size: 0.75rem; pointer-events: none;
+.g-btn:hover {
+  background: white; border-color: rgba(11,29,58,0.2);
+  box-shadow: var(--shadow-sm);
 }
-input:focus, select:focus {
-  border-color: var(--navy); background: white;
-  box-shadow: 0 0 0 3px rgba(11,29,58,0.07);
-}
-input:focus + i,
-.input-wrap:focus-within i { color: var(--navy); }
-input.error-field { border-color: var(--error); }
-input.error-field:focus { box-shadow: 0 0 0 3px rgba(240,68,56,0.1); }
+.g-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.g-svg { width: 20px; height: 20px; flex-shrink: 0; }
 
-/* Eye toggle for password */
-.eye-btn {
-  position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
-  background: none; border: none; cursor: pointer;
-  color: var(--text-3); font-size: 0.85rem;
-  display: flex; align-items: center; justify-content: center;
-  transition: color 0.2s; padding: 4px;
-}
-.eye-btn:hover { color: var(--navy); }
-
-/* Password strength */
-.strength-meter { margin-top: 8px; }
-.strength-bar-track {
-  height: 4px; background: var(--surface-2); border-radius: 100px;
-  overflow: hidden; margin-bottom: 5px;
-}
-.strength-bar-fill {
-  height: 100%; border-radius: 100px;
-  transition: width 0.35s ease, background 0.35s ease;
-  width: 0;
-}
-.strength-label { font-size: 0.7rem; font-weight: 600; color: var(--text-3); }
-
-/* Field error */
-.field-error {
-  font-size: 0.72rem; color: var(--error); margin-top: 5px;
-  display: none; align-items: center; gap: 5px; font-weight: 500;
-}
-.field-error.show { display: flex; }
-
-/* Checkbox */
-.check-row {
-  display: flex; align-items: flex-start; gap: 10px;
-  margin-bottom: 18px;
-}
-.check-row input[type="checkbox"] {
-  width: 18px; height: 18px; min-width: 18px; padding: 0;
-  border-radius: 5px; cursor: pointer; accent-color: var(--navy);
-  margin-top: 1px;
-}
-.check-label { font-size: 0.79rem; color: var(--text-3); line-height: 1.5; }
-.check-label a { color: var(--navy); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
-
-/* Forgot password */
-.forgot-row {
-  display: flex; justify-content: flex-end; margin-top: -10px; margin-bottom: 18px;
-}
-.forgot-link {
-  font-size: 0.79rem; color: var(--gold); font-weight: 600;
-  text-decoration: none; transition: color 0.2s;
-}
-.forgot-link:hover { color: var(--navy); }
-
-/* Submit button */
-.submit-btn {
-  width: 100%; height: 52px;
-  background: linear-gradient(135deg, var(--navy), var(--navy-3));
-  color: white; border: none; border-radius: var(--r-md);
-  font-family: var(--font); font-size: 0.95rem; font-weight: 700;
-  cursor: pointer; transition: all 0.25s;
-  display: flex; align-items: center; justify-content: center; gap: 9px;
-  box-shadow: 0 4px 18px rgba(11,29,58,0.25);
-  position: relative; overflow: hidden;
-}
-.submit-btn::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(135deg, var(--gold), var(--gold-2));
-  opacity: 0; transition: opacity 0.3s;
-}
-.submit-btn:hover::before { opacity: 1; }
-.submit-btn:hover { color: var(--navy); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(11,29,58,0.22), 0 4px 20px rgba(240,165,0,0.3); }
-.submit-btn span, .submit-btn i { position: relative; z-index: 1; }
-.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-.submit-btn:disabled:hover::before { opacity: 0; }
-
-/* Spinner */
-.spinner {
-  width: 20px; height: 20px;
-  border: 2.5px solid rgba(255,255,255,0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.75s linear infinite;
-  display: none;
-}
-.spinner.dark {
-  border-color: rgba(11,29,58,0.2);
-  border-top-color: var(--navy);
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* Google sign-in button */
+/* DIVIDER */
 .divider {
-  display: flex; align-items: center; gap: 12px;
-  margin: 20px 0; font-size: 0.75rem; font-weight: 600; color: var(--text-3);
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.72rem; font-weight: 600;
+  color: var(--text-3); margin-bottom: 16px;
 }
 .divider::before, .divider::after {
   content: ''; flex: 1; height: 1px; background: var(--border);
 }
-.google-btn {
-  width: 100%; height: 48px;
-  background: var(--surface); color: var(--text-1);
-  border: 1.5px solid var(--border); border-radius: var(--r-md);
-  font-family: var(--font); font-size: 0.875rem; font-weight: 600;
-  cursor: pointer; transition: all 0.2s;
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-}
-.google-btn:hover { background: white; border-color: rgba(11,29,58,0.18); box-shadow: var(--shadow-sm); }
-.google-icon {
-  width: 20px; height: 20px; flex-shrink: 0;
-}
 
-/* Google One Tap container */
-#g_id_onload {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 10000;
+/* ── FORM ── */
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fg { margin-bottom: 14px; }
+.fg label {
+  display: block; font-size: 0.75rem; font-weight: 600;
+  color: var(--text-2); margin-bottom: 6px; letter-spacing: 0.01em;
 }
-
-/* Toast */
-#toast-container {
-  position: fixed; top: 24px; right: 24px; z-index: 9999;
-  display: flex; flex-direction: column; gap: 10px;
+.iw { position: relative; }
+.iw i.icon {
+  position: absolute; left: 13px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3); font-size: 0.8rem;
+  pointer-events: none; transition: color 0.2s;
+}
+.iw input, .iw select {
+  width: 100%; height: 46px;
+  padding: 0 13px 0 38px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem; color: var(--text-1);
+  background: var(--surface);
+  outline: none; transition: all 0.2s;
+  -webkit-appearance: none; appearance: none;
+}
+.iw select { cursor: pointer; padding-right: 36px; }
+.iw .arr {
+  position: absolute; right: 12px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3); font-size: 0.7rem;
   pointer-events: none;
 }
-.toast {
-  display: flex; align-items: center; gap: 12px;
-  background: var(--navy); color: white;
-  padding: 14px 18px; border-radius: var(--r-md);
-  font-size: 0.84rem; font-weight: 500;
-  box-shadow: var(--shadow-md);
-  pointer-events: all;
-  animation: slideIn 0.35s cubic-bezier(0.4,0,0.2,1) forwards;
-  max-width: 340px;
+.iw .eye {
+  position: absolute; right: 12px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  color: var(--text-3); font-size: 0.82rem;
+  cursor: pointer; padding: 4px;
+  transition: color 0.2s; display: flex;
 }
-.toast.success { background: #0D3D25; border-left: 4px solid var(--success); }
-.toast.error { background: #3D1212; border-left: 4px solid var(--error); }
-.toast.info { background: var(--navy-2); border-left: 4px solid var(--gold); }
-.toast i { font-size: 0.9rem; flex-shrink: 0; }
-.toast.success i { color: var(--success); }
-.toast.error i { color: var(--error); }
-.toast.info i { color: var(--gold); }
-.toast-out { animation: slideOut 0.3s ease forwards; }
-@keyframes slideIn { from { opacity:0; transform: translateX(30px); } to { opacity:1; transform: none; } }
-@keyframes slideOut { to { opacity:0; transform: translateX(30px); } }
+.iw .eye:hover { color: var(--navy); }
+.iw input:focus, .iw select:focus {
+  border-color: var(--navy-mid);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(11,29,58,0.07);
+}
+.iw:focus-within i.icon { color: var(--navy); }
+.fe {
+  display: none; align-items: center; gap: 5px;
+  font-size: 0.7rem; color: var(--error);
+  font-weight: 500; margin-top: 4px;
+}
+.fe.show { display: flex; }
+.iw input.err, .iw select.err { border-color: var(--error); }
 
-/* Success state */
-.success-overlay {
+/* STRENGTH */
+.strength { margin-top: 6px; }
+.str-track {
+  height: 3px; background: var(--surface-2);
+  border-radius: 100px; overflow: hidden; margin-bottom: 4px;
+}
+.str-fill {
+  height: 100%; border-radius: 100px;
+  transition: width 0.3s ease, background 0.3s ease; width: 0;
+}
+.str-label { font-size: 0.68rem; font-weight: 500; color: var(--text-3); }
+
+/* FORGOT */
+.forgot-row {
+  display: flex; justify-content: flex-end;
+  margin-top: -8px; margin-bottom: 14px;
+}
+.forgot { font-size: 0.78rem; font-weight: 600; color: var(--gold); text-decoration: none; }
+.forgot:hover { color: var(--navy); }
+
+/* CHECK ROW */
+.chk-row {
+  display: flex; align-items: flex-start; gap: 9px;
+  margin-bottom: 18px; margin-top: 2px;
+}
+.chk-row input[type="checkbox"] {
+  width: 17px; height: 17px; min-width: 17px;
+  padding: 0; border-radius: 5px;
+  cursor: pointer; accent-color: var(--navy); margin-top: 2px;
+}
+.chk-row span { font-size: 0.775rem; color: var(--text-3); line-height: 1.55; }
+.chk-row a { color: var(--navy); font-weight: 600; text-underline-offset: 2px; }
+
+/* ── SUBMIT BTN ── */
+.sbtn {
+  width: 100%; height: 50px;
+  background: linear-gradient(135deg, var(--navy), var(--navy-3));
+  color: white; border: none;
+  border-radius: var(--r-md);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.925rem; font-weight: 600;
+  cursor: pointer; transition: all 0.25s;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  box-shadow: 0 4px 18px rgba(11,29,58,0.22);
+  position: relative; overflow: hidden;
+}
+.sbtn::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--gold), var(--gold-2));
+  opacity: 0; transition: opacity 0.25s;
+}
+.sbtn:hover::after { opacity: 1; }
+.sbtn:hover { color: var(--navy); transform: translateY(-1px); box-shadow: 0 8px 28px rgba(11,29,58,0.2), 0 4px 18px rgba(240,165,0,0.28); }
+.sbtn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; pointer-events: none; }
+.sbtn > * { position: relative; z-index: 1; }
+.sbtn .spin {
+  width: 18px; height: 18px;
+  border: 2.5px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: rot 0.7s linear infinite;
+  display: none;
+}
+@keyframes rot { to { transform: rotate(360deg); } }
+
+.alt-link {
+  text-align: center; margin-top: 16px;
+  font-size: 0.8rem; color: var(--text-3);
+}
+.alt-link a { color: var(--navy); font-weight: 700; }
+
+/* ── SUCCESS OVERLAY ── */
+.success-ov {
   position: absolute; inset: 0;
-  background: var(--white);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  z-index: 10; border-radius: 0;
+  background: white;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px 32px; z-index: 20;
   opacity: 0; pointer-events: none;
   transition: opacity 0.4s ease;
-  padding: 32px;
+  text-align: center;
 }
-.success-overlay.show { opacity: 1; pointer-events: all; }
-.success-icon {
+.success-ov.show { opacity: 1; pointer-events: all; }
+.suc-icon {
   width: 80px; height: 80px; border-radius: 50%;
   background: linear-gradient(135deg, #E6FAF1, #B8F0D4);
   display: flex; align-items: center; justify-content: center;
-  font-size: 2rem; color: var(--success);
+  font-size: 2.2rem; color: var(--success);
   margin-bottom: 20px;
-  box-shadow: 0 8px 28px rgba(18,183,106,0.2);
+  box-shadow: 0 8px 30px rgba(18,183,106,0.2);
+  animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
 }
-.success-title { font-size: 1.4rem; font-weight: 800; color: var(--navy); margin-bottom: 8px; }
-.success-msg { font-size: 0.875rem; color: var(--text-3); text-align: center; line-height: 1.7; margin-bottom: 28px; max-width: 300px; }
-.success-cta {
-  padding: 13px 32px; background: var(--gold); color: var(--navy);
-  border: none; border-radius: var(--r-md); font-family: var(--font);
+@keyframes popIn { from { transform:scale(0.4); opacity:0; } to { transform:scale(1); opacity:1; } }
+.suc-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.4rem; font-weight: 800;
+  color: var(--navy); margin-bottom: 8px;
+}
+.suc-msg {
+  font-size: 0.875rem; color: var(--text-3);
+  line-height: 1.7; margin-bottom: 28px; max-width: 310px;
+}
+.suc-cta {
+  padding: 12px 32px;
+  background: var(--gold); color: var(--navy);
+  border: none; border-radius: var(--r-md);
+  font-family: 'DM Sans', sans-serif;
   font-size: 0.9rem; font-weight: 700; cursor: pointer;
   transition: all 0.2s;
   display: inline-flex; align-items: center; gap: 8px;
 }
-.success-cta:hover { background: var(--gold-2); transform: translateY(-1px); }
+.suc-cta:hover { background: var(--gold-2); transform: translateY(-1px); }
 
-/* Forgot password modal */
-.modal-overlay {
+/* ── TOAST ── */
+#toasts {
+  position: fixed; top: 20px; right: 20px; z-index: 9999;
+  display: flex; flex-direction: column; gap: 9px;
+  pointer-events: none;
+}
+.toast {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; border-radius: var(--r-md);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.83rem; font-weight: 500;
+  max-width: 320px; pointer-events: all;
+  box-shadow: var(--shadow-md);
+  animation: tIn 0.3s ease;
+}
+.toast.success { background: #0D3D25; color: white; border-left: 4px solid var(--success); }
+.toast.error   { background: #3D1212; color: white; border-left: 4px solid var(--error); }
+.toast.info    { background: var(--navy); color: white; border-left: 4px solid var(--gold); }
+.toast i { font-size: 0.85rem; flex-shrink: 0; }
+.toast.success i { color: var(--success); }
+.toast.error i   { color: var(--error); }
+.toast.info i    { color: var(--gold); }
+.t-out { animation: tOut 0.3s ease forwards; }
+@keyframes tIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:none; } }
+@keyframes tOut { to { opacity:0; transform:translateX(20px); } }
+
+/* ── FORGOT MODAL ── */
+.modal-bg {
   position: fixed; inset: 0; z-index: 1000;
-  background: rgba(11,29,58,0.7); backdrop-filter: blur(6px);
-  display: flex; align-items: center; justify-content: center; padding: 24px;
-  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  background: rgba(11,29,58,0.65);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
 }
-.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-bg.open { opacity: 1; pointer-events: all; }
 .modal-card {
-  background: white; border-radius: var(--r-xl); padding: 40px;
-  max-width: 400px; width: 100%;
+  background: white; border-radius: var(--r-xl);
+  padding: 36px; max-width: 400px; width: 100%;
   box-shadow: var(--shadow-lg);
-  transform: translateY(20px); transition: transform 0.3s;
+  transform: translateY(20px);
+  transition: transform 0.3s;
+  position: relative;
 }
-.modal-overlay.open .modal-card { transform: none; }
-.modal-close {
-  position: absolute; top: 16px; right: 16px;
-  width: 36px; height: 36px; border-radius: 50%;
+.modal-bg.open .modal-card { transform: none; }
+.modal-x {
+  position: absolute; top: 14px; right: 14px;
+  width: 34px; height: 34px; border-radius: 50%;
   background: var(--surface); border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  color: var(--text-3); font-size: 0.85rem; transition: all 0.2s;
+  color: var(--text-3); font-size: 0.82rem;
+  transition: all 0.2s;
 }
-.modal-close:hover { background: var(--navy); color: white; }
-.modal-card { position: relative; }
+.modal-x:hover { background: var(--navy); color: white; }
 
-/* ============================================================
-   SCROLL PROGRESS
-   ============================================================ */
-#progress-bar {
-  position: fixed; top: 0; left: 0; height: 3px; z-index: 9999;
-  background: linear-gradient(90deg, var(--navy), var(--gold));
-  width: 0;
+/* ── ADMIN BADGE ── */
+.admin-note {
+  display: flex; align-items: center; gap: 9px;
+  padding: 11px 14px;
+  background: linear-gradient(135deg, rgba(11,29,58,0.05), rgba(240,165,0,0.06));
+  border: 1px solid rgba(240,165,0,0.25);
+  border-radius: var(--r-sm); margin-bottom: 18px;
+  font-size: 0.77rem; color: var(--text-2); font-weight: 500;
+  display: none;
 }
+.admin-note.show { display: flex; }
+.admin-note i { color: var(--gold); font-size: 0.8rem; flex-shrink: 0; }
 
-/* ============================================================
-   ANIMATIONS
-   ============================================================ */
-.fade-up {
-  opacity: 0; transform: translateY(24px);
-  animation: fadeUp 0.65s cubic-bezier(0.4,0,0.2,1) forwards;
-}
-@keyframes fadeUp { to { opacity:1; transform: none; } }
-.delay-1 { animation-delay: 0.1s; }
-.delay-2 { animation-delay: 0.2s; }
-.delay-3 { animation-delay: 0.3s; }
-.delay-4 { animation-delay: 0.4s; }
-.delay-5 { animation-delay: 0.5s; }
-
-/* Input animation */
-.field-group .input-wrap input,
-.field-group .input-wrap select {
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.1s;
-}
-.field-group .input-wrap input:focus { transform: none; }
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
-@media (max-width: 860px) {
-  .left-panel { display: none; }
-  .right-panel {
-    width: 100%; min-height: 100vh;
-    padding: 32px 24px;
-  }
-  .auth-card { max-width: 480px; }
-}
-
-@media (max-width: 480px) {
-  .right-panel { padding: 24px 16px; }
-  .field-row { grid-template-columns: 1fr; gap: 0; }
-  .form-title { font-size: 1.35rem; }
-  #toast-container { top: 16px; right: 16px; left: 16px; }
-  .toast { max-width: 100%; }
-}
-
-/* Mobile-only top branding */
+/* ── MOBILE BRAND ── */
 .mobile-brand {
   display: none;
-  align-items: center; justify-content: center; gap: 10px;
-  margin-bottom: 28px;
+  align-items: center; justify-content: center; gap: 12px;
+  margin-bottom: 24px;
 }
-.mobile-brand .brand-logo-icon {
-  width: 40px; height: 40px; border-radius: 12px;
-  background: linear-gradient(135deg, var(--gold), var(--gold-2));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; font-weight: 800; color: var(--navy);
+.mobile-brand .mb-icon {
+  width: 44px; height: 42px; object-fit: contain; border-radius: 10px;
 }
-.mobile-brand .brand-logo-text { font-size: 1.2rem; font-weight: 800; color: var(--navy); }
-.mobile-brand .brand-logo-text span { color: var(--gold); }
-@media (max-width: 860px) { .mobile-brand { display: flex; } }
+.mobile-brand .mb-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.3rem; font-weight: 800; color: var(--navy);
+}
+.mobile-brand .mb-name em { color: var(--gold); font-style: normal; }
+
+/* ── ROLE BADGE IN FORM ── */
+.current-role-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 100px;
+  font-size: 0.7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+.crb-student { background: #EFF8FF; color: #1570EF; }
+.crb-admin   { background: var(--gold-pale); color: #A07000; }
+
+/* ── ANIMATIONS ── */
+.fade-up {
+  opacity: 0; transform: translateY(20px);
+  animation: fu 0.55s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+@keyframes fu { to { opacity:1; transform:none; } }
+.d1 { animation-delay: 0.08s; }
+.d2 { animation-delay: 0.16s; }
+.d3 { animation-delay: 0.24s; }
+.d4 { animation-delay: 0.32s; }
+.d5 { animation-delay: 0.40s; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .page { grid-template-columns: 1fr; }
+  .left { display: none; }
+  .right { min-height: 100vh; padding: 28px 20px; }
+  .mobile-brand { display: flex; }
+}
+@media (max-width: 520px) {
+  .frow { grid-template-columns: 1fr; gap: 0; }
+  .role-selector { grid-template-columns: 1fr 1fr; }
+  #toasts { right: 12px; left: 12px; top: 12px; }
+  .toast { max-width: 100%; }
+  .right { padding: 20px 14px; }
+}
+@media (max-width: 360px) {
+  .panel-title { font-size: 1.3rem; }
+  .role-selector { gap: 8px; }
+}
 </style>
 </head>
 <body>
+<div id="toasts"></div>
+<canvas id="bg-canvas"></canvas>
 
-<!-- Scroll progress -->
-<div id="progress-bar"></div>
-
-<!-- Toast container -->
-<div id="toast-container"></div>
-
-<!-- Particle canvas -->
-<canvas id="particles"></canvas>
-
-<!-- Google One Tap -->
-<div id="g_id_onload"
-     data-client_id="267993935158-l0ojgokoj1005gohfganoii75ehq4c47.apps.googleusercontent.com"
-     data-context="signin"
-     data-ux_mode="popup"
-     data-callback="handleGoogleResponse"
-     data-auto_select="false"
-     data-itp_support="true">
-</div>
-
-<!-- Main Layout -->
-<div class="page-wrap">
-
-  <!-- LEFT PANEL -->
-  <div class="left-panel">
-    <div class="left-content">
-      <a href="index.html" class="brand-logo fade-up">
-        <div class="brand-logo-icon">NL</div>
-        <span class="brand-logo-text">Next <span>Level</span> TC</span>
-      </a>
-
-      <div class="lottie-wrap fade-up delay-1">
-        <div class="lottie-glow"></div>
-        <dotlottie-wc
-          src="https://lottie.host/105dd597-7e63-4af9-a5bf-68d9a8f75b4d/JsTrCTyYSE.lottie"
-          autoplay loop>
-        </dotlottie-wc>
-      </div>
-
-      <h2 class="brand-tagline fade-up delay-2">
-        Your Path to<br><span class="accent">Exam Excellence</span><br>Starts Here
-      </h2>
-      <p class="brand-sub fade-up delay-3">
-        Join 15,000+ Nigerian students acing JAMB, WAEC, NECO &amp; GCE with live classes, CBT practice and gamified learning.
-      </p>
-
-      <div class="trust-badges fade-up delay-4">
-        <div class="trust-badge"><i class="fas fa-shield-alt"></i>Secure Auth</div>
-        <div class="trust-badge"><i class="fas fa-trophy"></i>94% Pass Rate</div>
-        <div class="trust-badge"><i class="fas fa-mobile-alt"></i>iOS &amp; Android</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- RIGHT PANEL -->
-  <div class="right-panel">
-    <div class="auth-card">
-
-      <!-- Mobile brand -->
-      <div class="mobile-brand">
-        <div class="brand-logo-icon">NL</div>
-        <div class="brand-logo-text">Next <span>Level</span> TC</div>
-      </div>
-
-      <!-- Tab Switcher -->
-      <div class="tab-switcher fade-up">
-        <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Sign In</button>
-        <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Create Account</button>
-      </div>
-
-      <!-- ======= LOGIN PANEL ======= -->
-      <div class="form-panel active fade-up delay-1" id="panel-login">
-        <h1 class="form-title">Welcome back 👋</h1>
-        <p class="form-sub">Sign in to continue your exam prep journey.</p>
-
-        <!-- Google Sign In -->
-        <button class="google-btn" id="googleLoginBtn" onclick="initiateGoogleSignIn()">
-          <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-          Continue with Google
-        </button>
-
-        <div class="divider">or sign in with email</div>
-
-        <form id="loginForm" onsubmit="handleLogin(event)">
-          <div class="field-group">
-            <label for="loginEmail">Email Address</label>
-            <div class="input-wrap">
-              <i class="fas fa-envelope"></i>
-              <input type="email" id="loginEmail" placeholder="you@email.com" autocomplete="email" required>
-            </div>
-            <div class="field-error" id="loginEmailErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
-          </div>
-
-          <div class="field-group">
-            <label for="loginPassword">Password</label>
-            <div class="input-wrap">
-              <i class="fas fa-lock"></i>
-              <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" required>
-              <button type="button" class="eye-btn" onclick="toggleEye('loginPassword', this)" tabindex="-1">
-                <i class="fas fa-eye"></i>
-              </button>
-            </div>
-            <div class="field-error" id="loginPasswordErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
-          </div>
-
-          <div class="forgot-row">
-            <a href="#" class="forgot-link" onclick="openForgot(event)">Forgot password?</a>
-          </div>
-
-          <button type="submit" class="submit-btn" id="loginSubmitBtn">
-            <div class="spinner" id="loginSpinner"></div>
-            <i class="fas fa-sign-in-alt" id="loginIcon"></i>
-            <span id="loginBtnText">Sign In</span>
-          </button>
-        </form>
-
-        <p style="text-align:center; margin-top:20px; font-size:0.8rem; color:var(--text-3);">
-          Don't have an account? <a href="#" style="color:var(--navy);font-weight:700;" onclick="switchTab('signup');return false;">Create one free</a>
-        </p>
-      </div>
-
-      <!-- ======= SIGNUP PANEL ======= -->
-      <div class="form-panel" id="panel-signup">
-        <h1 class="form-title">Join NLTC Today 🚀</h1>
-        <p class="form-sub">Create your free account and start preparing for exam success.</p>
-
-        <!-- Google Sign Up -->
-        <button class="google-btn" id="googleSignupBtn" onclick="initiateGoogleSignIn()">
-          <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-          Continue with Google
-        </button>
-
-        <div class="divider">or sign up with email</div>
-
-        <form id="signupForm" onsubmit="handleSignup(event)">
-          <div class="field-row">
-            <div class="field-group">
-              <label for="signupFirstName">First Name</label>
-              <div class="input-wrap">
-                <i class="fas fa-user"></i>
-                <input type="text" id="signupFirstName" placeholder="Emeka" autocomplete="given-name" required>
-              </div>
-              <div class="field-error" id="signupFirstNameErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
-            </div>
-            <div class="field-group">
-              <label for="signupLastName">Last Name</label>
-              <div class="input-wrap">
-                <i class="fas fa-user"></i>
-                <input type="text" id="signupLastName" placeholder="Okafor" autocomplete="family-name" required>
-              </div>
-              <div class="field-error" id="signupLastNameErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
-            </div>
-          </div>
-
-          <div class="field-group">
-            <label for="signupEmail">Email Address</label>
-            <div class="input-wrap">
-              <i class="fas fa-envelope"></i>
-              <input type="email" id="signupEmail" placeholder="you@email.com" autocomplete="email" required>
-            </div>
-            <div class="field-error" id="signupEmailErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
-          </div>
-
-          <div class="field-group">
-            <label for="signupPhone">Phone Number</label>
-            <div class="input-wrap">
-              <i class="fas fa-phone"></i>
-              <input type="text" id="signupPhone" placeholder="080xxxxxxxx" autocomplete="tel">
-            </div>
-            <div class="field-error" id="signupPhoneErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
-          </div>
-
-          <div class="field-group">
-            <label for="signupExam">Target Examination</label>
-            <div class="input-wrap">
-              <i class="fas fa-graduation-cap"></i>
-              <select id="signupExam" required>
-                <option value="" disabled selected>Select your target exam</option>
-                <option value="JAMB/UTME">JAMB / UTME</option>
-                <option value="WAEC SSCE">WAEC SSCE</option>
-                <option value="NECO">NECO</option>
-                <option value="GCE O-Level">GCE O-Level</option>
-                <option value="Multiple">Multiple Exams</option>
-              </select>
-              <i class="fas fa-chevron-down select-arrow"></i>
-            </div>
-            <div class="field-error" id="signupExamErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
-          </div>
-
-          <div class="field-group">
-            <label for="signupState">State of Residence</label>
-            <div class="input-wrap">
-              <i class="fas fa-map-marker-alt"></i>
-              <select id="signupState" required>
-                <option value="" disabled selected>Select your state</option>
-                <option>Abia</option><option>Adamawa</option><option>Akwa Ibom</option><option>Anambra</option>
-                <option>Bauchi</option><option>Bayelsa</option><option>Benue</option><option>Borno</option>
-                <option>Cross River</option><option>Delta</option><option>Ebonyi</option><option>Edo</option>
-                <option>Ekiti</option><option>Enugu</option><option>FCT</option><option>Gombe</option>
-                <option>Imo</option><option>Jigawa</option><option>Kaduna</option><option>Kano</option>
-                <option>Katsina</option><option>Kebbi</option><option>Kogi</option><option>Kwara</option>
-                <option>Lagos</option><option>Nasarawa</option><option>Niger</option><option>Ogun</option>
-                <option>Ondo</option><option>Osun</option><option>Oyo</option><option>Plateau</option>
-                <option>Rivers</option><option>Sokoto</option><option>Taraba</option><option>Yobe</option>
-                <option>Zamfara</option>
-              </select>
-              <i class="fas fa-chevron-down select-arrow"></i>
-            </div>
-          </div>
-
-          <div class="field-group">
-            <label for="signupPassword">Password</label>
-            <div class="input-wrap">
-              <i class="fas fa-lock"></i>
-              <input type="password" id="signupPassword" placeholder="Min. 8 characters" autocomplete="new-password" required oninput="checkStrength(this.value)">
-              <button type="button" class="eye-btn" onclick="toggleEye('signupPassword', this)" tabindex="-1">
-                <i class="fas fa-eye"></i>
-              </button>
-            </div>
-            <div class="strength-meter">
-              <div class="strength-bar-track"><div class="strength-bar-fill" id="strengthFill"></div></div>
-              <div class="strength-label" id="strengthLabel">Enter a password</div>
-            </div>
-            <div class="field-error" id="signupPasswordErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
-          </div>
-
-          <div class="check-row" style="margin-top: 4px;">
-            <input type="checkbox" id="agreeTerms" required>
-            <label class="check-label" for="agreeTerms">
-              I agree to NLTC's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. I consent to receiving exam updates via SMS and email.
-            </label>
-          </div>
-
-          <button type="submit" class="submit-btn" id="signupSubmitBtn">
-            <div class="spinner" id="signupSpinner"></div>
-            <i class="fas fa-rocket" id="signupIcon"></i>
-            <span id="signupBtnText">Create Free Account</span>
-          </button>
-        </form>
-
-        <p style="text-align:center; margin-top:20px; font-size:0.8rem; color:var(--text-3);">
-          Already have an account? <a href="#" style="color:var(--navy);font-weight:700;" onclick="switchTab('login');return false;">Sign in here</a>
-        </p>
-      </div>
-
-      <!-- SUCCESS OVERLAY -->
-      <div class="success-overlay" id="successOverlay">
-        <div class="success-icon"><i class="fas fa-check"></i></div>
-        <div class="success-title" id="successTitle">Welcome to NLTC!</div>
-        <p class="success-msg" id="successMsg">Your account has been created successfully. You're now on your path to exam excellence!</p>
-        <button class="success-cta" onclick="goToDashboard()">
-          <i class="fas fa-rocket"></i> Go to Dashboard
-        </button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- ============================================================
-     FORGOT PASSWORD MODAL
-     ============================================================ -->
-<div class="modal-overlay" id="forgotModal">
+<!-- FORGOT MODAL -->
+<div class="modal-bg" id="forgotBg">
   <div class="modal-card">
-    <button class="modal-close" onclick="closeForgot()"><i class="fas fa-times"></i></button>
-    <div style="margin-bottom: 20px;">
-      <div style="width:48px;height:48px;border-radius:13px;background:var(--gold-pale);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--gold);margin-bottom:14px;">
-        <i class="fas fa-key"></i>
-      </div>
-      <h3 style="font-size:1.25rem;font-weight:800;color:var(--navy);margin-bottom:7px;">Reset Password</h3>
-      <p style="font-size:0.84rem;color:var(--text-3);line-height:1.65;">Enter your email and we'll send you a password reset link.</p>
+    <button class="modal-x" onclick="closeForgot()"><i class="fas fa-times"></i></button>
+    <div style="width:46px;height:46px;border-radius:12px;background:var(--gold-pale);display:flex;align-items:center;justify-content:center;font-size:1.15rem;color:var(--gold);margin-bottom:14px;">
+      <i class="fas fa-key"></i>
     </div>
-    <div class="field-group">
-      <label for="resetEmail">Email Address</label>
-      <div class="input-wrap">
-        <i class="fas fa-envelope"></i>
+    <h3 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:var(--navy);margin-bottom:6px;">Reset Password</h3>
+    <p style="font-size:0.83rem;color:var(--text-3);line-height:1.65;margin-bottom:20px;">Enter your email and we'll send a reset link to your inbox.</p>
+    <div class="fg">
+      <label>Email Address</label>
+      <div class="iw">
+        <i class="fas fa-envelope icon"></i>
         <input type="email" id="resetEmail" placeholder="you@email.com">
       </div>
-      <div class="field-error" id="resetEmailErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
+      <div class="fe" id="resetEmailErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
     </div>
-    <button class="submit-btn" id="resetBtn" onclick="handlePasswordReset()" style="margin-top:8px;">
-      <div class="spinner" id="resetSpinner"></div>
-      <i class="fas fa-paper-plane" id="resetIcon"></i>
-      <span id="resetBtnText">Send Reset Link</span>
+    <button class="sbtn" id="resetBtn" onclick="handleReset()">
+      <div class="spin" id="resetSpin"></div>
+      <i class="fas fa-paper-plane" id="resetIco"></i>
+      <span id="resetTxt">Send Reset Link</span>
     </button>
   </div>
 </div>
 
-<!-- ============================================================
-     FIREBASE + AUTH LOGIC
-     ============================================================ -->
-<script type="module">
-import { initializeApp }            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAnalytics }             from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
-  sendPasswordResetEmail,
-  updateProfile,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<!-- MAIN PAGE -->
+<div class="page">
 
-/* ── Firebase init ── */
-const firebaseConfig = {
-  apiKey:            "AIzaSyA9vzT1TBpTdRJUfyYm51goS-5HfL3FcbU",
-  authDomain:        "nltc-online.firebaseapp.com",
-  projectId:         "nltc-online",
-  storageBucket:     "nltc-online.firebasestorage.app",
-  messagingSenderId: "267993935158",
-  appId:             "1:267993935158:web:723c13b2564b817fbc9797",
-  measurementId:     "G-YV1W5SNLN5"
-};
-const app       = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const auth      = getAuth(app);
-const db        = getFirestore(app);
-const provider  = new GoogleAuthProvider();
-provider.setCustomParameters({ prompt: 'select_account' });
+  <!-- LEFT -->
+  <div class="left">
+    <div class="left-inner">
+      <a href="index.html" class="logo-wrap fade-up">
+        <img src="NLTC.png" alt="NLTC Logo" class="logo-img"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div style="display:none;width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold-2));align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--navy);">NL</div>
+        <div class="logo-wordmark">
+          <div class="logo-name">NL<em>TC</em></div>
+          <div class="logo-tag">Next Level Tutorial Centre</div>
+        </div>
+      </a>
 
-/* ── Expose functions to window so inline onclick handlers work ── */
+      <div class="lottie-ring fade-up d1">
+        <dotlottie-wc
+          src="admin.lottie"
+          autoplay loop
+          onerror="this.style.display='none';document.getElementById('lottieFallback').style.display='flex'">
+        </dotlottie-wc>
+        <div class="lottie-fallback" id="lottieFallback" style="display:none;">🎓</div>
+      </div>
 
-/* Tab switcher */
-window.switchTab = function(tab) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-  document.getElementById('panel-' + tab).classList.add('active');
-  clearAllErrors();
-};
+      <h2 class="left-headline fade-up d2">
+        Your Path to<br><em>Exam Excellence</em><br>Starts Here
+      </h2>
+      <p class="left-sub fade-up d3">
+        Join 15,000+ Nigerian students acing JAMB, WAEC, NECO & GCE with live classes, CBT practice and gamified learning.
+      </p>
+      <div class="trust-row fade-up d4">
+        <div class="trust-pill"><i class="fas fa-shield-alt"></i>Secure Auth</div>
+        <div class="trust-pill"><i class="fas fa-trophy"></i>94% Pass Rate</div>
+        <div class="trust-pill"><i class="fas fa-mobile-alt"></i>iOS & Android</div>
+      </div>
+    </div>
+  </div>
 
-/* Toast */
-window.showToast = function(msg, type = 'info') {
-  const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle' };
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="card">
+
+      <!-- Mobile logo -->
+      <div class="mobile-brand fade-up">
+        <img src="NLTC.png" alt="NLTC" class="mb-icon"
+             onerror="this.style.display='none'">
+        <div class="mb-name">NL<em>TC</em></div>
+      </div>
+
+      <!-- ROLE SELECTOR -->
+      <div class="role-selector fade-up">
+        <button class="role-btn active" id="role-student" onclick="setRole('student')">
+          <div class="role-btn-check"><i class="fas fa-check"></i></div>
+          <div class="role-btn-icon"><i class="fas fa-graduation-cap"></i></div>
+          <div class="role-btn-label">Student</div>
+        </button>
+        <button class="role-btn" id="role-admin" onclick="setRole('admin')">
+          <div class="role-btn-check"><i class="fas fa-check"></i></div>
+          <div class="role-btn-icon"><i class="fas fa-shield-alt"></i></div>
+          <div class="role-btn-label">Admin</div>
+        </button>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs fade-up d1">
+        <button class="tab active" id="tab-in" onclick="switchTab('in')">Sign In</button>
+        <button class="tab" id="tab-up" onclick="switchTab('up')">Create Account</button>
+      </div>
+
+      <!-- ===== LOGIN PANEL ===== -->
+      <div class="panel active" id="panel-in">
+        <div class="current-role-badge crb-student" id="badge-in-student">
+          <i class="fas fa-graduation-cap"></i> Student Login
+        </div>
+        <div class="current-role-badge crb-admin" id="badge-in-admin" style="display:none;">
+          <i class="fas fa-shield-alt"></i> Admin Login
+        </div>
+
+        <div class="admin-note" id="adminNote-in">
+          <i class="fas fa-lock"></i>
+          Admin accounts are pre-authorized. Contact your Super Admin if you need access.
+        </div>
+
+        <button class="g-btn" id="gLoginBtn" onclick="doGoogle()">
+          <svg class="g-svg" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Continue with Google
+        </button>
+        <div class="divider">or continue with email</div>
+
+        <form onsubmit="doLogin(event)">
+          <div class="fg">
+            <label>Email Address</label>
+            <div class="iw">
+              <i class="fas fa-envelope icon"></i>
+              <input type="email" id="li-email" placeholder="you@email.com" autocomplete="email" required>
+            </div>
+            <div class="fe" id="li-emailErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
+          </div>
+          <div class="fg">
+            <label>Password</label>
+            <div class="iw">
+              <i class="fas fa-lock icon"></i>
+              <input type="password" id="li-pass" placeholder="••••••••" autocomplete="current-password" required>
+              <button type="button" class="eye" onclick="toggleEye('li-pass',this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+            </div>
+            <div class="fe" id="li-passErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
+          </div>
+          <div class="forgot-row">
+            <a href="#" class="forgot" onclick="openForgot(event)">Forgot password?</a>
+          </div>
+          <button type="submit" class="sbtn" id="liBtnId">
+            <div class="spin" id="liSpin"></div>
+            <i class="fas fa-sign-in-alt" id="liIco"></i>
+            <span id="liTxt">Sign In</span>
+          </button>
+        </form>
+        <p class="alt-link">No account? <a href="#" onclick="switchTab('up');return false;">Create one free</a></p>
+      </div>
+
+      <!-- ===== SIGNUP PANEL ===== -->
+      <div class="panel" id="panel-up">
+        <div class="current-role-badge crb-student" id="badge-up-student">
+          <i class="fas fa-graduation-cap"></i> Student Registration
+        </div>
+        <div class="current-role-badge crb-admin" id="badge-up-admin" style="display:none;">
+          <i class="fas fa-shield-alt"></i> Admin Registration
+        </div>
+
+        <div class="admin-note" id="adminNote-up">
+          <i class="fas fa-lock"></i>
+          New admin accounts are restricted. An existing Super Admin must invite you first.
+        </div>
+
+        <button class="g-btn" id="gSignupBtn" onclick="doGoogle()">
+          <svg class="g-svg" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Continue with Google
+        </button>
+        <div class="divider">or sign up with email</div>
+
+        <form onsubmit="doSignup(event)">
+          <div class="frow">
+            <div class="fg">
+              <label>First Name *</label>
+              <div class="iw">
+                <i class="fas fa-user icon"></i>
+                <input type="text" id="su-first" placeholder="Emeka" autocomplete="given-name" required>
+              </div>
+              <div class="fe" id="su-firstErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
+            </div>
+            <div class="fg">
+              <label>Last Name *</label>
+              <div class="iw">
+                <i class="fas fa-user icon"></i>
+                <input type="text" id="su-last" placeholder="Okafor" autocomplete="family-name" required>
+              </div>
+              <div class="fe" id="su-lastErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
+            </div>
+          </div>
+          <div class="fg">
+            <label>Email Address *</label>
+            <div class="iw">
+              <i class="fas fa-envelope icon"></i>
+              <input type="email" id="su-email" placeholder="you@email.com" autocomplete="email" required>
+            </div>
+            <div class="fe" id="su-emailErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
+          </div>
+          <div class="fg">
+            <label>Phone Number</label>
+            <div class="iw">
+              <i class="fas fa-phone icon"></i>
+              <input type="tel" id="su-phone" placeholder="08012345678" autocomplete="tel">
+            </div>
+            <div class="fe" id="su-phoneErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
+          </div>
+
+          <!-- Admin-only field: admin code -->
+          <div class="fg" id="adminCodeField" style="display:none;">
+            <label>Admin Invite Code *</label>
+            <div class="iw">
+              <i class="fas fa-key icon"></i>
+              <input type="password" id="su-admincode" placeholder="Enter your invite code">
+              <button type="button" class="eye" onclick="toggleEye('su-admincode',this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+            </div>
+            <div class="fe" id="su-admincodeErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
+          </div>
+
+          <!-- Student-only fields -->
+          <div id="studentFields">
+            <div class="frow">
+              <div class="fg">
+                <label>Target Exam *</label>
+                <div class="iw">
+                  <i class="fas fa-graduation-cap icon"></i>
+                  <select id="su-exam" required>
+                    <option value="" disabled selected>Select exam</option>
+                    <option>JAMB / UTME</option>
+                    <option>WAEC SSCE</option>
+                    <option>NECO</option>
+                    <option>GCE O-Level</option>
+                    <option>Multiple</option>
+                  </select>
+                  <i class="fas fa-chevron-down arr"></i>
+                </div>
+                <div class="fe" id="su-examErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
+              </div>
+              <div class="fg">
+                <label>State</label>
+                <div class="iw">
+                  <i class="fas fa-map-marker-alt icon"></i>
+                  <select id="su-state">
+                    <option value="" disabled selected>Your state</option>
+                    <option>Abia</option><option>Adamawa</option><option>Akwa Ibom</option><option>Anambra</option>
+                    <option>Bauchi</option><option>Bayelsa</option><option>Benue</option><option>Borno</option>
+                    <option>Cross River</option><option>Delta</option><option>Ebonyi</option><option>Edo</option>
+                    <option>Ekiti</option><option>Enugu</option><option>FCT</option><option>Gombe</option>
+                    <option>Imo</option><option>Jigawa</option><option>Kaduna</option><option>Kano</option>
+                    <option>Katsina</option><option>Kebbi</option><option>Kogi</option><option>Kwara</option>
+                    <option>Lagos</option><option>Nasarawa</option><option>Niger</option><option>Ogun</option>
+                    <option>Ondo</option><option>Osun</option><option>Oyo</option><option>Plateau</option>
+                    <option>Rivers</option><option>Sokoto</option><option>Taraba</option><option>Yobe</option>
+                    <option>Zamfara</option>
+                  </select>
+                  <i class="fas fa-chevron-down arr"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="fg">
+            <label>Password *</label>
+            <div class="iw">
+              <i class="fas fa-lock icon"></i>
+              <input type="password" id="su-pass" placeholder="Min. 8 characters" autocomplete="new-password" required oninput="checkStr(this.value)">
+              <button type="button" class="eye" onclick="toggleEye('su-pass',this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+            </div>
+            <div class="strength">
+              <div class="str-track"><div class="str-fill" id="strFill"></div></div>
+              <div class="str-label" id="strLabel">Enter a password</div>
+            </div>
+            <div class="fe" id="su-passErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
+          </div>
+
+          <div class="chk-row">
+            <input type="checkbox" id="su-terms" required>
+            <span>I agree to NLTC's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. I consent to receiving exam updates via SMS and email.</span>
+          </div>
+
+          <button type="submit" class="sbtn" id="suBtnId">
+            <div class="spin" id="suSpin"></div>
+            <i class="fas fa-rocket" id="suIco"></i>
+            <span id="suTxt">Create Account</span>
+          </button>
+        </form>
+        <p class="alt-link">Already have an account? <a href="#" onclick="switchTab('in');return false;">Sign in</a></p>
+      </div>
+
+      <!-- SUCCESS OVERLAY -->
+      <div class="success-ov" id="successOv">
+        <div class="suc-icon"><i class="fas fa-check"></i></div>
+        <div class="suc-title" id="sucTitle">Welcome!</div>
+        <p class="suc-msg" id="sucMsg">You're in! Redirecting you now…</p>
+        <button class="suc-cta" onclick="redirect()">
+          <i class="fas fa-arrow-right"></i>
+          <span id="sucCtaLbl">Continue</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Lottie WC loader -->
+<script type="module" src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.10/dist/dotlottie-wc.js"></script>
+
+<script>
+/* ─────────────────────────────────────────────
+   STATE
+───────────────────────────────────────────── */
+let currentRole = 'student'; // 'student' | 'admin'
+let currentTab  = 'in';      // 'in' | 'up'
+let redirectTarget = 'dashboard.html';
+
+// Admin invite code — change this to a real secret
+const ADMIN_INVITE_CODE = 'NLTC-ADMIN-2025';
+
+/* ─────────────────────────────────────────────
+   ROLE MANAGEMENT
+───────────────────────────────────────────── */
+function setRole(role) {
+  currentRole = role;
+  document.getElementById('role-student').classList.toggle('active', role === 'student');
+  document.getElementById('role-admin').classList.toggle('active', role === 'admin');
+
+  const isAdmin = role === 'admin';
+
+  // badges
+  document.getElementById('badge-in-student').style.display = isAdmin ? 'none' : '';
+  document.getElementById('badge-in-admin').style.display   = isAdmin ? '' : 'none';
+  document.getElementById('badge-up-student').style.display = isAdmin ? 'none' : '';
+  document.getElementById('badge-up-admin').style.display   = isAdmin ? '' : 'none';
+
+  // admin notes
+  document.getElementById('adminNote-in').classList.toggle('show', isAdmin);
+  document.getElementById('adminNote-up').classList.toggle('show', isAdmin);
+
+  // admin-only fields
+  document.getElementById('adminCodeField').style.display = isAdmin ? '' : 'none';
+  document.getElementById('studentFields').style.display = isAdmin ? 'none' : '';
+
+  // exam required attr
+  const examEl = document.getElementById('su-exam');
+  if (examEl) examEl.required = !isAdmin;
+}
+
+/* ─────────────────────────────────────────────
+   TAB MANAGEMENT
+───────────────────────────────────────────── */
+function switchTab(t) {
+  currentTab = t;
+  document.getElementById('tab-in').classList.toggle('active', t === 'in');
+  document.getElementById('tab-up').classList.toggle('active', t === 'up');
+  document.getElementById('panel-in').classList.toggle('active', t === 'in');
+  document.getElementById('panel-up').classList.toggle('active', t === 'up');
+  clearErrs();
+}
+
+/* ─────────────────────────────────────────────
+   TOAST
+───────────────────────────────────────────── */
+function toast(msg, type = 'info') {
+  const icons = { success:'fa-check-circle', error:'fa-times-circle', info:'fa-info-circle' };
   const t = document.createElement('div');
   t.className = `toast ${type}`;
   t.innerHTML = `<i class="fas ${icons[type]}"></i><span>${msg}</span>`;
-  document.getElementById('toast-container').appendChild(t);
-  setTimeout(() => { t.classList.add('toast-out'); setTimeout(() => t.remove(), 300); }, 4500);
-};
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => { t.classList.add('t-out'); setTimeout(() => t.remove(), 350); }, 4500);
+}
 
-/* Field error helpers */
+/* ─────────────────────────────────────────────
+   ERROR HELPERS
+───────────────────────────────────────────── */
 function showErr(id, msg) {
   const el = document.getElementById(id);
   if (!el) return;
   el.querySelector('span').textContent = msg;
   el.classList.add('show');
 }
-function clearErr(id) {
+function hideErr(id) {
   const el = document.getElementById(id);
   if (el) el.classList.remove('show');
 }
-function clearAllErrors() {
-  document.querySelectorAll('.field-error').forEach(e => e.classList.remove('show'));
-  document.querySelectorAll('input, select').forEach(i => i.classList.remove('error-field'));
+function clearErrs() {
+  document.querySelectorAll('.fe').forEach(e => e.classList.remove('show'));
+  document.querySelectorAll('input.err, select.err').forEach(e => e.classList.remove('err'));
 }
 
-/* Button loading state */
-function setLoading(btnId, spinnerId, iconId, textId, loading, text) {
-  const btn = document.getElementById(btnId);
-  const sp  = document.getElementById(spinnerId);
-  const ic  = document.getElementById(iconId);
-  const tx  = document.getElementById(textId);
-  btn.disabled = loading;
-  sp.style.display  = loading ? 'block' : 'none';
-  ic.style.display  = loading ? 'none'  : 'inline';
-  if (text) tx.textContent = text;
-}
-
-/* Password strength */
-window.checkStrength = function(val) {
-  const fill  = document.getElementById('strengthFill');
-  const label = document.getElementById('strengthLabel');
-  if (!val) { fill.style.width = '0'; label.textContent = 'Enter a password'; fill.style.background = '#e0e0e0'; return; }
-  let score = 0;
-  if (val.length >= 8)              score++;
-  if (/[A-Z]/.test(val))           score++;
-  if (/[0-9]/.test(val))           score++;
-  if (/[^A-Za-z0-9]/.test(val))    score++;
-  const levels = [
-    { w: '20%', c: '#F04438', l: 'Very weak' },
-    { w: '40%', c: '#F79009', l: 'Weak' },
-    { w: '65%', c: '#FEC84B', l: 'Fair' },
-    { w: '85%', c: '#12B76A', l: 'Strong' },
-    { w: '100%', c: '#039855', l: 'Very strong' }
-  ];
-  const lv = levels[score] || levels[0];
-  fill.style.width = lv.w;
-  fill.style.background = lv.c;
-  label.style.color = lv.c;
-  label.textContent = lv.l;
-};
-
-/* Eye toggle */
-window.toggleEye = function(id, btn) {
+/* ─────────────────────────────────────────────
+   EYE TOGGLE
+───────────────────────────────────────────── */
+function toggleEye(id, btn) {
   const inp = document.getElementById(id);
-  const icon = btn.querySelector('i');
-  if (inp.type === 'password') { inp.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); }
-  else { inp.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
-};
-
-/* Forgot password modal */
-window.openForgot = function(e) { e && e.preventDefault(); document.getElementById('forgotModal').classList.add('open'); };
-window.closeForgot = function() { document.getElementById('forgotModal').classList.remove('open'); };
-
-/* Save user to Firestore */
-async function saveUserToFirestore(user, extras = {}) {
-  const ref = doc(db, 'users', user.uid);
-  const snap = await getDoc(ref);
-  const data = {
-    uid:         user.uid,
-    email:       user.email,
-    displayName: user.displayName || extras.displayName || '',
-    photoURL:    user.photoURL || '',
-    plan:        'free',
-    xp:          0,
-    streak:      0,
-    badges:      [],
-    lastLogin:   serverTimestamp(),
-    updatedAt:   serverTimestamp(),
-    ...extras
-  };
-  if (!snap.exists()) {
-    data.createdAt = serverTimestamp();
-  }
-  await setDoc(ref, data, { merge: true });
+  const ico = btn.querySelector('i');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  ico.classList.toggle('fa-eye');
+  ico.classList.toggle('fa-eye-slash');
 }
 
-/* Show success overlay */
-function showSuccess(title, msg) {
-  document.getElementById('successTitle').textContent = title;
-  document.getElementById('successMsg').textContent = msg;
-  document.getElementById('successOverlay').classList.add('show');
+/* ─────────────────────────────────────────────
+   PASSWORD STRENGTH
+───────────────────────────────────────────── */
+function checkStr(v) {
+  const fill = document.getElementById('strFill');
+  const lbl  = document.getElementById('strLabel');
+  if (!v) { fill.style.width = '0'; lbl.textContent = 'Enter a password'; lbl.style.color = 'var(--text-3)'; return; }
+  let s = 0;
+  if (v.length >= 8) s++;
+  if (/[A-Z]/.test(v)) s++;
+  if (/[0-9]/.test(v)) s++;
+  if (/[^A-Za-z0-9]/.test(v)) s++;
+  const lvl = [
+    { w:'18%', c:'#F04438', l:'Very weak' },
+    { w:'38%', c:'#F79009', l:'Weak' },
+    { w:'62%', c:'#FEC84B', l:'Fair' },
+    { w:'84%', c:'#12B76A', l:'Strong' },
+    { w:'100%',c:'#039855',l:'Very strong' }
+  ][s] || { w:'0%', c:'#e0e0e0', l:'Enter a password' };
+  fill.style.width = lvl.w;
+  fill.style.background = lvl.c;
+  lbl.style.color = lvl.c;
+  lbl.textContent = lvl.l;
 }
 
-window.goToDashboard = function() {
-  showToast('Redirecting to dashboard…', 'info');
-  // Replace with actual dashboard URL
-  setTimeout(() => { window.location.href = 'index.html'; }, 1200);
-};
+/* ─────────────────────────────────────────────
+   LOADING HELPERS
+───────────────────────────────────────────── */
+function setBtnLoading(btnId, spinId, icoId, txtId, loading, txt) {
+  const btn = document.getElementById(btnId);
+  const sp  = document.getElementById(spinId);
+  const ic  = document.getElementById(icoId);
+  const tx  = document.getElementById(txtId);
+  btn.disabled = loading;
+  sp.style.display = loading ? 'block' : 'none';
+  ic.style.display = loading ? 'none' : '';
+  if (txt) tx.textContent = txt;
+}
 
-/* ── LOGIN ── */
-window.handleLogin = async function(e) {
-  e.preventDefault();
-  clearAllErrors();
-  const email = document.getElementById('loginEmail').value.trim();
-  const pass  = document.getElementById('loginPassword').value;
-  let valid = true;
-  if (!email) { showErr('loginEmailErr', 'Email is required'); document.getElementById('loginEmail').classList.add('error-field'); valid = false; }
-  if (!pass)  { showErr('loginPasswordErr', 'Password is required'); document.getElementById('loginPassword').classList.add('error-field'); valid = false; }
-  if (!valid) return;
+/* ─────────────────────────────────────────────
+   SUCCESS OVERLAY
+───────────────────────────────────────────── */
+function showSuccess(title, msg, ctaLabel, target) {
+  document.getElementById('sucTitle').textContent   = title;
+  document.getElementById('sucMsg').textContent     = msg;
+  document.getElementById('sucCtaLbl').textContent  = ctaLabel;
+  redirectTarget = target;
+  document.getElementById('successOv').classList.add('show');
+}
 
-  setLoading('loginSubmitBtn', 'loginSpinner', 'loginIcon', 'loginBtnText', true, 'Signing in…');
+function redirect() {
+  window.location.href = redirectTarget;
+}
+
+/* ─────────────────────────────────────────────
+   ROLE-BASED REDIRECT
+───────────────────────────────────────────── */
+function getRedirectTarget(role) {
+  return role === 'admin' ? 'admin.html' : 'dashboard.html';
+}
+
+/* ─────────────────────────────────────────────
+   GOOGLE SIGN IN
+───────────────────────────────────────────── */
+async function doGoogle() {
+  const btns = ['gLoginBtn','gSignupBtn'];
+  btns.forEach(id => { const b = document.getElementById(id); if(b) b.disabled = true; });
   try {
-    const cred = await signInWithEmailAndPassword(auth, email, pass);
-    await saveUserToFirestore(cred.user);
-    showToast('Welcome back! 🎉', 'success');
-    showSuccess('Welcome back! 👋', `You're signed in as ${cred.user.email}. Let's continue your exam prep!`);
-  } catch (err) {
-    const msgs = {
-      'auth/user-not-found':    ['loginEmailErr', 'No account found with this email'],
-      'auth/wrong-password':    ['loginPasswordErr', 'Incorrect password. Please try again.'],
-      'auth/invalid-email':     ['loginEmailErr', 'Please enter a valid email address'],
-      'auth/too-many-requests': [null, 'Too many failed attempts. Please try again later.'],
-      'auth/invalid-credential':['loginPasswordErr', 'Incorrect email or password. Please try again.'],
-    };
-    const m = msgs[err.code];
-    if (m && m[0]) { showErr(m[0], m[1]); document.getElementById(m[0].replace('Err',''))?.classList.add('error-field'); }
-    else showToast(m ? m[1] : 'Sign in failed. Please try again.', 'error');
+    const { user, data, isNew } = await window.__nltcGoogle();
+
+    // Check role match
+    const storedRole = data?.role || 'student';
+
+    if (currentRole === 'admin' && storedRole !== 'admin') {
+      toast('This account does not have admin privileges.', 'error');
+      btns.forEach(id => { const b = document.getElementById(id); if(b) b.disabled = false; });
+      return;
+    }
+
+    const target = getRedirectTarget(storedRole);
+    const fname  = user.displayName?.split(' ')[0] || 'User';
+
+    toast(`Welcome${isNew ? '' : ' back'}, ${fname}! 🎉`, 'success');
+    showSuccess(
+      isNew ? 'Account Created! 🚀' : `Welcome Back! 👋`,
+      isNew
+        ? `Hi ${fname}! Your NLTC account is ready. Let's get you to your dashboard.`
+        : `Good to see you again, ${fname}! Taking you to your dashboard.`,
+      storedRole === 'admin' ? 'Go to Admin Panel' : 'Go to Dashboard',
+      target
+    );
+  } catch(err) {
+    if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+      toast('Google sign-in failed. Please try again.', 'error');
+      console.error(err);
+    }
   } finally {
-    setLoading('loginSubmitBtn', 'loginSpinner', 'loginIcon', 'loginBtnText', false, 'Sign In');
+    btns.forEach(id => { const b = document.getElementById(id); if(b) b.disabled = false; });
   }
-};
+}
 
-/* ── SIGNUP ── */
-window.handleSignup = async function(e) {
+/* ─────────────────────────────────────────────
+   EMAIL LOGIN
+───────────────────────────────────────────── */
+async function doLogin(e) {
   e.preventDefault();
-  clearAllErrors();
-  const first  = document.getElementById('signupFirstName').value.trim();
-  const last   = document.getElementById('signupLastName').value.trim();
-  const email  = document.getElementById('signupEmail').value.trim();
-  const phone  = document.getElementById('signupPhone').value.trim();
-  const exam   = document.getElementById('signupExam').value;
-  const state  = document.getElementById('signupState').value;
-  const pass   = document.getElementById('signupPassword').value;
-  const agreed = document.getElementById('agreeTerms').checked;
+  clearErrs();
+  const email = document.getElementById('li-email').value.trim();
+  const pass  = document.getElementById('li-pass').value;
+  let ok = true;
+  if (!email) { showErr('li-emailErr','Email is required'); ok = false; }
+  if (!pass)  { showErr('li-passErr','Password is required'); ok = false; }
+  if (!ok) return;
 
-  let valid = true;
-  if (!first) { showErr('signupFirstNameErr', 'First name is required'); valid = false; }
-  if (!last)  { showErr('signupLastNameErr', 'Last name is required'); valid = false; }
-  if (!email) { showErr('signupEmailErr', 'Email is required'); valid = false; }
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('signupEmailErr', 'Enter a valid email address'); valid = false; }
-  if (phone && !/^0[789][01]\d{8}$/.test(phone)) { showErr('signupPhoneErr', 'Enter a valid Nigerian phone number'); valid = false; }
-  if (!exam)  { showErr('signupExamErr', 'Please select your target exam'); valid = false; }
-  if (pass.length < 8) { showErr('signupPasswordErr', 'Password must be at least 8 characters'); valid = false; }
-  if (!agreed) { showToast('Please accept the terms and conditions', 'error'); valid = false; }
-  if (!valid) return;
-
-  setLoading('signupSubmitBtn', 'signupSpinner', 'signupIcon', 'signupBtnText', true, 'Creating account…');
+  setBtnLoading('liBtnId','liSpin','liIco','liTxt', true, 'Signing in…');
   try {
-    const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    await updateProfile(cred.user, { displayName: `${first} ${last}` });
-    await saveUserToFirestore(cred.user, {
+    const { user, data } = await window.__nltcLogin(email, pass);
+    const storedRole = data?.role || 'student';
+
+    if (currentRole === 'admin' && storedRole !== 'admin') {
+      toast('This account does not have admin privileges.', 'error');
+      return;
+    }
+    if (currentRole === 'student' && storedRole === 'admin') {
+      // Allow — admin can also use student login path
+    }
+
+    const target = getRedirectTarget(storedRole);
+    const fname  = data?.firstName || user.displayName?.split(' ')[0] || 'User';
+    toast(`Welcome back, ${fname}! 🎉`, 'success');
+    showSuccess(
+      `Welcome Back! 👋`,
+      `Signed in as ${user.email}. Redirecting you now.`,
+      storedRole === 'admin' ? 'Go to Admin Panel' : 'Go to Dashboard',
+      target
+    );
+  } catch(err) {
+    const map = {
+      'auth/user-not-found':     ['li-emailErr', 'No account found with this email'],
+      'auth/wrong-password':     ['li-passErr',  'Incorrect password'],
+      'auth/invalid-credential': ['li-passErr',  'Incorrect email or password'],
+      'auth/invalid-email':      ['li-emailErr', 'Invalid email address'],
+      'auth/too-many-requests':  [null,           'Too many attempts. Try again later.'],
+    };
+    const m = map[err.code];
+    if (m && m[0]) showErr(m[0], m[1]);
+    else toast(m ? m[1] : 'Sign in failed. Please try again.', 'error');
+  } finally {
+    setBtnLoading('liBtnId','liSpin','liIco','liTxt', false, 'Sign In');
+  }
+}
+
+/* ─────────────────────────────────────────────
+   EMAIL SIGNUP
+───────────────────────────────────────────── */
+async function doSignup(e) {
+  e.preventDefault();
+  clearErrs();
+  const first  = document.getElementById('su-first').value.trim();
+  const last   = document.getElementById('su-last').value.trim();
+  const email  = document.getElementById('su-email').value.trim();
+  const phone  = document.getElementById('su-phone').value.trim();
+  const pass   = document.getElementById('su-pass').value;
+  const terms  = document.getElementById('su-terms').checked;
+
+  let ok = true;
+  if (!first) { showErr('su-firstErr','First name required'); ok = false; }
+  if (!last)  { showErr('su-lastErr','Last name required'); ok = false; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('su-emailErr','Valid email required'); ok = false; }
+  if (phone && !/^0[789][01]\d{8}$/.test(phone)) { showErr('su-phoneErr','Enter a valid Nigerian number'); ok = false; }
+  if (pass.length < 8) { showErr('su-passErr','Minimum 8 characters'); ok = false; }
+  if (!terms) { toast('Please accept the Terms & Privacy Policy', 'error'); ok = false; }
+
+  let assignedRole = 'student';
+
+  if (currentRole === 'admin') {
+    const code = document.getElementById('su-admincode').value.trim();
+    if (!code) { showErr('su-admincodeErr','Invite code required for admin signup'); ok = false; }
+    else if (code !== ADMIN_INVITE_CODE) { showErr('su-admincodeErr','Invalid invite code'); ok = false; }
+    else assignedRole = 'admin';
+  } else {
+    const exam = document.getElementById('su-exam').value;
+    if (!exam) { showErr('su-examErr','Please select your target exam'); ok = false; }
+  }
+
+  if (!ok) return;
+
+  setBtnLoading('suBtnId','suSpin','suIco','suTxt', true, 'Creating account…');
+  try {
+    const extras = {
       firstName:   first,
       lastName:    last,
       displayName: `${first} ${last}`,
       phone:       phone || '',
-      targetExam:  exam,
-      state:       state || '',
-      createdAt:   serverTimestamp(),
-    });
-    showToast('Account created successfully! 🎉', 'success');
-    showSuccess('Welcome to NLTC! 🚀', `Hi ${first}! Your account is ready. Start your ${exam} prep journey today!`);
-  } catch (err) {
-    const msgs = {
-      'auth/email-already-in-use': ['signupEmailErr', 'An account already exists with this email'],
-      'auth/invalid-email':        ['signupEmailErr', 'Please enter a valid email address'],
-      'auth/weak-password':        ['signupPasswordErr', 'Password is too weak. Use at least 8 characters.'],
+      role:        assignedRole,
+      plan:        assignedRole === 'admin' ? 'admin' : 'free',
     };
-    const m = msgs[err.code];
-    if (m && m[0]) { showErr(m[0], m[1]); }
-    else showToast(m ? m[1] : 'Registration failed. Please try again.', 'error');
-  } finally {
-    setLoading('signupSubmitBtn', 'signupSpinner', 'signupIcon', 'signupBtnText', false, 'Create Free Account');
-  }
-};
-
-/* ── GOOGLE SIGN IN (Firebase Popup) ── */
-window.signInWithGoogle = async function() {
-  try {
-    const cred = await signInWithPopup(auth, provider);
-    const isNew = cred._tokenResponse?.isNewUser;
-    await saveUserToFirestore(cred.user, isNew ? {
-      firstName:  cred.user.displayName?.split(' ')[0] || '',
-      lastName:   cred.user.displayName?.split(' ').slice(1).join(' ') || '',
-      createdAt:  serverTimestamp(),
-      targetExam: '',
-      phone:      cred.user.phoneNumber || '',
-      state:      '',
-    } : {});
-    showToast(`Welcome${isNew ? '' : ' back'}, ${cred.user.displayName?.split(' ')[0] || ''}! 🎉`, 'success');
-    showSuccess(
-      isNew ? 'Account Created! 🚀' : 'Welcome Back! 👋',
-      isNew
-        ? `Hi ${cred.user.displayName?.split(' ')[0]}! Your NLTC account is ready via Google.`
-        : `Good to see you again, ${cred.user.displayName?.split(' ')[0]}!`
-    );
-  } catch (err) {
-    if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
-      showToast('Google sign-in failed. Please try again.', 'error');
+    if (assignedRole === 'student') {
+      extras.targetExam = document.getElementById('su-exam').value;
+      extras.state      = document.getElementById('su-state').value || '';
     }
-  }
-};
 
-/* ── PASSWORD RESET ── */
-window.handlePasswordReset = async function() {
-  clearErr('resetEmailErr');
-  const email = document.getElementById('resetEmail').value.trim();
-  if (!email) { showErr('resetEmailErr', 'Please enter your email address'); return; }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('resetEmailErr', 'Enter a valid email address'); return; }
-
-  const btn = document.getElementById('resetBtn');
-  const sp  = document.getElementById('resetSpinner');
-  const ic  = document.getElementById('resetIcon');
-  const tx  = document.getElementById('resetBtnText');
-  btn.disabled = true; sp.style.display = 'block'; ic.style.display = 'none'; tx.textContent = 'Sending…';
-
-  try {
-    await sendPasswordResetEmail(auth, email);
-    showToast('Reset link sent! Check your inbox 📧', 'success');
-    closeForgot();
-    document.getElementById('resetEmail').value = '';
-  } catch (err) {
-    const msgs = {
-      'auth/user-not-found': 'No account found with this email',
-      'auth/invalid-email':  'Please enter a valid email address',
-    };
-    showErr('resetEmailErr', msgs[err.code] || 'Failed to send reset link. Try again.');
-  } finally {
-    btn.disabled = false; sp.style.display = 'none'; ic.style.display = 'inline'; tx.textContent = 'Send Reset Link';
-  }
-};
-
-/* ── Google Identity Services handler (exposed to global) ── */
-window.handleGoogleResponse = async function(response) {
-  try {
-    // Create a credential from the ID token
-    const credential = GoogleAuthProvider.credential(response.credential);
-    const result = await signInWithCredential(auth, credential);
-    const user = result.user;
-    const isNew = result._tokenResponse?.isNewUser;
-    
-    await saveUserToFirestore(user, isNew ? {
-      firstName:  user.displayName?.split(' ')[0] || '',
-      lastName:   user.displayName?.split(' ').slice(1).join(' ') || '',
-      createdAt:  serverTimestamp(),
-      targetExam: '',
-      phone:      user.phoneNumber || '',
-      state:      '',
-    } : {});
-    
-    showToast(`Welcome${isNew ? '' : ' back'}, ${user.displayName?.split(' ')[0] || ''}! 🎉`, 'success');
+    const { user } = await window.__nltcSignup(email, pass, extras);
+    const target = getRedirectTarget(assignedRole);
+    toast(`Account created! Welcome, ${first} 🎉`, 'success');
     showSuccess(
-      isNew ? 'Account Created! 🚀' : 'Welcome Back! 👋',
-      isNew
-        ? `Hi ${user.displayName?.split(' ')[0]}! Your NLTC account is ready via Google.`
-        : `Good to see you again, ${user.displayName?.split(' ')[0]}!`
+      assignedRole === 'admin' ? 'Admin Account Created! 🛡️' : `Welcome to NLTC! 🚀`,
+      assignedRole === 'admin'
+        ? `Hi ${first}! Your admin account is ready.`
+        : `Hi ${first}! Your free account is ready. Start your exam prep!`,
+      assignedRole === 'admin' ? 'Go to Admin Panel' : 'Go to Dashboard',
+      target
     );
-  } catch (err) {
-    console.error('Google Sign-In Error:', err);
-    showToast('Google sign-in failed. Please try again.', 'error');
+  } catch(err) {
+    const map = {
+      'auth/email-already-in-use': ['su-emailErr','An account exists with this email'],
+      'auth/invalid-email':        ['su-emailErr','Invalid email address'],
+      'auth/weak-password':        ['su-passErr', 'Password too weak (min 8 chars)'],
+    };
+    const m = map[err.code];
+    if (m) showErr(m[0], m[1]);
+    else toast('Registration failed. Please try again.', 'error');
+  } finally {
+    setBtnLoading('suBtnId','suSpin','suIco','suTxt', false, 'Create Account');
   }
-};
-
-/* ── Auth state observer ── */
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log('User signed in:', user.email);
-  }
-});
-
-// Make the signInWithGoogle function available globally
-window.signInWithGoogle = signInWithGoogle;
-
-</script>
-
-<!-- ============================================================
-     GOOGLE IDENTITY SERVICES INITIALIZATION
-     ============================================================ -->
-<script>
-// Initialize Google Identity Services
-function initiateGoogleSignIn() {
-  const client = google.accounts.oauth2.initTokenClient({
-    client_id: '267993935158-l0ojgokoj1005gohfganoii75ehq4c47.apps.googleusercontent.com',
-    scope: 'email profile',
-    callback: async (tokenResponse) => {
-      if (tokenResponse.error) {
-        showToast('Google sign-in was cancelled or failed.', 'error');
-        return;
-      }
-      
-      try {
-        // Use the token to sign in with Firebase
-        const { signInWithCredential, GoogleAuthProvider } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
-        const credential = GoogleAuthProvider.credential(tokenResponse.access_token);
-        const result = await signInWithCredential(auth, credential);
-        const user = result.user;
-        const isNew = result._tokenResponse?.isNewUser;
-        
-        await saveUserToFirestore(user, isNew ? {
-          firstName:  user.displayName?.split(' ')[0] || '',
-          lastName:   user.displayName?.split(' ').slice(1).join(' ') || '',
-          createdAt:  serverTimestamp(),
-          targetExam: '',
-          phone:      user.phoneNumber || '',
-          state:      '',
-        } : {});
-        
-        showToast(`Welcome${isNew ? '' : ' back'}, ${user.displayName?.split(' ')[0] || ''}! 🎉`, 'success');
-        showSuccess(
-          isNew ? 'Account Created! 🚀' : 'Welcome Back! 👋',
-          isNew
-            ? `Hi ${user.displayName?.split(' ')[0]}! Your NLTC account is ready via Google.`
-            : `Good to see you again, ${user.displayName?.split(' ')[0]}!`
-        );
-      } catch (err) {
-        console.error('Token sign-in error:', err);
-        showToast('Google sign-in failed. Please try again.', 'error');
-      }
-    },
-  });
-  
-  client.requestAccessToken();
 }
 
-// Make initiateGoogleSignIn available globally
-window.initiateGoogleSignIn = initiateGoogleSignIn;
-</script>
+/* ─────────────────────────────────────────────
+   FORGOT PASSWORD
+───────────────────────────────────────────── */
+function openForgot(e) { e && e.preventDefault(); document.getElementById('forgotBg').classList.add('open'); }
+function closeForgot()  { document.getElementById('forgotBg').classList.remove('open'); }
 
-<!-- ============================================================
-     NON-MODULE SCRIPTS (Particles, UI)
-     ============================================================ -->
-<script>
-/* Particle canvas */
-(function () {
-  const canvas = document.getElementById('particles');
+async function handleReset() {
+  hideErr('resetEmailErr');
+  const email = document.getElementById('resetEmail').value.trim();
+  if (!email) { showErr('resetEmailErr','Please enter your email'); return; }
+
+  setBtnLoading('resetBtn','resetSpin','resetIco','resetTxt', true, 'Sending…');
+  try {
+    await window.__nltcReset(email);
+    toast('Reset link sent! Check your inbox 📧', 'success');
+    closeForgot();
+    document.getElementById('resetEmail').value = '';
+  } catch(err) {
+    const map = {
+      'auth/user-not-found': 'No account found with this email',
+      'auth/invalid-email':  'Enter a valid email address',
+    };
+    showErr('resetEmailErr', map[err.code] || 'Could not send reset link. Try again.');
+  } finally {
+    setBtnLoading('resetBtn','resetSpin','resetIco','resetTxt', false, 'Send Reset Link');
+  }
+}
+
+/* ─────────────────────────────────────────────
+   CLOSE MODAL ON OVERLAY CLICK
+───────────────────────────────────────────── */
+document.getElementById('forgotBg').addEventListener('click', function(e) {
+  if (e.target === this) closeForgot();
+});
+
+/* ─────────────────────────────────────────────
+   AUTH STATE — auto-redirect if already logged in
+───────────────────────────────────────────── */
+window.__nltcAuthReady = async function(user) {
+  try {
+    const db = window.__nltcDb;
+    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (snap.exists()) {
+      const role = snap.data()?.role || 'student';
+      // Only auto-redirect if not currently signing up
+      if (document.getElementById('successOv').classList.contains('show')) return;
+      // Uncomment to enable auto-redirect:
+      // window.location.href = getRedirectTarget(role);
+    }
+  } catch(e) {}
+};
+
+/* ─────────────────────────────────────────────
+   BACKGROUND CANVAS (particles)
+───────────────────────────────────────────── */
+(function() {
+  const canvas = document.getElementById('bg-canvas');
   const ctx = canvas.getContext('2d');
   let W, H, pts;
-  const N = 60, MAX_D = 110, SPD = 0.35;
+  const N = 55, MAX_D = 110, SPD = 0.3;
   function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-  function rand(a, b) { return Math.random() * (b - a) + a; }
+  function ri(a,b) { return Math.random()*(b-a)+a; }
   function init() {
     resize();
-    pts = Array.from({ length: N }, () => ({
-      x: rand(0, W), y: rand(0, H),
-      vx: rand(-SPD, SPD), vy: rand(-SPD, SPD),
-      r: rand(0.8, 2), gold: Math.random() < 0.18
+    pts = Array.from({length:N}, () => ({
+      x:ri(0,W), y:ri(0,H),
+      vx:ri(-SPD,SPD), vy:ri(-SPD,SPD),
+      r:ri(0.7,1.8),
+      gold: Math.random()<0.18
     }));
   }
   function tick() {
-    ctx.clearRect(0, 0, W, H);
+    ctx.clearRect(0,0,W,H);
     pts.forEach(p => {
       p.x += p.vx; p.y += p.vy;
-      if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
-      if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+      if(p.x<0)p.x=W; if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H; if(p.y>H)p.y=0;
     });
-    for (let i = 0; i < pts.length; i++) {
-      for (let j = i + 1; j < pts.length; j++) {
-        const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
-        const d = Math.sqrt(dx * dx + dy * dy);
-        if (d < MAX_D) {
-          const a = 0.1 * (1 - d / MAX_D);
-          ctx.strokeStyle = (pts[i].gold || pts[j].gold) ? `rgba(240,165,0,${a * 0.6})` : `rgba(255,255,255,${a})`;
-          ctx.lineWidth = 0.6;
-          ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); ctx.stroke();
+    for(let i=0;i<pts.length;i++) {
+      for(let j=i+1;j<pts.length;j++) {
+        const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<MAX_D) {
+          const a=0.09*(1-d/MAX_D);
+          ctx.strokeStyle = (pts[i].gold||pts[j].gold) ? `rgba(240,165,0,${a*0.55})` : `rgba(255,255,255,${a})`;
+          ctx.lineWidth=0.5;
+          ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y); ctx.stroke();
         }
       }
     }
     pts.forEach(p => {
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = p.gold ? 'rgba(240,165,0,0.55)' : 'rgba(255,255,255,0.28)';
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle = p.gold ? 'rgba(240,165,0,0.5)' : 'rgba(255,255,255,0.22)';
       ctx.fill();
     });
     requestAnimationFrame(tick);
   }
-  window.addEventListener('resize', () => { resize(); init(); });
+  window.addEventListener('resize', ()=>{resize();init();});
   init(); tick();
 })();
-
-/* Scroll progress */
-window.addEventListener('scroll', () => {
-  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
-  document.getElementById('progress-bar').style.width = pct + '%';
-}, { passive: true });
-
-/* Close modal on outside click */
-document.getElementById('forgotModal').addEventListener('click', function(e) {
-  if (e.target === this) closeForgot();
-});
-
-/* Real-time email validation feedback */
-document.addEventListener('DOMContentLoaded', () => {
-  ['loginEmail', 'signupEmail'].forEach(id => {
-    const inp = document.getElementById(id);
-    if (!inp) return;
-    inp.addEventListener('blur', () => {
-      if (inp.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inp.value)) {
-        inp.classList.add('error-field');
-      } else {
-        inp.classList.remove('error-field');
-      }
-    });
-    inp.addEventListener('input', () => inp.classList.remove('error-field'));
-  });
-});
 </script>
-
 </body>
 </html>
