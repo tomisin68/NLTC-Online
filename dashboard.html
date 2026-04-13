@@ -1304,7 +1304,7 @@ function renderCBTQuestion(){
   document.getElementById('cbtQCounter').textContent=`Question ${_cbt.current+1} of ${total}`;
   document.getElementById('cbtProgressFill').style.width=`${(_cbt.current/total)*100}%`;
   document.getElementById('cbtQuestionText').textContent=q.question||q.text||'(No question text)';
-  const opts=q.options||[q.A,q.B,q.C,q.D].filter(Boolean);
+  const opts=Array.isArray(q.options)?q.options:q.options&&typeof q.options==='object'?['A','B','C','D'].map(k=>q.options[k]).filter(Boolean):[q.A,q.B,q.C,q.D].filter(Boolean);
   const letters=['A','B','C','D','E'];
   const answered=_cbt.answers[_cbt.current];
   const isReview=_cbt.submitted;
@@ -1338,8 +1338,14 @@ function renderCBTQuestion(){
 
 function getCorrectIdx(q){
   if(typeof q.correctIndex==='number')return q.correctIndex;
-  if(q.answer){const opts=q.options||[q.A,q.B,q.C,q.D].filter(Boolean);const idx=opts.findIndex(o=>o===q.answer);return idx>=0?idx:0;}
-  if(q.correct){const map={A:0,B:1,C:2,D:3,E:4};return map[q.correct]??0;}
+  // Admin panel stores correctAnswer as "A"/"B"/"C"/"D" string
+  if(q.correctAnswer){const map={A:0,B:1,C:2,D:3,E:4};return map[q.correctAnswer.toUpperCase()]??0;}
+  if(q.correct){const map={A:0,B:1,C:2,D:3,E:4};return map[q.correct.toUpperCase()]??0;}
+  if(q.answer){
+    const opts=Array.isArray(q.options)?q.options:q.options&&typeof q.options==='object'?['A','B','C','D'].map(k=>q.options[k]).filter(Boolean):[q.A,q.B,q.C,q.D].filter(Boolean);
+    const idx=opts.findIndex(o=>o===q.answer);
+    return idx>=0?idx:0;
+  }
   return 0;
 }
 
