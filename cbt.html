@@ -79,14 +79,12 @@ img{max-width:100%;height:auto;}
 .info-pill{background:var(--surface-2);border-radius:100px;padding:4px 11px;font-size:.7rem;font-weight:600;color:var(--text-2);display:flex;align-items:center;gap:5px;}
 .powered-by{text-align:center;margin-top:10px;font-size:.7rem;color:var(--text-3);}
 
-/* Custom question count & exam type controls */
 .custom-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
 .ctrl-group{display:flex;flex-direction:column;gap:5px;}
 .ctrl-label{font-size:.68rem;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;}
 .ctrl-select{height:38px;padding:0 30px 0 11px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:var(--font-body);font-size:.82rem;color:var(--text-1);background:white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%237A90B0' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;width:100%;}
 .ctrl-select:focus{border-color:var(--navy);}
 
-/* Past sessions on setup */
 .past-sessions-wrap{margin-top:18px;border-top:1px solid var(--border);padding-top:14px;}
 .past-sessions-title{font-size:.72rem;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px;}
 .past-session-item{display:flex;align-items:center;gap:10px;padding:8px 11px;background:var(--surface);border-radius:var(--r-sm);margin-bottom:6px;border:1px solid var(--border);}
@@ -117,7 +115,6 @@ img{max-width:100%;height:auto;}
 
 /* ═══ EXAM SCREEN ═══ */
 #exam-screen{background:#0A1628;}
-
 .exam-topbar{background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07);padding:0 16px;height:56px;display:flex;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:50;}
 .exam-logo-sm{font-family:var(--font-head);font-size:.88rem;font-weight:800;color:white;display:flex;align-items:center;gap:7px;flex-shrink:0;}
 .exam-logo-sm span{background:var(--gold);color:var(--navy);padding:2px 7px;border-radius:5px;}
@@ -136,13 +133,9 @@ img{max-width:100%;height:auto;}
 @keyframes timerPulse{0%,100%{opacity:1;}50%{opacity:.65;}}
 .submit-topbtn{padding:6px 14px;background:var(--error);color:white;border-radius:7px;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .2s;border:none;white-space:nowrap;}
 .submit-topbtn:hover{background:#c0392b;}
-
-/* Calculator toggle button in topbar */
 .calc-topbtn{width:32px;height:32px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0;}
 .calc-topbtn:hover{background:rgba(255,255,255,.14);color:white;}
 .calc-topbtn.active{background:rgba(240,165,0,.2);border-color:var(--gold);color:var(--gold);}
-
-/* Qmap toggle button for mobile */
 .qmap-topbtn{width:32px;height:32px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:7px;color:rgba(255,255,255,.7);font-size:.78rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0;display:none;}
 .qmap-topbtn:hover{background:rgba(255,255,255,.14);color:white;}
 .qmap-topbtn.active{background:rgba(46,144,250,.2);border-color:#2E90FA;color:#2E90FA;}
@@ -152,17 +145,13 @@ img{max-width:100%;height:auto;}
 .exam-q-area{flex:1;overflow-y:auto;padding:20px 24px 20px;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--exam-nav-h) + 20px);}
 .exam-q-area::-webkit-scrollbar{width:4px;}
 .exam-q-area::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);}
-
 .q-subject-label{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;padding:3px 11px;border-radius:100px;margin-bottom:14px;text-transform:uppercase;letter-spacing:.06em;}
 .q-number{font-size:.78rem;font-weight:600;color:rgba(255,255,255,.3);margin-bottom:8px;}
 .q-text{font-size:1rem;font-weight:500;color:white;line-height:1.8;margin-bottom:20px;}
 .q-year-tag{display:inline-flex;align-items:center;gap:4px;font-size:.65rem;font-weight:700;background:rgba(240,165,0,.15);color:var(--gold);border:1px solid rgba(240,165,0,.25);border-radius:100px;padding:2px 8px;margin-bottom:10px;margin-left:6px;}
-
-/* Question image */
 .q-img-wrap{margin-bottom:16px;}
 .q-img-wrap img{max-width:100%;max-height:260px;border-radius:8px;border:1px solid rgba(255,255,255,.12);display:block;}
 .q-img-placeholder{background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.15);border-radius:8px;padding:16px;text-align:center;font-size:.78rem;color:rgba(255,255,255,.3);margin-bottom:16px;}
-
 .options-list{display:flex;flex-direction:column;gap:9px;}
 .opt-item{display:flex;align-items:flex-start;gap:11px;padding:12px 15px;border:1.5px solid rgba(255,255,255,.1);border-radius:var(--r-sm);cursor:pointer;transition:all .15s;background:rgba(255,255,255,.04);}
 .opt-item:hover{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.07);}
@@ -179,28 +168,14 @@ img{max-width:100%;height:auto;}
 .opt-text{font-size:.88rem;color:rgba(255,255,255,.78);line-height:1.6;padding-top:4px;}
 .opt-item.selected .opt-text{color:white;}
 
-/* ═══ EXAM NAV — FIXED to bottom of screen on mobile ═══ */
-.exam-nav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  height:var(--exam-nav-h);
-  padding:10px 16px;
-  border-top:1px solid rgba(255,255,255,.08);
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  flex-shrink:0;
-  background:#0A1628;
-  z-index:40;
-  padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
-}
+/* ═══ EXAM NAV ═══ */
+.exam-nav{position:fixed;bottom:0;left:0;right:0;height:var(--exam-nav-h);padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;background:#0A1628;z-index:40;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));}
 .nav-btn{display:flex;align-items:center;gap:6px;padding:10px 20px;border-radius:var(--r-sm);font-size:.82rem;font-weight:700;cursor:pointer;transition:all .18s;border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);}
 .nav-btn:hover:not(:disabled){background:rgba(255,255,255,.08);color:white;border-color:rgba(255,255,255,.22);}
 .nav-btn:disabled{opacity:.28;cursor:not-allowed;}
 .nav-btn.primary{background:var(--gold);border-color:var(--gold);color:var(--navy);}
 .nav-btn.primary:hover{background:var(--gold-2);border-color:var(--gold-2);}
 .nav-center{font-size:.75rem;color:rgba(255,255,255,.28);text-align:center;}
-
 .keyboard-hints{display:flex;gap:8px;flex-wrap:wrap;padding:7px 24px;border-top:1px solid rgba(255,255,255,.04);flex-shrink:0;}
 .kbd{display:inline-flex;align-items:center;gap:4px;font-size:.64rem;color:rgba(255,255,255,.22);}
 .kbd-key{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:1px 6px;font-family:var(--font-mono);font-size:.62rem;color:rgba(255,255,255,.35);}
@@ -319,9 +294,12 @@ img{max-width:100%;height:auto;}
 .rq-opt.wrong-ans .rq-opt-text{color:var(--error);}
 .rq-opt.neutral .rq-opt-letter{background:var(--surface-2);color:var(--text-3);}
 .rq-opt.neutral .rq-opt-text{color:var(--text-2);}
-.rq-exp{padding:11px 16px;background:rgba(18,183,106,.06);border-top:1px solid rgba(18,183,106,.12);}
-.rq-exp-label{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--success);margin-bottom:3px;}
-.rq-exp-text{font-size:.78rem;color:var(--text-2);line-height:1.65;}
+.rq-exp-block{border-top:1px solid var(--border);background:var(--surface);padding:12px 16px;}
+.rq-exp-row{margin-bottom:4px;}
+.rq-exp-row .rq-exp-label{font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:4px;display:block;}
+.rq-exp-row .rq-exp-text{font-size:.82rem;color:var(--text-1);line-height:1.7;display:flex;align-items:flex-start;flex-wrap:wrap;gap:4px;}
+.rq-correct-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--success);color:white;font-size:.72rem;font-weight:800;flex-shrink:0;}
+.rq-wrong-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--error);color:white;font-size:.72rem;font-weight:800;flex-shrink:0;}
 
 /* ═══ CONFIRM SUBMIT MODAL ═══ */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:900;align-items:center;justify-content:center;padding:16px;}
@@ -330,7 +308,7 @@ img{max-width:100%;height:auto;}
 .modal-icon{font-size:2.2rem;text-align:center;margin-bottom:12px;}
 .modal-title{font-family:var(--font-head);font-size:1.05rem;font-weight:800;color:var(--navy);text-align:center;margin-bottom:7px;}
 .modal-text{font-size:.8rem;color:var(--text-2);text-align:center;line-height:1.65;margin-bottom:18px;}
-.modal-stat-row{display:flex;gap:9px;margin-bottom:18px;}
+.modal-stat-row{display:flex;gap:9px;margin-bottom:18px;flex-wrap:wrap;}
 .modal-stat{flex:1;text-align:center;background:var(--surface);border-radius:var(--r-sm);padding:11px;}
 .modal-stat-num{font-family:var(--font-head);font-size:1.15rem;font-weight:800;color:var(--navy);}
 .modal-stat-label{font-size:.68rem;color:var(--text-3);margin-top:2px;}
@@ -350,6 +328,48 @@ img{max-width:100%;height:auto;}
 .toast-out{animation:tOut .25s ease forwards;}
 @keyframes tIn{from{opacity:0;transform:translateX(10px);}to{opacity:1;transform:none;}}
 @keyframes tOut{to{opacity:0;transform:translateX(10px);}}
+
+/* ═══ JAMB SUBJECT PICKER SCREEN ═══ */
+#jamb-picker-screen{background:var(--navy);align-items:center;justify-content:flex-start;padding:20px;padding-top:env(safe-area-inset-top,20px);}
+.picker-card{background:white;border-radius:24px;width:100%;max-width:560px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.4);margin:0 auto;}
+.picker-top{background:linear-gradient(135deg,var(--navy-2),var(--navy-3));padding:24px 28px;text-align:center;}
+.picker-title{font-family:var(--font-head);font-size:1.2rem;font-weight:800;color:white;margin-bottom:5px;}
+.picker-sub{font-size:.8rem;color:rgba(255,255,255,.45);line-height:1.6;}
+.picker-timer{display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:rgba(255,255,255,.1);border-radius:100px;padding:5px 13px;font-family:var(--font-mono);font-size:.82rem;color:white;}
+.picker-body{padding:22px 24px;}
+.picker-progress{display:flex;gap:6px;margin-bottom:18px;}
+.picker-progress-dot{flex:1;height:5px;border-radius:100px;background:var(--surface-2);}
+.picker-progress-dot.done{background:var(--success);}
+.picker-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.picker-subj-card{border:2px solid var(--border);border-radius:var(--r-md);padding:18px 14px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:white;}
+.picker-subj-card:hover{border-color:var(--navy-2);transform:translateY(-2px);box-shadow:0 6px 20px rgba(11,29,58,.1);}
+.picker-subj-card.done-card{background:var(--success-bg);border-color:var(--success);cursor:default;transform:none;}
+.picker-subj-card.done-card:hover{transform:none;box-shadow:none;}
+.pscard-emoji{font-size:1.8rem;margin-bottom:8px;}
+.pscard-name{font-family:var(--font-head);font-size:.88rem;font-weight:700;color:var(--navy);margin-bottom:3px;}
+.pscard-meta{font-size:.7rem;color:var(--text-3);}
+.pscard-score{font-family:var(--font-head);font-size:.95rem;font-weight:800;margin-top:6px;}
+.pscard-done-badge{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;color:white;font-size:.65rem;}
+.picker-hint{font-size:.75rem;color:var(--text-3);text-align:center;line-height:1.6;}
+
+/* Subject Bridge / Done Banner */
+.subj-done-banner{position:fixed;inset:0;background:rgba(11,29,58,.85);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.subj-done-banner.hidden{display:none;}
+.bridge-card{background:white;border-radius:22px;padding:28px;max-width:400px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.4);}
+.bridge-emoji{font-size:2.5rem;margin-bottom:10px;}
+.bridge-title{font-family:var(--font-head);font-size:1.1rem;font-weight:800;color:var(--navy);margin-bottom:6px;}
+.bridge-score{font-family:var(--font-head);font-size:2rem;font-weight:800;margin-bottom:4px;}
+.bridge-meta{font-size:.8rem;color:var(--text-3);margin-bottom:18px;line-height:1.6;}
+.bridge-actions{display:flex;gap:9px;flex-wrap:wrap;}
+.bridge-btn{flex:1;min-width:120px;padding:11px;border-radius:var(--r-sm);font-size:.84rem;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;border:none;}
+.bridge-btn.primary{background:var(--navy);color:white;}
+.bridge-btn.primary:hover{background:var(--navy-3);}
+.bridge-btn.gold{background:var(--gold);color:var(--navy);}
+.bridge-btn.gold:hover{background:var(--gold-2);}
+.bridge-btn.danger{background:var(--error);color:white;}
+
+/* High score badge */
+.hs-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(240,165,0,.2);border:1px solid rgba(240,165,0,.4);border-radius:100px;padding:4px 12px;font-size:.72rem;font-weight:700;color:var(--gold-2);margin-top:8px;}
 
 /* ═══ RESPONSIVE ═══ */
 @media(max-width:768px){
@@ -419,16 +439,15 @@ img{max-width:100%;height:auto;}
         </div>
       </div>
 
-      <!-- Custom controls (exam type + question count for non-JAMB modes) -->
       <div id="custom-controls-wrap" style="display:none;">
         <div class="custom-controls">
           <div class="ctrl-group">
             <div class="ctrl-label">Exam Type</div>
             <select class="ctrl-select" id="custom-exam-type">
               <option value="utme">UTME / JAMB</option>
-              <option value="wassce">WAEC SSCE</option>
+              <option value="waec">WAEC SSCE</option>
               <option value="neco">NECO</option>
-              <option value="post-utme">Post-UTME</option>
+              <option value="postutme">Post-UTME</option>
             </select>
           </div>
           <div class="ctrl-group">
@@ -445,7 +464,6 @@ img{max-width:100%;height:auto;}
         </div>
       </div>
 
-      <!-- JAMB subject selection -->
       <div id="jamb-subject-section">
         <div class="section-label">Choose 3 More Subjects <span style="font-size:.66rem;color:var(--text-3);">(English is always included)</span></div>
         <div class="subj-notice"><i class="fas fa-info-circle"></i> Use of English (60 questions) is automatically included</div>
@@ -457,7 +475,6 @@ img{max-width:100%;height:auto;}
         </div>
       </div>
 
-      <!-- Single subject selection -->
       <div id="single-subject-section" style="display:none;">
         <div class="section-label">Select Subject</div>
         <div class="subject-select-grid" id="single-subjects-grid"></div>
@@ -469,7 +486,6 @@ img{max-width:100%;height:auto;}
       </button>
       <div class="powered-by">Powered by ALOC · Questions fetched live</div>
 
-      <!-- Past Sessions -->
       <div class="past-sessions-wrap" id="pastSessionsWrap" style="display:none;">
         <div class="past-sessions-title">📊 Recent Sessions</div>
         <div id="pastSessionsList"></div>
@@ -492,6 +508,33 @@ img{max-width:100%;height:auto;}
     <button class="retry-btn sec" onclick="goToSetup()">Back to Setup</button>
   </div>
   <div style="margin-top:auto;padding-bottom:20px;font-size:.7rem;color:rgba(255,255,255,.2);">This may take up to 30 seconds on first load</div>
+</div>
+
+<!-- ═══════════════════ JAMB SUBJECT PICKER ═══════════════════ -->
+<div class="screen" id="jamb-picker-screen">
+  <div class="picker-card">
+    <div class="picker-top">
+      <div class="picker-title" id="picker-title">Choose Your First Subject</div>
+      <div class="picker-sub">Select a subject to begin. You can do them in any order.</div>
+      <div class="picker-timer"><i class="fas fa-clock"></i> <span id="picker-timer-display">2:00:00</span></div>
+    </div>
+    <div class="picker-body">
+      <div class="picker-progress" id="picker-progress"></div>
+      <div class="picker-grid" id="picker-grid"></div>
+      <div class="picker-hint" id="picker-hint">Tap a subject card to load it and begin answering</div>
+    </div>
+  </div>
+</div>
+
+<!-- Subject Done Bridge (overlay) -->
+<div class="subj-done-banner hidden" id="subj-done-banner">
+  <div class="bridge-card">
+    <div class="bridge-emoji" id="bridge-emoji">🎉</div>
+    <div class="bridge-title" id="bridge-title">Subject Complete!</div>
+    <div class="bridge-score" id="bridge-score"></div>
+    <div class="bridge-meta" id="bridge-meta"></div>
+    <div class="bridge-actions" id="bridge-actions"></div>
+  </div>
 </div>
 
 <!-- ═══════════════════════ EXAM SCREEN ═══════════════════════ -->
@@ -520,7 +563,6 @@ img{max-width:100%;height:auto;}
     </div>
     <div class="qmap-sidebar" id="qmap-sidebar"></div>
   </div>
-  <!-- Fixed nav bar -->
   <div class="exam-nav">
     <button class="nav-btn" id="prev-btn" onclick="navigate(-1)"><i class="fas fa-chevron-left"></i> Prev</button>
     <div class="nav-center" id="nav-center-text"></div>
@@ -586,6 +628,7 @@ img{max-width:100%;height:auto;}
       </div>
       <div class="result-title" id="result-headline">—</div>
       <div class="result-sub" id="result-sub">—</div>
+      <div class="hs-badge" id="hs-badge" style="display:none;"></div>
     </div>
     <div class="result-body">
       <div class="result-overall-stats" id="result-stats"></div>
@@ -619,7 +662,7 @@ img{max-width:100%;height:auto;}
   <div class="modal-box">
     <div class="modal-icon">⚠️</div>
     <div class="modal-title">Submit Exam?</div>
-    <div class="modal-text">This action cannot be undone.</div>
+    <div class="modal-text" id="modal-text">This action cannot be undone.</div>
     <div class="modal-stat-row" id="modal-stats"></div>
     <div class="modal-actions">
       <button class="modal-btn cancel" onclick="closeModal()">Continue</button>
@@ -636,7 +679,6 @@ const ALOC_TOKEN = 'ALOC-151ffaaa75aa4dc081ef';
 const ALOC_BASE  = 'https://questions.aloc.com.ng/api/v2';
 const DASHBOARD_URL = 'index.html';
 
-/* ALOC subject slugs — must match the API exactly */
 const ALOC_SLUG = {
   english:     'use-of-english',
   mathematics: 'mathematics',
@@ -670,29 +712,30 @@ const SUBJECTS_CONFIG = {
 };
 
 const NON_ENGLISH = Object.entries(SUBJECTS_CONFIG)
-  .filter(([k])=>k!=='english')
-  .map(([k,v])=>({key:k,...v}));
+  .filter(([k]) => k !== 'english')
+  .map(([k,v]) => ({key:k,...v}));
 
 /* ════════════════════════════════════════
    STATE
 ════════════════════════════════════════ */
 let state = {
-  mode:'jamb',
-  selectedJambSubs:[],
-  singleSubject:null,
-  subjects:[],
-  currentSubIdx:0,
-  currentQIdx:0,
-  timerInterval:null,
-  timeLeft:7200,
-  submitted:false,
-  startTime:null,
-  customQCount:20,
-  customExamType:'utme',
+  mode: 'jamb',
+  selectedJambSubs: [],
+  singleSubject: null,
+  subjects: [],
+  currentSubIdx: 0,
+  currentQIdx: 0,
+  timerInterval: null,
+  timeLeft: 7200,
+  submitted: false,
+  startTime: null,
+  customQCount: 20,
+  customExamType: 'utme',
+  jambQueue: [],
 };
 
 /* ════════════════════════════════════════
-   PAST SESSIONS (localStorage)
+   PAST SESSIONS
 ════════════════════════════════════════ */
 const SESSIONS_KEY = 'nltc_cbt_sessions';
 
@@ -719,9 +762,10 @@ function renderPastSessions() {
   wrap.style.display = 'block';
   list.innerHTML = sessions.slice(0, 5).map(s => {
     const scoreColor = s.score >= 70 ? '#12B76A' : s.score >= 50 ? '#F0A500' : '#F04438';
-    const scoreBg = s.score >= 70 ? '#E6FAF1' : s.score >= 50 ? '#FFF8E7' : '#FEF3F2';
-    const d = new Date(s.ts);
-    const when = d.toLocaleDateString('en-NG',{day:'numeric',month:'short'}) + ' ' + d.toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'});
+    const scoreBg    = s.score >= 70 ? '#E6FAF1' : s.score >= 50 ? '#FFF8E7' : '#FEF3F2';
+    const d    = new Date(s.ts);
+    const when = d.toLocaleDateString('en-NG',{day:'numeric',month:'short'}) + ' ' +
+                 d.toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'});
     return `<div class="past-session-item">
       <div class="psi-score" style="background:${scoreBg};color:${scoreColor};">${s.score}%</div>
       <div class="psi-info">
@@ -733,7 +777,7 @@ function renderPastSessions() {
 }
 
 /* ════════════════════════════════════════
-   DASHBOARD NAV
+   NAVIGATION
 ════════════════════════════════════════ */
 function goToDashboard() {
   clearInterval(state.timerInterval);
@@ -746,36 +790,52 @@ function goToDashboard() {
 ════════════════════════════════════════ */
 function selectMode(mode) {
   state.mode = mode;
-  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('selected'));
-  document.getElementById('mode-'+mode).classList.add('selected');
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('mode-' + mode).classList.add('selected');
   const isJamb = mode === 'jamb';
-  document.getElementById('jamb-subject-section').style.display = isJamb ? 'block' : 'none';
+  document.getElementById('jamb-subject-section').style.display   = isJamb ? 'block' : 'none';
   document.getElementById('single-subject-section').style.display = !isJamb ? 'block' : 'none';
-  document.getElementById('custom-controls-wrap').style.display = !isJamb ? 'block' : 'none';
-  // Pre-set question count based on mode
-  const qCountEl = document.getElementById('custom-q-count');
-  if (mode === 'waec') { qCountEl.value = '50'; }
-  else if (mode === 'postutme') { qCountEl.value = '30'; }
-  else { qCountEl.value = '20'; }
+  document.getElementById('custom-controls-wrap').style.display   = !isJamb ? 'block' : 'none';
+  if (!isJamb) {
+    state.selectedJambSubs = [];
+    document.querySelectorAll('[id^="jsubj-"]').forEach(b => {
+      b.className = 'subj-btn';
+      const chk = b.querySelector('.subj-check'); if (chk) chk.style.display = 'none';
+    });
+  }
+  resetSingleSelection();
+  const qEl = document.getElementById('custom-q-count');
+  if (mode === 'waec')     qEl.value = '50';
+  else if (mode === 'postutme') qEl.value = '30';
+  else                     qEl.value = '20';
   updateStartBtn();
+}
+
+function resetSingleSelection() {
+  state.singleSubject = null;
+  const grid = document.getElementById('single-subjects-grid');
+  if (!grid) return;
+  Array.from(grid.children).forEach(btn => {
+    btn.className = 'subj-btn';
+    const chk = btn.querySelector('.subj-check');
+    if (chk) chk.style.display = 'none';
+  });
 }
 
 function buildJambSubjectGrid() {
   const grid = document.getElementById('jamb-subjects-grid');
-  grid.innerHTML = NON_ENGLISH.map(s=>`
+  grid.innerHTML = NON_ENGLISH.map(s => `
     <button class="subj-btn" id="jsubj-${s.key}" onclick="toggleJambSubject('${s.key}')">
-      <span>${s.emoji}</span>
-      <span>${s.name}</span>
+      <span>${s.emoji}</span><span>${s.name}</span>
       <span class="subj-check" id="jsubj-chk-${s.key}" style="display:none;"><i class="fas fa-check-circle"></i></span>
     </button>`).join('');
 }
 
 function buildSingleSubjectGrid() {
   const grid = document.getElementById('single-subjects-grid');
-  grid.innerHTML = Object.entries(SUBJECTS_CONFIG).map(([k,v])=>`
+  grid.innerHTML = Object.entries(SUBJECTS_CONFIG).map(([k,v]) => `
     <button class="subj-btn" id="ssubj-${k}" onclick="selectSingleSubject('${k}')">
-      <span>${v.emoji}</span>
-      <span>${v.name}</span>
+      <span>${v.emoji}</span><span>${v.name}</span>
       <span class="subj-check" id="ssubj-chk-${k}" style="display:none;"><i class="fas fa-check-circle"></i></span>
     </button>`).join('');
 }
@@ -784,45 +844,44 @@ function toggleJambSubject(key) {
   const idx = state.selectedJambSubs.indexOf(key);
   if (idx >= 0) {
     state.selectedJambSubs.splice(idx, 1);
-    document.getElementById('jsubj-'+key).className = 'subj-btn';
-    document.getElementById('jsubj-chk-'+key).style.display = 'none';
+    document.getElementById('jsubj-' + key).className = 'subj-btn';
+    document.getElementById('jsubj-chk-' + key).style.display = 'none';
   } else {
-    if (state.selectedJambSubs.length >= 3) { showToast('Select only 3 subjects (English is auto-included)','error'); return; }
+    if (state.selectedJambSubs.length >= 3) { showToast('Select only 3 subjects (English is auto-included)', 'error'); return; }
     state.selectedJambSubs.push(key);
-    document.getElementById('jsubj-chk-'+key).style.display = 'inline';
+    document.getElementById('jsubj-chk-' + key).style.display = 'inline';
   }
-  state.selectedJambSubs.forEach((k,i)=>{
-    document.getElementById('jsubj-'+k).className = `subj-btn sel sel-${i+1}`;
+  state.selectedJambSubs.forEach((k, i) => {
+    document.getElementById('jsubj-' + k).className = `subj-btn sel sel-${i+1}`;
   });
   updateStartBtn();
 }
 
 function selectSingleSubject(key) {
+  resetSingleSelection();
   state.singleSubject = key;
-  document.querySelectorAll('[id^="ssubj-"]').forEach(b=>{
-    b.className = 'subj-btn';
-    const chk = b.querySelector('.subj-check'); if(chk) chk.style.display = 'none';
-  });
-  document.getElementById('ssubj-'+key).className = 'subj-btn sel sel-single';
-  document.getElementById('ssubj-chk-'+key).style.display = 'inline';
+  const btn = document.getElementById('ssubj-' + key);
+  const chk = document.getElementById('ssubj-chk-' + key);
+  if (btn) btn.className = 'subj-btn sel sel-single';
+  if (chk) chk.style.display = 'inline';
   updateStartBtn();
 }
 
 function updateStartBtn() {
-  const btn = document.getElementById('startBtn');
+  const btn  = document.getElementById('startBtn');
   const info = document.getElementById('selected-info');
   if (state.mode === 'jamb') {
     const ready = state.selectedJambSubs.length === 3;
     btn.disabled = !ready;
     const rem = 3 - state.selectedJambSubs.length;
     info.textContent = ready
-      ? `✓ English + ${state.selectedJambSubs.map(k=>SUBJECTS_CONFIG[k].name).join(', ')}`
-      : `Select ${rem} more subject${rem!==1?'s':''}`;
+      ? `✓ English + ${state.selectedJambSubs.map(k => SUBJECTS_CONFIG[k].name).join(', ')}`
+      : `Select ${rem} more subject${rem !== 1 ? 's' : ''}`;
     info.style.color = ready ? 'var(--success)' : 'var(--text-3)';
   } else {
-    const qCount = document.getElementById('custom-q-count')?.value || 20;
+    const qCount   = document.getElementById('custom-q-count')?.value || 20;
     const examType = document.getElementById('custom-exam-type')?.value || 'utme';
-    state.customQCount = parseInt(qCount);
+    state.customQCount   = parseInt(qCount);
     state.customExamType = examType;
     btn.disabled = !state.singleSubject;
     info.textContent = state.singleSubject
@@ -836,9 +895,10 @@ function updateStartBtn() {
    FETCH QUESTIONS
 ════════════════════════════════════════ */
 async function fetchSubjectQuestions(subjectKey, count, examType) {
-  const headers = { 'AccessToken': ALOC_TOKEN, 'Accept': 'application/json' };
-  const slug = ALOC_SLUG[subjectKey] || subjectKey;
-  const type = examType || 'utme';
+  const headers   = { 'AccessToken': ALOC_TOKEN, 'Accept': 'application/json' };
+  const slug      = ALOC_SLUG[subjectKey] || subjectKey;
+  const type      = examType || 'utme';
+  const isEnglish = subjectKey === 'english';
 
   function parseResponse(data) {
     if (Array.isArray(data)) return data;
@@ -850,59 +910,67 @@ async function fetchSubjectQuestions(subjectKey, count, examType) {
 
   function normalize(q) {
     if (!q) return null;
-    const text = q.question || q.body || q.question_body || '';
+    const text = q.question || q.body || q.question_body || q.question_text || '';
     if (!text || typeof text !== 'string' || text.trim() === '') return null;
-    const opts = q.option || q.options || {};
+    const opts    = q.option || q.options || {};
     const hasOpts = ['a','b','c','d'].some(l => opts[l] && String(opts[l]).trim());
     if (!hasOpts) return null;
-    const correctAns = (q.answer || q.correctAnswer || q.correct_answer || '').toString().toUpperCase().trim();
-    const image = q.image || q.image_url || q.question_image || null;
-    /* Capture year — ALOC returns it in multiple possible fields */
-    const year = q.year || q.exam_year || q.examYear || q.session || null;
-    return { ...q, _text: text.trim(), _opts: opts, _answer: correctAns, _image: image, _year: year };
+    const correctAns  = (q.answer || q.correctAnswer || q.correct_answer || '').toString().toUpperCase().trim();
+    const image       = q.image || q.image_url || q.question_image || null;
+    const year        = q.year || q.exam_year || q.examYear || q.session || null;
+    const explanation = q.explanation || q.explaination || q.answer_explanation ||
+                        q.solution_text || q.workings || q.hint || q.reason || '';
+    return { ...q, _text:text.trim(), _opts:opts, _answer:correctAns, _image:image, _year:year, _explanation:String(explanation||'') };
   }
 
   const allQuestions = [];
   const seen = new Set();
+
   const addQ = (list) => {
+    if (!Array.isArray(list)) return;
     list.forEach(q => {
-      const n = normalize(q);
-      const uid = n && (n.id || n._text.slice(0,40));
+      const n   = normalize(q);
+      const uid = n && (n.id ? String(n.id) : n._text.slice(0, 60));
       if (n && uid && !seen.has(uid)) { seen.add(uid); allQuestions.push(n); }
     });
   };
 
-  /* Strategy 1: fetch with subject + exam type, batched to ensure we get enough */
-  const batchSize = 40;
-  const batches = Math.ceil(count / batchSize);
-
-  for (let b = 0; b < Math.min(batches + 1, 4) && allQuestions.length < count; b++) {
+  async function tryFetch(url) {
     try {
-      /* Primary: /q/{count}?subject={slug}&type={type} */
-      const url1 = `${ALOC_BASE}/q/${batchSize}?subject=${encodeURIComponent(slug)}&type=${type}`;
-      const r1 = await fetch(url1, { headers });
-      if (r1.ok) { addQ(parseResponse(await r1.json().catch(()=>({})))); }
-    } catch(e) {}
+      const r = await fetch(url, { headers });
+      if (!r.ok) return [];
+      return parseResponse(await r.json().catch(() => ({})));
+    } catch(e) { return []; }
+  }
 
-    if (allQuestions.length < count) {
-      try {
-        /* Secondary: /m endpoint */
-        const r2 = await fetch(`${ALOC_BASE}/m?subject=${encodeURIComponent(slug)}&type=${type}`, { headers });
-        if (r2.ok) { addQ(parseResponse(await r2.json().catch(()=>({})))); }
-      } catch(e) {}
+  const batchSize = 40;
+
+  if (isEnglish) {
+    const englishUrls = [
+      `${ALOC_BASE}/q/${batchSize}?subject=english&type=utme`,
+      `${ALOC_BASE}/q/${batchSize}?subject=english`,
+      `${ALOC_BASE}/m?subject=use-of-english&type=utme`,
+      `${ALOC_BASE}/m?subject=use-of-english`,
+      `${ALOC_BASE}/q/${batchSize}?subject=use-of-english&type=utme`,
+      `${ALOC_BASE}/q/${batchSize}?subject=use-of-english`,
+      `${ALOC_BASE}/m?subject=english&type=utme`,
+      `${ALOC_BASE}/m?subject=english`,
+    ];
+    for (const url of englishUrls) {
+      if (allQuestions.length >= count) break;
+      addQ(await tryFetch(url));
+      if (allQuestions.length < count) await new Promise(r => setTimeout(r, 300));
     }
-
-    if (allQuestions.length < count) {
-      try {
-        /* Tertiary: without type param */
-        const r3 = await fetch(`${ALOC_BASE}/q/${batchSize}?subject=${encodeURIComponent(slug)}`, { headers });
-        if (r3.ok) { addQ(parseResponse(await r3.json().catch(()=>({})))); }
-      } catch(e) {}
-    }
-
-    /* Small delay between batch retries to avoid rate limiting */
-    if (b < batches && allQuestions.length < count) {
-      await new Promise(r => setTimeout(r, 350));
+  } else {
+    const batches = Math.ceil(count / batchSize);
+    for (let b = 0; b < Math.min(batches + 1, 4) && allQuestions.length < count; b++) {
+      addQ(await tryFetch(`${ALOC_BASE}/q/${batchSize}?subject=${encodeURIComponent(slug)}&type=${type}`));
+      if (allQuestions.length < count)
+        addQ(await tryFetch(`${ALOC_BASE}/m?subject=${encodeURIComponent(slug)}&type=${type}`));
+      if (allQuestions.length < count)
+        addQ(await tryFetch(`${ALOC_BASE}/q/${batchSize}?subject=${encodeURIComponent(slug)}`));
+      if (b < batches && allQuestions.length < count)
+        await new Promise(r => setTimeout(r, 350));
     }
   }
 
@@ -910,7 +978,6 @@ async function fetchSubjectQuestions(subjectKey, count, examType) {
     throw new Error(`No questions returned for ${SUBJECTS_CONFIG[subjectKey]?.name || subjectKey}. Please check your connection.`);
   }
 
-  /* Shuffle and return requested count (even if we got fewer than requested) */
   return allQuestions.sort(() => Math.random() - 0.5).slice(0, count);
 }
 
@@ -918,88 +985,251 @@ async function fetchSubjectQuestions(subjectKey, count, examType) {
    START EXAM
 ════════════════════════════════════════ */
 async function startExam() {
-  /* Read custom controls */
-  state.customQCount = parseInt(document.getElementById('custom-q-count')?.value || 20);
+  state.customQCount   = parseInt(document.getElementById('custom-q-count')?.value || 20);
   state.customExamType = document.getElementById('custom-exam-type')?.value || 'utme';
+  if (state.mode === 'jamb') await startJambExam();
+  else await startSingleSubjectExam();
+}
 
-  let subjectsToLoad = [];
-  if (state.mode === 'jamb') {
-    subjectsToLoad = [
-      { key:'english', count:60, examType:'utme' },
-      ...state.selectedJambSubs.map(k=>({ key:k, count:40, examType:'utme' }))
-    ];
-    state.timeLeft = 7200;
-  } else if (state.mode === 'waec') {
-    subjectsToLoad = [{ key:state.singleSubject, count:state.customQCount, examType:state.customExamType }];
-    state.timeLeft = 2700;
-  } else if (state.mode === 'postutme') {
-    subjectsToLoad = [{ key:state.singleSubject, count:state.customQCount, examType:state.customExamType }];
-    state.timeLeft = 1800;
+/* ════════════════════════════════════════
+   JAMB PICKER FLOW
+════════════════════════════════════════ */
+async function startJambExam() {
+  state.jambQueue = [
+    { key:'english', count:60 },
+    ...state.selectedJambSubs.map(k => ({ key:k, count:40 }))
+  ];
+  state.subjects      = [];
+  state.currentSubIdx = 0;
+  state.currentQIdx   = 0;
+  state.submitted     = false;
+  state.startTime     = Date.now();
+  state.timeLeft      = 7200;
+  startTimer();
+  showJambPicker();
+}
+
+function showJambPicker() {
+  updatePickerTimer();
+  const queue    = state.jambQueue;
+  const doneKeys = state.subjects.map(s => s.key);
+  const allDone  = doneKeys.length === queue.length;
+
+  document.getElementById('picker-title').textContent =
+    allDone ? 'All Subjects Complete — Ready to Submit!'
+    : doneKeys.length === 0 ? 'Choose Your First Subject'
+    : `${doneKeys.length} of ${queue.length} Done — Choose Next Subject`;
+
+  document.getElementById('picker-progress').innerHTML =
+    queue.map((s, i) =>
+      `<div class="picker-progress-dot ${i < doneKeys.length ? 'done' : ''}"></div>`
+    ).join('');
+
+  document.getElementById('picker-grid').innerHTML = queue.map(sl => {
+    const cfg  = SUBJECTS_CONFIG[sl.key];
+    const done = state.subjects.find(s => s.key === sl.key);
+    if (done) {
+      const correct    = done.questions.filter((q, qi) => done.answered[qi] === q._answer).length;
+      const total      = done.questions.length;
+      const pct        = Math.round(correct / total * 100);
+      const scoreColor = pct >= 50 ? 'var(--success)' : pct >= 30 ? 'var(--gold)' : 'var(--error)';
+      return `<div class="picker-subj-card done-card">
+        <div class="pscard-done-badge"><i class="fas fa-check"></i></div>
+        <div class="pscard-emoji">${cfg.emoji}</div>
+        <div class="pscard-name">${cfg.name}</div>
+        <div class="pscard-meta">${correct}/${total} correct</div>
+        <div class="pscard-score" style="color:${scoreColor};">${pct}%</div>
+      </div>`;
+    }
+    return `<div class="picker-subj-card" onclick="loadAndStartJambSubject('${sl.key}',${sl.count})">
+      <div class="pscard-emoji">${cfg.emoji}</div>
+      <div class="pscard-name">${cfg.name}</div>
+      <div class="pscard-meta">${sl.count} questions</div>
+      <div class="pscard-meta" style="margin-top:4px;font-weight:700;color:var(--navy);">Tap to start</div>
+    </div>`;
+  }).join('');
+
+  const hintEl = document.getElementById('picker-hint');
+  if (allDone) {
+    hintEl.innerHTML = `<button onclick="confirmSubmit()" style="width:100%;padding:12px;background:var(--error);color:white;border:none;border-radius:var(--r-sm);font-family:var(--font-head);font-size:.95rem;font-weight:800;cursor:pointer;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:8px;"><i class="fas fa-paper-plane"></i> Submit All & See Results</button>`;
   } else {
-    subjectsToLoad = [{ key:state.singleSubject, count:state.customQCount, examType:state.customExamType }];
-    state.timeLeft = 0;
+    hintEl.textContent = 'Tap a subject to load it and start answering. The 2-hour timer keeps running.';
   }
 
-  showScreen('loading-screen');
-  document.getElementById('load-spinner').style.display = 'block';
-  document.getElementById('load-error-wrap').style.display = 'none';
-  document.getElementById('load-status-text').textContent = 'Fetching questions, please wait…';
+  showScreen('jamb-picker-screen');
+}
 
-  const listEl = document.getElementById('load-subjects-list');
-  listEl.innerHTML = subjectsToLoad.map((s, idx) => {
-    const cfg = SUBJECTS_CONFIG[s.key];
-    return `<div class="load-subj-row">
+function updatePickerTimer() {
+  const h   = Math.floor(state.timeLeft / 3600);
+  const m   = Math.floor((state.timeLeft % 3600) / 60);
+  const s   = state.timeLeft % 60;
+  const txt = h > 0
+    ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+    : `${m}:${String(s).padStart(2,'0')}`;
+  const el = document.getElementById('picker-timer-display');
+  if (el) el.textContent = txt;
+}
+
+async function loadAndStartJambSubject(key, count) {
+  const cfg = SUBJECTS_CONFIG[key];
+  showScreen('loading-screen');
+  document.getElementById('load-spinner').style.display  = 'block';
+  document.getElementById('load-error-wrap').style.display = 'none';
+  document.getElementById('load-status-text').textContent = `Loading ${cfg.name}…`;
+  document.getElementById('load-subjects-list').innerHTML = `
+    <div class="load-subj-row">
       <span class="load-subj-icon">${cfg.emoji}</span>
       <div style="flex:1;">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <span class="load-subj-name">${cfg.name}</span>
-          <span class="load-subj-count" id="lc-${idx}">0/${s.count}</span>
+          <span class="load-subj-count" id="lc-0">0/${count}</span>
         </div>
-        <div class="load-subj-bar"><div class="load-subj-fill" id="lf-${idx}" style="background:${cfg.color};width:0%;"></div></div>
+        <div class="load-subj-bar"><div class="load-subj-fill" id="lf-0" style="background:${cfg.color};width:0%;"></div></div>
       </div>
     </div>`;
-  }).join('');
+  document.getElementById('load-detail').textContent = `Loading ${cfg.name}…`;
 
   try {
-    const loadedSubjects = [];
+    const qs   = await fetchSubjectQuestions(key, count, 'utme');
+    const fill = document.getElementById('lf-0'), cnt = document.getElementById('lc-0');
+    if (fill) fill.style.width = '100%';
+    if (cnt)  cnt.textContent  = `${qs.length}/${count}`;
+    document.getElementById('load-detail').textContent = `✓ ${qs.length} questions loaded. Starting…`;
 
-    for (let idx = 0; idx < subjectsToLoad.length; idx++) {
-      const sl = subjectsToLoad[idx];
-      const cfg = SUBJECTS_CONFIG[sl.key];
-      document.getElementById('load-detail').textContent = `Loading ${cfg.name}…`;
+    const existing = state.subjects.findIndex(s => s.key === key);
+    const subObj   = { key, name:cfg.name, emoji:cfg.emoji, color:cfg.color, questions:qs, answered:{} };
+    if (existing >= 0) state.subjects[existing] = subObj;
+    else state.subjects.push(subObj);
 
-      const qs = await fetchSubjectQuestions(sl.key, sl.count, sl.examType);
-      const fill = document.getElementById('lf-'+idx);
-      const cnt  = document.getElementById('lc-'+idx);
-      if (fill) fill.style.width = '100%';
-      if (cnt)  cnt.textContent  = `${qs.length}/${sl.count}`;
-      document.getElementById('load-detail').textContent = `✓ ${cfg.name} — ${qs.length} questions loaded`;
-      loadedSubjects.push({ key:sl.key, name:cfg.name, emoji:cfg.emoji, color:cfg.color, questions:qs, answered:{} });
+    state.currentSubIdx = state.subjects.length - 1;
+    state.currentQIdx   = 0;
+
+    await new Promise(r => setTimeout(r, 300));
+    initExamScreen();
+    showScreen('exam-screen');
+    buildTabBar();
+  } catch(e) {
+    showLoadError(e.message);
+    const errWrap = document.getElementById('load-error-wrap');
+    if (!errWrap.querySelector('.back-to-picker')) {
+      const b = document.createElement('button');
+      b.className = 'retry-btn sec back-to-picker';
+      b.style.marginTop = '6px';
+      b.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Subject Picker';
+      b.onclick = showJambPicker;
+      errWrap.appendChild(b);
     }
+  }
+}
 
-    state.subjects      = loadedSubjects;
+function showSubjectBridge() {
+  const sub = state.subjects[state.currentSubIdx];
+  const cfg = SUBJECTS_CONFIG[sub.key];
+  let correct = 0, wrong = 0, unanswered = 0;
+  sub.questions.forEach((q, qi) => {
+    const ans = sub.answered[qi], ca = q._answer;
+    if (!ans) unanswered++;
+    else if (ans === ca) correct++;
+    else wrong++;
+  });
+  const total = sub.questions.length;
+  const pct   = Math.round(correct / total * 100);
+  const scoreColor = pct >= 50 ? 'var(--success)' : pct >= 30 ? 'var(--gold)' : 'var(--error)';
+
+  const doneKeys  = state.subjects.map(s => s.key);
+  const remaining = state.jambQueue.filter(s => !doneKeys.includes(s.key));
+  const allDone   = remaining.length === 0;
+
+  document.getElementById('bridge-emoji').textContent      = pct >= 70 ? '🎉' : pct >= 50 ? '👍' : '📚';
+  document.getElementById('bridge-title').textContent      = `${cfg.name} Complete!`;
+  document.getElementById('bridge-score').innerHTML        = `<span style="color:${scoreColor};">${pct}%</span>`;
+  document.getElementById('bridge-meta').textContent       =
+    `${correct} correct · ${wrong} wrong · ${unanswered} skipped out of ${total} questions`;
+
+  const actionsEl = document.getElementById('bridge-actions');
+  if (allDone) {
+    actionsEl.innerHTML = `
+      <button class="bridge-btn primary" onclick="closeSubjectBridge();showJambPicker()"><i class="fas fa-chart-bar"></i> Review All</button>
+      <button class="bridge-btn danger"  onclick="closeSubjectBridge();confirmSubmit()"><i class="fas fa-paper-plane"></i> Submit All</button>`;
+  } else {
+    actionsEl.innerHTML = `
+      <button class="bridge-btn primary" onclick="closeSubjectBridge();showJambPicker()"><i class="fas fa-th"></i> Next Subject</button>
+      <button class="bridge-btn gold"    onclick="closeSubjectBridge()"><i class="fas fa-eye"></i> Review Answers</button>`;
+  }
+
+  document.getElementById('subj-done-banner').classList.remove('hidden');
+}
+
+function closeSubjectBridge() {
+  document.getElementById('subj-done-banner').classList.add('hidden');
+}
+
+/* ════════════════════════════════════════
+   SINGLE SUBJECT FLOW
+════════════════════════════════════════ */
+async function startSingleSubjectExam() {
+  if (state.mode === 'waec')          state.timeLeft = 2700;
+  else if (state.mode === 'postutme') state.timeLeft = 1800;
+  else                                state.timeLeft = 0;
+
+  const sl  = { key:state.singleSubject, count:state.customQCount, examType:state.customExamType };
+  const cfg = SUBJECTS_CONFIG[sl.key];
+
+  showScreen('loading-screen');
+  document.getElementById('load-spinner').style.display  = 'block';
+  document.getElementById('load-error-wrap').style.display = 'none';
+  document.getElementById('load-status-text').textContent = 'Fetching questions, please wait…';
+  document.getElementById('load-detail').textContent      = `Loading ${cfg.name}…`;
+  document.getElementById('load-subjects-list').innerHTML = `
+    <div class="load-subj-row">
+      <span class="load-subj-icon">${cfg.emoji}</span>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="load-subj-name">${cfg.name}</span>
+          <span class="load-subj-count" id="lc-0">0/${sl.count}</span>
+        </div>
+        <div class="load-subj-bar"><div class="load-subj-fill" id="lf-0" style="background:${cfg.color};width:0%;"></div></div>
+      </div>
+    </div>`;
+
+  try {
+    const qs   = await fetchSubjectQuestions(sl.key, sl.count, sl.examType);
+    const fill = document.getElementById('lf-0'), cnt = document.getElementById('lc-0');
+    if (fill) fill.style.width = '100%';
+    if (cnt)  cnt.textContent  = `${qs.length}/${sl.count}`;
+
+    state.subjects      = [{ key:sl.key, name:cfg.name, emoji:cfg.emoji, color:cfg.color, questions:qs, answered:{} }];
     state.currentSubIdx = 0;
     state.currentQIdx   = 0;
     state.submitted     = false;
     state.startTime     = Date.now();
 
-    document.getElementById('load-detail').textContent = 'All subjects loaded — starting exam…';
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise(r => setTimeout(r, 300));
     initExamScreen();
     showScreen('exam-screen');
     startTimer();
-
   } catch(e) {
-    document.getElementById('load-spinner').style.display = 'none';
-    document.getElementById('load-error-wrap').style.display = 'block';
-    document.getElementById('load-error-msg').textContent = e.message || 'Failed to load questions. Check your internet and try again.';
+    showLoadError(e.message);
   }
 }
 
+function showLoadError(msg) {
+  document.getElementById('load-spinner').style.display  = 'none';
+  document.getElementById('load-error-wrap').style.display = 'block';
+  document.getElementById('load-error-msg').textContent  =
+    msg || 'Failed to load questions. Check your internet and try again.';
+}
+
 function retryLoad() {
-  if (state.mode === 'jamb' && state.selectedJambSubs.length === 3) startExam();
-  else if (state.singleSubject) startExam();
-  else goToSetup();
+  if (state.mode === 'jamb') {
+    if (state.jambQueue && state.jambQueue.length > 0) showJambPicker();
+    else if (state.selectedJambSubs.length === 3) startExam();
+    else goToSetup();
+  } else if (state.singleSubject) {
+    startExam();
+  } else {
+    goToSetup();
+  }
 }
 
 /* ════════════════════════════════════════
@@ -1014,17 +1244,47 @@ function initExamScreen() {
 
 function buildTabBar() {
   const tabs = document.getElementById('exam-tabs');
-  tabs.innerHTML = state.subjects.map((s,i)=>`
-    <div class="etab ${i===0?'active':''}" id="etab-${i}" onclick="switchSubject(${i})">
-      <span class="etab-dot" style="background:${s.color};"></span>${s.name.split(' ')[0]}
-      <span class="etab-count" id="etab-count-${i}">(0/${s.questions.length})</span>
-    </div>`).join('');
+  if (state.mode === 'jamb' && state.jambQueue && state.jambQueue.length > 0) {
+    tabs.innerHTML = state.jambQueue.map((sl, i) => {
+      const cfg      = SUBJECTS_CONFIG[sl.key];
+      const loaded   = state.subjects.find(s => s.key === sl.key);
+      const isCurrent = loaded && state.subjects.indexOf(loaded) === state.currentSubIdx;
+      const isDone   = !!loaded;
+      const ansCount = loaded ? Object.keys(loaded.answered).length : 0;
+      const qCount   = loaded ? loaded.questions.length : sl.count;
+      const doneCheck = isDone ? ' ✓' : '';
+      return `<div class="etab ${isCurrent ? 'active' : ''}" id="etab-jq-${i}"
+        onclick="${isDone ? `switchToJambSubject('${sl.key}')` : `showToast('Tap this subject on the picker to start it','info')`}"
+        title="${cfg.name}${isDone ? ' — Done' : ' — Not started yet'}">
+        <span class="etab-dot" style="background:${cfg.color};opacity:${isDone ? 1 : .4};"></span>${cfg.name.split(' ')[0]}${doneCheck}
+        <span class="etab-count">(${ansCount}/${qCount})</span>
+      </div>`;
+    }).join('');
+  } else {
+    tabs.innerHTML = state.subjects.map((s, i) =>
+      `<div class="etab ${i === state.currentSubIdx ? 'active' : ''}" id="etab-${i}" onclick="switchSubject(${i})" title="${s.name}">
+        <span class="etab-dot" style="background:${s.color};"></span>${s.name.split(' ')[0]}
+        <span class="etab-count" id="etab-count-${i}">(${Object.keys(s.answered).length}/${s.questions.length})</span>
+      </div>`
+    ).join('');
+  }
+}
+
+function switchToJambSubject(key) {
+  const idx = state.subjects.findIndex(s => s.key === key);
+  if (idx < 0) { showToast('Subject not loaded yet', 'info'); return; }
+  state.currentSubIdx = idx;
+  state.currentQIdx   = 0;
+  buildTabBar();
+  renderQMap();
+  renderMobileQMap();
+  renderQuestion();
 }
 
 function switchSubject(idx) {
   state.currentSubIdx = idx;
   state.currentQIdx   = 0;
-  document.querySelectorAll('.etab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  document.querySelectorAll('.etab').forEach((t, i) => t.classList.toggle('active', i === idx));
   renderQMap();
   renderMobileQMap();
   renderQuestion();
@@ -1038,38 +1298,33 @@ function resolveImage(q) {
 }
 
 function renderQuestion() {
-  const sub = state.subjects[state.currentSubIdx];
-  const q   = sub.questions[state.currentQIdx];
-  const cfg = SUBJECTS_CONFIG[sub.key];
+  const sub      = state.subjects[state.currentSubIdx];
+  const q        = sub.questions[state.currentQIdx];
+  const cfg      = SUBJECTS_CONFIG[sub.key];
   const answered = sub.answered[state.currentQIdx];
   const total    = sub.questions.length;
 
-  const opts   = q._opts || {};
-  const letters = ['A','B','C','D','E'].filter(l=>{
+  const opts    = q._opts || {};
+  const letters = ['A','B','C','D','E'].filter(l => {
     const v = opts[l.toLowerCase()];
     return v !== undefined && v !== null && String(v).trim() !== '';
   });
 
   const imgSrc = resolveImage(q);
-  let imgHtml  = '';
-  if (imgSrc) {
-    imgHtml = `<div class="q-img-wrap">
-      <img src="${imgSrc}" alt="Question diagram"
+  const imgHtml = imgSrc
+    ? `<div class="q-img-wrap"><img src="${imgSrc}" alt="Question diagram"
         onerror="this.parentElement.innerHTML='<div class=\\'q-img-placeholder\\'><i class=\\'fas fa-image\\'></i> Diagram not available</div>'"
-        loading="lazy">
-    </div>`;
-  }
-
-  /* Year tag */
-  const yearTag = q._year
-    ? `<span class="q-year-tag"><i class="fas fa-calendar-alt"></i> ${q._year}</span>`
+        loading="lazy"></div>`
     : '';
 
-  const optHtml = letters.map(l=>{
+  const yearTag = q._year
+    ? `<span class="q-year-tag"><i class="fas fa-calendar-alt"></i> ${q._year}</span>` : '';
+
+  const optHtml = letters.map(l => {
     const isSelected = answered === l;
-    return `<div class="opt-item ${isSelected?'selected':''}" onclick="selectAnswer('${l}')" data-letter="${l}">
+    return `<div class="opt-item ${isSelected ? 'selected' : ''}" onclick="selectAnswer('${l}')" data-letter="${l}">
       <div class="opt-letter">${l}</div>
-      <div class="opt-text">${opts[l.toLowerCase()]||''}</div>
+      <div class="opt-text">${opts[l.toLowerCase()] || ''}</div>
     </div>`;
   }).join('');
 
@@ -1078,26 +1333,33 @@ function renderQuestion() {
       <div class="q-subject-label" style="background:${cfg.color}28;color:${cfg.color};">${sub.emoji} ${sub.name}</div>
       ${yearTag}
     </div>
-    <div class="q-number">Question ${state.currentQIdx+1} of ${total}</div>
-    <div class="q-text">${q._text||'Question text unavailable.'}</div>
+    <div class="q-number">Question ${state.currentQIdx + 1} of ${total}</div>
+    <div class="q-text">${q._text || 'Question text unavailable.'}</div>
     ${imgHtml}
     <div class="options-list">${optHtml}</div>`;
 
-  /* Nav */
   const isFirst = state.currentQIdx === 0 && state.currentSubIdx === 0;
   const isLastQ = state.currentQIdx === total - 1;
   const isLastS = state.currentSubIdx === state.subjects.length - 1;
   document.getElementById('prev-btn').disabled = isFirst;
+
   const nb = document.getElementById('next-btn');
-  if (isLastQ && isLastS) {
+  if (state.mode === 'jamb' && isLastQ) {
+    const allSubjDone = state.subjects.length >= state.jambQueue.length;
+    nb.innerHTML  = allSubjDone
+      ? 'Submit All <i class="fas fa-paper-plane"></i>'
+      : 'Finish Subject <i class="fas fa-flag-checkered"></i>';
+    nb.onclick    = allSubjDone ? confirmSubmit : showSubjectBridge;
+    nb.className  = 'nav-btn primary';
+  } else if (state.mode !== 'jamb' && isLastQ && isLastS) {
     nb.innerHTML = 'Submit <i class="fas fa-paper-plane"></i>';
-    nb.onclick = confirmSubmit;
+    nb.onclick   = confirmSubmit;
   } else {
     nb.innerHTML = 'Next <i class="fas fa-chevron-right"></i>';
-    nb.onclick = () => navigate(1);
+    nb.onclick   = () => navigate(1);
   }
-  document.getElementById('nav-center-text').textContent = `${state.currentQIdx+1} / ${total}`;
 
+  document.getElementById('nav-center-text').textContent = `${state.currentQIdx + 1} / ${total}`;
   renderQMap();
   renderMobileQMap();
 }
@@ -1106,16 +1368,18 @@ function selectAnswer(letter) {
   if (state.submitted) return;
   const sub = state.subjects[state.currentSubIdx];
   sub.answered[state.currentQIdx] = letter;
-
-  document.querySelectorAll('.opt-item').forEach(el=>{
-    const l = el.dataset.letter;
-    const sel = l === letter;
+  document.querySelectorAll('.opt-item').forEach(el => {
+    const sel = el.dataset.letter === letter;
     el.classList.toggle('selected', sel);
     const lEl = el.querySelector('.opt-letter');
     if (sel) {
-      lEl.style.background = 'var(--gold)'; lEl.style.borderColor = 'var(--gold)'; lEl.style.color = 'var(--navy)';
+      lEl.style.background  = 'var(--gold)';
+      lEl.style.borderColor = 'var(--gold)';
+      lEl.style.color       = 'var(--navy)';
     } else {
-      lEl.style.background = ''; lEl.style.borderColor = ''; lEl.style.color = '';
+      lEl.style.background  = '';
+      lEl.style.borderColor = '';
+      lEl.style.color       = '';
     }
   });
   updateTabCount();
@@ -1130,32 +1394,31 @@ function navigate(dir) {
     if (state.currentSubIdx > 0) {
       state.currentSubIdx--;
       state.currentQIdx = state.subjects[state.currentSubIdx].questions.length - 1;
-      document.querySelectorAll('.etab').forEach((t,i)=>t.classList.toggle('active',i===state.currentSubIdx));
+      document.querySelectorAll('.etab').forEach((t,i) => t.classList.toggle('active', i === state.currentSubIdx));
     }
   } else if (newQ >= sub.questions.length) {
     if (state.currentSubIdx < state.subjects.length - 1) {
       state.currentSubIdx++;
       state.currentQIdx = 0;
-      document.querySelectorAll('.etab').forEach((t,i)=>t.classList.toggle('active',i===state.currentSubIdx));
+      document.querySelectorAll('.etab').forEach((t,i) => t.classList.toggle('active', i === state.currentSubIdx));
     }
   } else {
     state.currentQIdx = newQ;
   }
   renderQuestion();
-  /* Scroll question area back to top */
   const qa = document.getElementById('exam-q-area');
   if (qa) qa.scrollTop = 0;
 }
 
 function updateTabCount() {
-  state.subjects.forEach((s,i)=>{
-    const el = document.getElementById('etab-count-'+i);
-    if(el) el.textContent = `(${Object.keys(s.answered).length}/${s.questions.length})`;
+  state.subjects.forEach((s, i) => {
+    const el = document.getElementById('etab-count-' + i);
+    if (el) el.textContent = `(${Object.keys(s.answered).length}/${s.questions.length})`;
   });
 }
 
 /* ════════════════════════════════════════
-   QUESTION MAP (desktop sidebar)
+   QUESTION MAP
 ════════════════════════════════════════ */
 function renderQMap() {
   const sidebar = document.getElementById('qmap-sidebar');
@@ -1165,24 +1428,24 @@ function renderQMap() {
 
 function buildQMapHTML() {
   let html = '';
-  state.subjects.forEach((s,si)=>{
+  state.subjects.forEach((s, si) => {
     const isCurSub = si === state.currentSubIdx;
     const ansCount = Object.keys(s.answered).length;
     html += `<div class="qmap-section">
       <div class="qmap-sec-label" style="color:${s.color};border-color:${s.color}33;">${s.emoji} ${s.name.split(' ')[0]} (${ansCount}/${s.questions.length})</div>
       <div class="qmap-grid">`;
-    s.questions.forEach((q,qi)=>{
+    s.questions.forEach((q, qi) => {
       const isAns = s.answered[qi] !== undefined;
       const isCur = isCurSub && qi === state.currentQIdx;
-      html += `<button class="qmap-btn ${isAns?'answered':''} ${isCur?'current':''}"
-        style="${isAns?`background:${s.color}30;border-color:${s.color};color:${s.color};`:''}"
-        onclick="jumpTo(${si},${qi})">${qi+1}</button>`;
+      html += `<button class="qmap-btn ${isAns ? 'answered' : ''} ${isCur ? 'current' : ''}"
+        style="${isAns ? `background:${s.color}30;border-color:${s.color};color:${s.color};` : ''}"
+        onclick="jumpTo(${si},${qi})">${qi + 1}</button>`;
     });
     html += `</div></div>`;
   });
-  const totalQ   = state.subjects.reduce((a,s)=>a+s.questions.length,0);
-  const totalAns = state.subjects.reduce((a,s)=>a+Object.keys(s.answered).length,0);
-  const pct = totalQ ? Math.round(totalAns/totalQ*100) : 0;
+  const totalQ   = state.subjects.reduce((a,s) => a + s.questions.length, 0);
+  const totalAns = state.subjects.reduce((a,s) => a + Object.keys(s.answered).length, 0);
+  const pct = totalQ ? Math.round(totalAns / totalQ * 100) : 0;
   html += `<div class="qmap-progress">
     <div class="qmap-prog-label">Progress</div>
     <div class="qmap-prog-bar"><div class="qmap-prog-fill" style="width:${pct}%;"></div></div>
@@ -1191,9 +1454,6 @@ function buildQMapHTML() {
   return html;
 }
 
-/* ════════════════════════════════════════
-   MOBILE QUESTION MAP
-════════════════════════════════════════ */
 function renderMobileQMap() {
   document.getElementById('mobile-qmap-content').innerHTML = buildQMapHTML();
 }
@@ -1203,14 +1463,11 @@ function toggleMobileQMap() {
   const panel   = document.getElementById('mobileQmapPanel');
   const btn     = document.getElementById('qmapTopBtn');
   const isOpen  = panel.classList.contains('show');
-  if (isOpen) {
-    closeMobileQMap();
-  } else {
-    renderMobileQMap();
-    overlay.classList.add('show');
-    panel.classList.add('show');
-    btn.classList.add('active');
-  }
+  if (isOpen) { closeMobileQMap(); return; }
+  renderMobileQMap();
+  overlay.classList.add('show');
+  panel.classList.add('show');
+  btn.classList.add('active');
 }
 
 function closeMobileQMap() {
@@ -1222,15 +1479,12 @@ function closeMobileQMap() {
 function jumpTo(si, qi) {
   state.currentSubIdx = si;
   state.currentQIdx   = qi;
-  document.querySelectorAll('.etab').forEach((t,i)=>t.classList.toggle('active',i===si));
+  document.querySelectorAll('.etab').forEach((t,i) => t.classList.toggle('active', i === si));
   closeMobileQMap();
   renderQuestion();
   const qa = document.getElementById('exam-q-area');
   if (qa) qa.scrollTop = 0;
 }
-
-/* alias for backward compat */
-function updateQMap() { renderQMap(); renderMobileQMap(); }
 
 /* ════════════════════════════════════════
    CALCULATOR
@@ -1249,7 +1503,6 @@ function calcAction(type, val) {
   switch(type) {
     case 'num': {
       if (calc.waitingForOperand || calc.justEvaled) {
-        /* Start a brand-new number after an operator or equals */
         calc.display = val;
         calc.waitingForOperand = false;
         calc.justEvaled = false;
@@ -1259,30 +1512,24 @@ function calcAction(type, val) {
       break;
     }
     case 'dot': {
-      if (calc.waitingForOperand) {
-        /* Start "0." as the new number */
-        calc.display = '0.';
-        calc.waitingForOperand = false;
-      } else if (!calc.display.includes('.')) {
-        calc.display += '.';
-      }
+      if (calc.waitingForOperand) { calc.display = '0.'; calc.waitingForOperand = false; }
+      else if (!calc.display.includes('.')) calc.display += '.';
       break;
     }
     case 'op': {
       if (calc.prevOp && !calc.waitingForOperand) {
-        /* Chain operations: evaluate pending op first */
         try {
           const res = applyOp(parseFloat(calc.prevVal), parseFloat(calc.display), calc.prevOp);
           calc.display = String(roundCalc(res));
           calc.prevVal = roundCalc(res);
-          calc.expr = roundCalc(res) + ' ' + opSymbol(val) + ' ';
+          calc.expr    = roundCalc(res) + ' ' + opSymbol(val) + ' ';
         } catch(e) {}
       } else {
         calc.prevVal = parseFloat(calc.display);
-        calc.expr = calc.display + ' ' + opSymbol(val) + ' ';
+        calc.expr    = calc.display + ' ' + opSymbol(val) + ' ';
       }
       calc.prevOp = val;
-      calc.waitingForOperand = true; /* next digit starts a fresh number */
+      calc.waitingForOperand = true;
       calc.justEvaled = false;
       break;
     }
@@ -1290,31 +1537,24 @@ function calcAction(type, val) {
       if (calc.prevOp) {
         try {
           const res = applyOp(parseFloat(calc.prevVal), parseFloat(calc.display), calc.prevOp);
-          calc.expr = calc.expr + calc.display + ' =';
+          calc.expr  = calc.expr + calc.display + ' =';
           calc.display = String(roundCalc(res));
-          calc.prevOp = null;
-          calc.prevVal = null;
-          calc.justEvaled = true;
-          calc.waitingForOperand = false;
+          calc.prevOp  = null; calc.prevVal = null;
+          calc.justEvaled = true; calc.waitingForOperand = false;
         } catch(e) { calc.display = 'Error'; }
       }
       break;
     }
     case 'clear': {
-      calc.display = '0'; calc.expr = ''; calc.prevOp = null; calc.prevVal = null;
+      calc.display = '0'; calc.expr = '';
+      calc.prevOp  = null; calc.prevVal = null;
       calc.justEvaled = false; calc.waitingForOperand = false;
       break;
     }
-    case 'sign': {
-      if (calc.display !== '0') calc.display = String(parseFloat(calc.display) * -1);
-      break;
-    }
-    case 'percent': {
-      calc.display = String(parseFloat(calc.display) / 100);
-      break;
-    }
+    case 'sign':    { if (calc.display !== '0') calc.display = String(parseFloat(calc.display) * -1); break; }
+    case 'percent': { calc.display = String(parseFloat(calc.display) / 100); break; }
   }
-  document.getElementById('calc-val').textContent = calc.display.length > 10 ? parseFloat(calc.display).toExponential(4) : calc.display;
+  document.getElementById('calc-val').textContent  = calc.display.length > 10 ? parseFloat(calc.display).toExponential(4) : calc.display;
   document.getElementById('calc-expr').textContent = calc.expr;
 }
 
@@ -1342,23 +1582,28 @@ function opSymbol(op) {
 ════════════════════════════════════════ */
 function startTimer() {
   const timerEl = document.getElementById('exam-timer');
-  if (state.mode === 'practice') { timerEl.textContent = 'Practice'; return; }
+  if (state.mode === 'practice') { if (timerEl) timerEl.textContent = 'Practice'; return; }
+  if (state.mode === 'jamb' && state.timerInterval) return; /* already running */
   clearInterval(state.timerInterval);
-  state.timerInterval = setInterval(()=>{
+  state.timerInterval = setInterval(() => {
     state.timeLeft--;
-    const h = Math.floor(state.timeLeft/3600);
-    const m = Math.floor((state.timeLeft%3600)/60);
+    const h = Math.floor(state.timeLeft / 3600);
+    const m = Math.floor((state.timeLeft % 3600) / 60);
     const s = state.timeLeft % 60;
-    timerEl.textContent = h > 0
+    const txt = h > 0
       ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
       : `${m}:${String(s).padStart(2,'0')}`;
-    timerEl.className = 'exam-timer' + (state.timeLeft <= 300 ? state.timeLeft <= 60 ? ' danger' : ' warning' : '');
+    if (timerEl) {
+      timerEl.textContent = txt;
+      timerEl.className   = 'exam-timer' + (state.timeLeft <= 300 ? (state.timeLeft <= 60 ? ' danger' : ' warning') : '');
+    }
+    updatePickerTimer();
     if (state.timeLeft <= 0) { clearInterval(state.timerInterval); autoSubmit(); }
   }, 1000);
 }
 
 function autoSubmit() {
-  showToast('Time is up! Submitting…','error');
+  showToast('Time is up! Submitting…', 'error');
   setTimeout(submitExam, 1500);
 }
 
@@ -1366,12 +1611,21 @@ function autoSubmit() {
    SUBMIT & RESULTS
 ════════════════════════════════════════ */
 function confirmSubmit() {
-  const totalQ   = state.subjects.reduce((a,s)=>a+s.questions.length,0);
-  const totalAns = state.subjects.reduce((a,s)=>a+Object.keys(s.answered).length,0);
+  const totalQ   = state.subjects.reduce((a,s) => a + s.questions.length, 0);
+  const totalAns = state.subjects.reduce((a,s) => a + Object.keys(s.answered).length, 0);
+  const notStarted = (state.mode === 'jamb' && state.jambQueue)
+    ? state.jambQueue.length - state.subjects.length : 0;
+
   document.getElementById('modal-stats').innerHTML = `
     <div class="modal-stat"><div class="modal-stat-num" style="color:var(--success);">${totalAns}</div><div class="modal-stat-label">Answered</div></div>
-    <div class="modal-stat"><div class="modal-stat-num" style="color:var(--error);">${totalQ-totalAns}</div><div class="modal-stat-label">Skipped</div></div>
-    <div class="modal-stat"><div class="modal-stat-num">${totalQ}</div><div class="modal-stat-label">Total</div></div>`;
+    <div class="modal-stat"><div class="modal-stat-num" style="color:var(--error);">${totalQ - totalAns}</div><div class="modal-stat-label">Skipped</div></div>
+    <div class="modal-stat"><div class="modal-stat-num">${totalQ}</div><div class="modal-stat-label">Total</div></div>
+    ${notStarted > 0 ? `<div class="modal-stat" style="flex-basis:100%;"><div class="modal-stat-num" style="color:var(--error);">${notStarted}</div><div class="modal-stat-label">Subjects Not Started</div></div>` : ''}`;
+
+  document.getElementById('modal-text').textContent = notStarted > 0
+    ? `⚠️ You have ${notStarted} subject${notStarted > 1 ? 's' : ''} you haven't attempted. Scores will show as 0%.`
+    : 'This action cannot be undone.';
+
   document.getElementById('submit-modal').classList.add('show');
 }
 
@@ -1380,71 +1634,112 @@ function closeModal() { document.getElementById('submit-modal').classList.remove
 function submitExam() {
   closeModal();
   clearInterval(state.timerInterval);
+  state.timerInterval = null;
   state.submitted = true;
   buildResults(Date.now() - state.startTime);
 }
 
 function buildResults(elapsed) {
-  const subResults = state.subjects.map(s=>{
+  let subjectsForResults = [...state.subjects];
+  if (state.mode === 'jamb' && state.jambQueue) {
+    const doneKeys = state.subjects.map(s => s.key);
+    state.jambQueue.forEach(sl => {
+      if (!doneKeys.includes(sl.key)) {
+        const cfg = SUBJECTS_CONFIG[sl.key];
+        subjectsForResults.push({
+          key:sl.key, name:cfg.name, emoji:cfg.emoji, color:cfg.color,
+          questions: new Array(sl.count).fill({ _answer:'' }), answered:{}
+        });
+      }
+    });
+  }
+
+  const subResults = subjectsForResults.map(s => {
     const cfg = SUBJECTS_CONFIG[s.key];
-    let correct=0, wrong=0, unanswered=0;
-    s.questions.forEach((q,qi)=>{
-      const ans = s.answered[qi];
-      const ca  = q._answer;
+    let correct = 0, wrong = 0, unanswered = 0;
+    s.questions.forEach((q, qi) => {
+      const ans = s.answered[qi], ca = q._answer;
       if (!ans) unanswered++;
       else if (ans === ca) correct++;
       else wrong++;
     });
     const total = s.questions.length;
-    const pct   = Math.round(correct/total*100);
-    const marks = state.mode === 'jamb' ? Math.round(correct/total*100) : correct;
-    return { ...s, correct, wrong, unanswered, total, marks, pct, color:cfg.color, emoji:cfg.emoji };
+    const pct   = total > 0 ? Math.round(correct / total * 100) : 0;
+    const marks = state.mode === 'jamb' ? pct : correct;
+    return { ...s, correct, wrong, unanswered, total, marks, pct, color:cfg?.color||s.color, emoji:cfg?.emoji||s.emoji };
   });
 
-  const totalQ    = subResults.reduce((a,r)=>a+r.total,0);
-  const totalCorr = subResults.reduce((a,r)=>a+r.correct,0);
-  const overallPct= Math.round(totalCorr/totalQ*100);
-  const elMin = Math.floor(elapsed/60000);
-  const elSec = Math.floor((elapsed%60000)/1000);
+  const totalQ     = subResults.reduce((a,r) => a + r.total, 0);
+  const totalCorr  = subResults.reduce((a,r) => a + r.correct, 0);
+  const overallPct = Math.round(totalCorr / totalQ * 100);
+  const elMin      = Math.floor(elapsed / 60000);
+  const elSec      = Math.floor((elapsed % 60000) / 1000);
 
-  /* Save to history */
   savePastSession({
-    score: overallPct,
-    correct: totalCorr,
-    total: totalQ,
-    subjects: subResults.map(r=>r.name).join(', '),
-    mode: state.mode.toUpperCase(),
+    score:    overallPct,
+    correct:  totalCorr,
+    total:    totalQ,
+    subjects: subResults.map(r => r.name).join(', '),
+    mode:     state.mode.toUpperCase(),
   });
 
-  /* Ring animation */
+  /* High score */
+  let isNewHighScore = false;
+  if (state.mode === 'jamb') {
+    try {
+      const HS_KEY    = 'nltc_jamb_highscore';
+      const jambScore = subResults.reduce((a,r) => a + r.marks, 0);
+      const prev      = parseInt(localStorage.getItem(HS_KEY) || '0');
+      if (jambScore > prev) { localStorage.setItem(HS_KEY, String(jambScore)); isNewHighScore = true; }
+    } catch(e) {}
+  }
+
+  /* Ring */
   const ring = document.getElementById('score-ring-fill');
   ring.style.stroke = overallPct >= 50 ? 'var(--success)' : overallPct >= 30 ? 'var(--gold)' : 'var(--error)';
-  setTimeout(()=>{ ring.style.strokeDashoffset = 264 - (264 * overallPct / 100); }, 200);
+  setTimeout(() => { ring.style.strokeDashoffset = 264 - (264 * overallPct / 100); }, 200);
   document.getElementById('result-score-pct').textContent = overallPct + '%';
 
   const passed = overallPct >= 40;
   const badge  = document.getElementById('result-badge');
-  badge.className = 'result-badge ' + (passed ? 'pass' : 'fail');
+  badge.className   = 'result-badge ' + (passed ? 'pass' : 'fail');
   badge.textContent = passed ? '✓ Exam Completed' : '✗ Needs Improvement';
 
   const headlines = overallPct >= 70 ? ['Excellent! 🎉','Outstanding performance!']
                   : overallPct >= 50 ? ['Great Work! 👏','Keep pushing harder!']
                   : overallPct >= 40 ? ['Fair Attempt 📚','Review your weak areas!']
-                  : ['Keep Practicing 💪','Don\'t give up — keep studying!'];
+                  :                    ['Keep Practicing 💪','Don\'t give up — keep studying!'];
   document.getElementById('result-headline').textContent = headlines[0];
+
+  const jambMarkTotal = subResults.reduce((a,r) => a + r.marks, 0);
   document.getElementById('result-sub').textContent =
-    `${state.mode === 'jamb' ? `${subResults.reduce((a,r)=>a+r.marks,0)}/400 marks` : `${totalCorr}/${totalQ} correct`} · ${elMin}m ${elSec}s`;
+    `${state.mode === 'jamb' ? `${jambMarkTotal}/400 marks` : `${totalCorr}/${totalQ} correct`} · ${elMin}m ${elSec}s`;
+
+  const hsBadgeEl = document.getElementById('hs-badge');
+  if (state.mode === 'jamb' && hsBadgeEl) {
+    if (isNewHighScore) {
+      hsBadgeEl.style.display = 'inline-flex';
+      hsBadgeEl.textContent   = '🏆 New High Score! ' + jambMarkTotal + '/400';
+    } else {
+      try {
+        const prev = parseInt(localStorage.getItem('nltc_jamb_highscore') || '0');
+        if (prev > 0) { hsBadgeEl.style.display = 'inline-flex'; hsBadgeEl.textContent = '🏅 Best: ' + prev + '/400'; }
+      } catch(e) {}
+    }
+  }
 
   document.getElementById('result-stats').innerHTML = `
     <div class="res-stat"><div class="res-stat-num" style="color:var(--success);">${totalCorr}</div><div class="res-stat-label">Correct</div></div>
-    <div class="res-stat"><div class="res-stat-num" style="color:var(--error);">${subResults.reduce((a,r)=>a+r.wrong,0)}</div><div class="res-stat-label">Wrong</div></div>
-    <div class="res-stat"><div class="res-stat-num" style="color:var(--text-3);">${subResults.reduce((a,r)=>a+r.unanswered,0)}</div><div class="res-stat-label">Skipped</div></div>`;
+    <div class="res-stat"><div class="res-stat-num" style="color:var(--error);">${subResults.reduce((a,r) => a + r.wrong, 0)}</div><div class="res-stat-label">Wrong</div></div>
+    <div class="res-stat"><div class="res-stat-num" style="color:var(--text-3);">${subResults.reduce((a,r) => a + r.unanswered, 0)}</div><div class="res-stat-label">Skipped</div></div>`;
 
-  document.getElementById('subject-results-grid').innerHTML = subResults.map(r=>`
+  document.getElementById('subject-results-grid').innerHTML = subResults.map(r => `
     <div class="subj-result-card" style="border-color:${r.color}44;">
       <div class="subj-res-top">
         <div style="display:flex;align-items:center;gap:6px;"><span>${r.emoji}</span><div class="subj-res-name">${r.name}</div></div>
-        <div class="subj-res-score" style="color:${r.pct>=50?'var(--success)':r.pct>=30?'var(--gold)':'var(--error)'};">${state.mode==='jamb'?r.marks+'/100':r.correct+'/'+r.total}</div>
+        <div class="subj-res-score" style="color:${r.pct>=50?'var(--success)':r.pct>=30?'var(--gold)':'var(--error)'};">
+          ${state.mode === 'jamb' ? r.marks + '/100' : r.correct + '/' + r.total}
+        </div>
       </div>
       <div class="subj-res-bar-track"><div class="subj-res-bar-fill" style="width:${r.pct}%;background:${r.color};"></div></div>
       <div class="subj-res-meta">✓ ${r.correct} · ✗ ${r.wrong} · — ${r.unanswered}</div>
@@ -1452,12 +1747,11 @@ function buildResults(elapsed) {
 
   window._examResults = subResults;
 
-  /* Post score back to dashboard */
   try {
     const scoreData = { type:'nltc_cbt_score', score:overallPct, subject:state.subjects.map(s=>s.name).join(', '), correct:totalCorr, total:totalQ };
     window.parent.postMessage(scoreData,'*');
     localStorage.setItem('nltc_last_cbt', JSON.stringify({ ...scoreData, timestamp:Date.now() }));
-  } catch(e){}
+  } catch(e) {}
 
   showScreen('result-screen');
 }
@@ -1469,47 +1763,82 @@ let reviewFilter = 'all';
 
 function showReview() {
   reviewFilter = 'all';
-  document.querySelectorAll('.rev-filter').forEach((f,i)=>f.classList.toggle('active',i===0));
+  document.querySelectorAll('.rev-filter').forEach((f,i) => f.classList.toggle('active', i === 0));
   renderReview();
   showScreen('review-screen');
 }
 
 function setReviewFilter(f, btn) {
   reviewFilter = f;
-  document.querySelectorAll('.rev-filter').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.rev-filter').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderReview();
 }
 
 function renderReview() {
-  const results = window._examResults; if(!results) return;
+  const results = window._examResults; if (!results) return;
   let html = '', counter = 1;
-  results.forEach(sr=>{
-    sr.questions.forEach((q,qi)=>{
-      const ans       = sr.answered[qi];
-      const ca        = q._answer;
-      const isCorrect = ans && ans === ca;
-      const isWrong   = ans && ans !== ca;
+  results.forEach(sr => {
+    sr.questions.forEach((q, qi) => {
+      const ans          = sr.answered[qi];
+      const ca           = q._answer;
+      const isCorrect    = ans && ans === ca;
+      const isWrong      = ans && ans !== ca;
       const isUnanswered = !ans;
-      if (reviewFilter === 'wrong' && !isWrong)      { counter++; return; }
+      if (reviewFilter === 'wrong'      && !isWrong)      { counter++; return; }
       if (reviewFilter === 'unanswered' && !isUnanswered) { counter++; return; }
+
       const opts    = q._opts || {};
-      const letters = ['A','B','C','D','E'].filter(l=>opts[l.toLowerCase()]!==undefined&&String(opts[l.toLowerCase()]).trim()!=='');
+      const letters = ['A','B','C','D','E'].filter(l =>
+        opts[l.toLowerCase()] !== undefined && String(opts[l.toLowerCase()]).trim() !== '');
+
       const statusClass = isCorrect ? 'correct' : isWrong ? 'wrong' : 'unanswered';
       const statusIcon  = isCorrect ? '✓' : isWrong ? '✗' : '—';
+
       const imgSrc  = resolveImage(q);
       const imgHtml = imgSrc
-        ? `<div class="rq-img-wrap"><img src="${imgSrc}" alt="Diagram" loading="lazy" onerror="this.parentElement.innerHTML='<div style=\\'font-size:.75rem;color:var(--text-3);padding:8px;\\'>Diagram unavailable</div>'"></div>`
+        ? `<div class="rq-img-wrap"><img src="${imgSrc}" alt="Diagram" loading="lazy"
+            onerror="this.parentElement.innerHTML='<div style=\\'font-size:.75rem;color:var(--text-3);padding:8px;\\'>Diagram unavailable</div>'"></div>`
         : '';
-      const yearHtml = q._year ? `<span class="rq-year-tag"><i class="fas fa-calendar-alt"></i> ${q._year}</span>` : '';
-      const optHtml = letters.map(l=>{
+
+      const yearHtml = q._year
+        ? `<span class="rq-year-tag"><i class="fas fa-calendar-alt"></i> ${q._year}</span>` : '';
+
+      const optHtml = letters.map(l => {
         const isC = l === ca, isW = l === ans && !isC;
-        return `<div class="rq-opt ${isC?'correct-ans':isW?'wrong-ans':'neutral'}">
+        return `<div class="rq-opt ${isC ? 'correct-ans' : isW ? 'wrong-ans' : 'neutral'}">
           <div class="rq-opt-letter">${l}</div>
-          <div class="rq-opt-text">${opts[l.toLowerCase()]||''}${isC?' ✓':''}</div>
+          <div class="rq-opt-text">${opts[l.toLowerCase()] || ''}${isC ? ' ✓' : ''}</div>
         </div>`;
       }).join('');
-      const exp = q.explanation || q.answer_explanation || '';
+
+      const exp = q._explanation || q.explanation || q.explaination ||
+                  q.answer_explanation || q.workings || q.hint || '';
+      const correctOptText = ca && opts[ca.toLowerCase()] ? opts[ca.toLowerCase()] : '';
+      const expBlock = ca ? `
+        <div class="rq-exp-block">
+          <div class="rq-exp-row">
+            <div class="rq-exp-label">✅ Correct Answer</div>
+            <div class="rq-exp-text">
+              <span class="rq-correct-badge">${ca}</span>
+              ${correctOptText ? `<span style="color:var(--text-2);margin-left:6px;">${correctOptText}</span>` : ''}
+            </div>
+          </div>
+          ${ans && ans !== ca ? `
+          <div class="rq-exp-row" style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px;">
+            <div class="rq-exp-label" style="color:var(--error);">❌ Your Answer</div>
+            <div class="rq-exp-text" style="color:var(--error);">
+              <span class="rq-wrong-badge">${ans}</span>
+              ${opts[(ans||'').toLowerCase()] ? `<span style="margin-left:6px;">${opts[(ans||'').toLowerCase()]}</span>` : ''}
+            </div>
+          </div>` : ''}
+          ${exp ? `
+          <div class="rq-exp-row" style="border-top:1px solid rgba(18,183,106,.15);margin-top:8px;padding-top:8px;background:rgba(18,183,106,.04);padding-left:16px;padding-right:16px;border-radius:0 0 var(--r-md) var(--r-md);">
+            <div class="rq-exp-label" style="color:var(--success);">💡 Explanation</div>
+            <div class="rq-exp-text" style="line-height:1.75;">${exp}</div>
+          </div>` : ''}
+        </div>` : '';
+
       html += `<div class="review-q-card">
         <div class="rq-header">
           <div class="rq-num ${statusClass}">${statusIcon}</div>
@@ -1521,35 +1850,34 @@ function renderReview() {
         </div>
         ${imgHtml}
         <div class="rq-options">${optHtml}</div>
-        ${ca?`<div class="rq-exp"><div class="rq-exp-label">Correct Answer</div><div class="rq-exp-text"><strong style="color:var(--success);">${ca}</strong>${opts[ca.toLowerCase()]?' — '+opts[ca.toLowerCase()]:''}</div></div>`:''}
-        ${exp?`<div class="rq-exp"><div class="rq-exp-label">Explanation</div><div class="rq-exp-text">${exp}</div></div>`:''}
+        ${expBlock}
       </div>`;
       counter++;
     });
   });
-  if (!html) html = `<div style="text-align:center;padding:40px;color:var(--text-3);font-size:.88rem;">${reviewFilter==='wrong'?'🎉 No wrong answers!':'📭 Nothing in this category.'}</div>`;
+  if (!html) html = `<div style="text-align:center;padding:40px;color:var(--text-3);font-size:.88rem;">${reviewFilter === 'wrong' ? '🎉 No wrong answers!' : '📭 Nothing in this category.'}</div>`;
   document.getElementById('review-body').innerHTML = html;
 }
 
 /* ════════════════════════════════════════
    KEYBOARD SHORTCUTS
 ════════════════════════════════════════ */
-document.addEventListener('keydown', e=>{
+document.addEventListener('keydown', e => {
   if (!document.getElementById('exam-screen').classList.contains('active')) return;
-  if (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
   const k = e.key.toUpperCase();
   if (['A','B','C','D'].includes(k) && !document.getElementById('calcOverlay').classList.contains('show')) {
     selectAnswer(k);
   } else if (k === 'N') { navigate(1); }
   else if (k === 'P')   { navigate(-1); }
-  else if (k === 'R')   { const s=state.subjects[state.currentSubIdx]; delete s.answered[state.currentQIdx]; renderQuestion(); }
+  else if (k === 'R')   { const s = state.subjects[state.currentSubIdx]; delete s.answered[state.currentQIdx]; renderQuestion(); }
   else if (k === 'S')   { confirmSubmit(); }
   else if (k === 'C')   { toggleCalculator(); }
   else if (k === 'M')   { toggleMobileQMap(); }
-  else if (['1','2','3','4'].includes(k)) { const i=parseInt(k)-1; if(i<state.subjects.length) switchSubject(i); }
+  else if (['1','2','3','4'].includes(k)) { const i = parseInt(k) - 1; if (i < state.subjects.length) switchSubject(i); }
 });
 
-document.addEventListener('keydown', e=>{
+document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeModal();
     closeMobileQMap();
@@ -1561,23 +1889,24 @@ document.addEventListener('keydown', e=>{
    UTILITIES
 ════════════════════════════════════════ */
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  window.scrollTo(0,0);
+  window.scrollTo(0, 0);
 }
 
 function goToSetup() {
   clearInterval(state.timerInterval);
+  state.timerInterval = null;
   state.selectedJambSubs = [];
-  state.singleSubject = null;
-  document.querySelectorAll('[id^="jsubj-"]').forEach(b=>{
+  state.singleSubject    = null;
+  state.jambQueue        = [];
+  state.subjects         = [];
+  document.getElementById('subj-done-banner').classList.add('hidden');
+  document.querySelectorAll('[id^="jsubj-"]').forEach(b => {
     b.className = 'subj-btn';
-    const chk = b.querySelector('.subj-check'); if(chk) chk.style.display = 'none';
+    const chk = b.querySelector('.subj-check'); if (chk) chk.style.display = 'none';
   });
-  document.querySelectorAll('[id^="ssubj-"]').forEach(b=>{
-    b.className = 'subj-btn';
-    const chk = b.querySelector('.subj-check'); if(chk) chk.style.display = 'none';
-  });
+  resetSingleSelection();
   selectMode('jamb');
   updateStartBtn();
   renderPastSessions();
@@ -1585,26 +1914,25 @@ function goToSetup() {
 }
 
 function shareResult() {
-  const results = window._examResults; if(!results) return;
-  const totalCorr = results.reduce((a,r)=>a+r.correct,0);
-  const totalQ    = results.reduce((a,r)=>a+r.total,0);
-  const pct       = Math.round(totalCorr/totalQ*100);
+  const results = window._examResults; if (!results) return;
+  const totalCorr = results.reduce((a,r) => a + r.correct, 0);
+  const totalQ    = results.reduce((a,r) => a + r.total, 0);
+  const pct       = Math.round(totalCorr / totalQ * 100);
   const text = `I scored ${pct}% on ${state.mode.toUpperCase()} CBT Practice on NLTC! 📚🎓\n${results.map(r=>`${r.emoji} ${r.name}: ${r.correct}/${r.total}`).join('\n')}\n\nJoin NLTC at nltc-online.web.app`;
-  if (navigator.share) { navigator.share({title:'My NLTC CBT Result',text}).catch(()=>{}); }
-  else { navigator.clipboard?.writeText(text).then(()=>showToast('Result copied!','success')).catch(()=>{}); }
+  if (navigator.share) navigator.share({ title:'My NLTC CBT Result', text }).catch(() => {});
+  else navigator.clipboard?.writeText(text).then(() => showToast('Result copied!','success')).catch(() => {});
 }
 
-function showToast(msg, type='info') {
-  const icons = {success:'fa-check-circle',error:'fa-times-circle',info:'fa-info-circle'};
-  const t = document.createElement('div'); t.className = `toast ${type}`;
+function showToast(msg, type = 'info') {
+  const icons = { success:'fa-check-circle', error:'fa-times-circle', info:'fa-info-circle' };
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
   t.innerHTML = `<i class="fas ${icons[type]||'fa-info-circle'}" style="flex-shrink:0;margin-top:1px;"></i><span>${msg}</span>`;
   document.getElementById('toast-ct').appendChild(t);
-  setTimeout(()=>{ t.classList.add('toast-out'); setTimeout(()=>t.remove(),300); }, 4000);
+  setTimeout(() => { t.classList.add('toast-out'); setTimeout(() => t.remove(), 300); }, 4000);
 }
 
-document.getElementById('submit-modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeModal(); });
-
-/* Custom controls listeners */
+document.getElementById('submit-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
 document.getElementById('custom-q-count').addEventListener('change', updateStartBtn);
 document.getElementById('custom-exam-type').addEventListener('change', updateStartBtn);
 
@@ -1617,7 +1945,7 @@ selectMode('jamb');
 updateStartBtn();
 renderPastSessions();
 
-/* Auto-start from dashboard preset */
+/* Auto-setup from dashboard preset */
 (function checkPreset() {
   try {
     const raw = sessionStorage.getItem('nltc_cbt_preset');
@@ -1632,13 +1960,15 @@ renderPastSessions();
     selectMode(mode);
 
     if (mode === 'jamb') {
-      if (key !== 'english' && NON_ENGLISH.find(s=>s.key===key)) {
-        toggleJambSubject(key);
-      }
-      showToast(`${SUBJECTS_CONFIG[key].name} pre-selected — pick 2 more to begin`, 'info');
+      if (key !== 'english' && NON_ENGLISH.find(s => s.key === key)) toggleJambSubject(key);
+      showToast(`${SUBJECTS_CONFIG[key].name} pre-selected — pick 2 more subjects, then press Begin`, 'info');
     } else {
       state.singleSubject = key;
-      /* Apply preset exam type if provided */
+      resetSingleSelection();
+      const sbtn = document.getElementById('ssubj-' + key);
+      const schk = document.getElementById('ssubj-chk-' + key);
+      if (sbtn) sbtn.className = 'subj-btn sel sel-single';
+      if (schk) schk.style.display = 'inline';
       if (preset.examType) {
         const etEl = document.getElementById('custom-exam-type');
         if (etEl) etEl.value = preset.examType;
@@ -1646,10 +1976,11 @@ renderPastSessions();
       }
       if (preset.qCount) {
         const qcEl = document.getElementById('custom-q-count');
-        if (qcEl) qcEl.value = preset.qCount;
+        if (qcEl) qcEl.value = String(preset.qCount);
         state.customQCount = parseInt(preset.qCount);
       }
-      startExam();
+      updateStartBtn();
+      showToast(`${SUBJECTS_CONFIG[key].name} ready — adjust settings then press Begin`, 'info');
     }
   } catch(e) {
     console.warn('Preset error:', e);
