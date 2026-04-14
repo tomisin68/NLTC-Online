@@ -8,70 +8,94 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<!-- Firebase -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+<!-- ═══════════════════════════════════════════════════════════════
+     FIREBASE — using signInWithRedirect (not signInWithPopup)
+     Reason: firebaseapp.com is unreachable on Nigerian ISPs (MTN,
+     Airtel, Glo etc.) when used as a popup intermediary.
+     signInWithRedirect goes straight to accounts.google.com which
+     is always reachable. getRedirectResult() picks up credentials
+     on page return.
+════════════════════════════════════════════════════════════════ -->
+<script type="module">
+  import {
+    initializeApp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signInWithRedirect,
+    getRedirectResult,
+    GoogleAuthProvider,
+    sendPasswordResetEmail,
+    onAuthStateChanged,
+    updateProfile
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  /* ── Firebase config ── */
   const firebaseConfig = {
-    apiKey: "AIzaSyA9vzT1TBpTdRJUfyYm51goS-5HfL3FcbU",
-    authDomain: "nltc-online.firebaseapp.com",
-    projectId: "nltc-online",
-    storageBucket: "nltc-online.firebasestorage.app",
+    apiKey:            "AIzaSyA9vzT1TBpTdRJUfyYm51goS-5HfL3FcbU",
+    authDomain:        "nltc-online.firebaseapp.com",
+    projectId:         "nltc-online",
+    storageBucket:     "nltc-online.firebasestorage.app",
     messagingSenderId: "267993935158",
-    appId: "1:267993935158:web:723c13b2564b817fbc9797"
+    appId:             "1:267993935158:web:723c13b2564b817fbc9797"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+  const app      = initializeApp(firebaseConfig);
+  const auth     = getAuth(app);
+  const db       = getFirestore(app);
   const gProvider = new GoogleAuthProvider();
   gProvider.setCustomParameters({ prompt: 'select_account' });
 
-  window.__nltcAuth = auth;
-  window.__nltcDb = db;
+  /* ── Expose to window so non-module scripts can call them ── */
+  window.__nltcAuth      = auth;
+  window.__nltcDb        = db;
   window.__nltcGProvider = gProvider;
 
+  /* ── Save / merge user doc in Firestore ── */
   async function saveUser(user, extras = {}) {
-    const ref = doc(db, 'users', user.uid);
+    const ref  = doc(db, 'users', user.uid);
     const snap = await getDoc(ref);
     const payload = {
-      uid: user.uid,
-      email: user.email,
+      uid:         user.uid,
+      email:       user.email,
       displayName: user.displayName || extras.displayName || '',
-      photoURL: user.photoURL || '',
-      lastLogin: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+      photoURL:    user.photoURL || '',
+      lastLogin:   serverTimestamp(),
+      updatedAt:   serverTimestamp(),
       ...extras
     };
     if (!snap.exists()) {
       payload.createdAt = serverTimestamp();
-      payload.xp = 0;
-      payload.streak = 0;
-      payload.badges = [];
+      payload.xp        = 0;
+      payload.streak    = 0;
+      payload.badges    = [];
     }
     await setDoc(ref, payload, { merge: true });
     const fresh = await getDoc(ref);
     return fresh.data();
   }
-
   window.__nltcSaveUser = saveUser;
 
-  onAuthStateChanged(auth, (user) => {
-    if (user && window.__nltcAuthReady) {
-      window.__nltcAuthReady(user);
-    }
-  });
-
-  // Email/Password login
+  /* ── Email / password login ── */
   window.__nltcLogin = async function(email, password) {
     const cred = await signInWithEmailAndPassword(auth, email, password);
     const data = await saveUser(cred.user);
     return { user: cred.user, data };
   };
 
-  // Email/Password signup
+  /* ── Email / password signup ── */
   window.__nltcSignup = async function(email, password, extras) {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: extras.displayName });
@@ -79,28 +103,138 @@
     return { user: cred.user, data };
   };
 
-  // Google sign in
-  window.__nltcGoogle = async function() {
-    const result = await signInWithPopup(auth, gProvider);
-    const isNew = result._tokenResponse?.isNewUser;
-    const extras = isNew ? {
-      role: 'student',
-      plan: 'free',
-      firstName: result.user.displayName?.split(' ')[0] || '',
-      lastName: result.user.displayName?.split(' ').slice(1).join(' ') || '',
-      targetExam: '',
-      state: '',
-    } : {};
-    const data = await saveUser(result.user, extras);
-    return { user: result.user, data, isNew };
+  /* ── Initiate Google redirect (no popup) ── */
+  window.__nltcGoogleRedirect = async function() {
+    await signInWithRedirect(auth, gProvider);
+    // execution stops here — browser navigates away
   };
 
-  // Password reset
+  /* ── Password reset ── */
   window.__nltcReset = async function(email) {
     await sendPasswordResetEmail(auth, email);
   };
+
+  /* ══════════════════════════════════════════════════════════════
+     HANDLE REDIRECT RETURN
+     This runs on every page load. If we're returning from a Google
+     redirect, getRedirectResult() will have the credential.
+     If not (normal load), result is null and we do nothing.
+  ══════════════════════════════════════════════════════════════ */
+  async function handleRedirectResult() {
+    const loader = document.getElementById('redirectLoading');
+
+    /* Show a brief loading screen while we await the result.
+       We always await it; it resolves instantly when there's no
+       pending redirect so there's no visible flicker on normal loads. */
+    try {
+      const result = await getRedirectResult(auth);
+
+      if (!result) {
+        /* Normal page load — no redirect pending */
+        if (loader) loader.classList.remove('show');
+        return;
+      }
+
+      /* We have a Google user coming back from redirect */
+      if (loader) loader.classList.add('show');
+
+      const isNew   = result._tokenResponse?.isNewUser;
+      const extras  = isNew ? {
+        role:        'student',
+        plan:        'free',
+        firstName:   result.user.displayName?.split(' ')[0]  || '',
+        lastName:    result.user.displayName?.split(' ').slice(1).join(' ') || '',
+        targetExam:  '',
+        state:       '',
+      } : {};
+
+      const data        = await saveUser(result.user, extras);
+      const storedRole  = data?.role || 'student';
+
+      /* Restore the role the user had selected before redirect */
+      const intendedRole = sessionStorage.getItem('nltc_intended_role') || 'student';
+      sessionStorage.removeItem('nltc_intended_role');
+
+      if (intendedRole === 'admin' && storedRole !== 'admin') {
+        if (loader) loader.classList.remove('show');
+        window.__nltcPendingToast = {
+          msg:  'This account does not have admin privileges.',
+          type: 'error'
+        };
+        return;
+      }
+
+      const target = storedRole === 'admin' ? 'admin.html' : 'dashboard.html';
+      const fname  = result.user.displayName?.split(' ')[0] || 'User';
+
+      /* Show success overlay then redirect */
+      if (typeof window.__nltcShowSuccess === 'function') {
+        window.__nltcShowSuccess(
+          isNew ? 'Account Created! 🚀' : 'Welcome Back! 👋',
+          isNew
+            ? `Hi ${fname}! Your NLTC account is ready. Let's go!`
+            : `Good to see you again, ${fname}! Taking you to your dashboard.`,
+          storedRole === 'admin' ? 'Go to Admin Panel' : 'Go to Dashboard',
+          target
+        );
+      } else {
+        /* Fallback if DOM not ready yet */
+        window.location.href = target;
+      }
+
+    } catch(err) {
+      if (loader) loader.classList.remove('show');
+
+      /* Cancelled by user — silent */
+      if (err.code === 'auth/redirect-cancelled-by-user') return;
+
+      console.error('[NLTC Redirect Result Error]', err.code, err.message, err);
+
+      const msgMap = {
+        'auth/network-request-failed':          'Network error during sign-in. Check your connection.',
+        'auth/popup-blocked':                   'Sign-in was blocked. Please try again.',
+        'auth/account-exists-with-different-credential':
+          'An account with this email already exists using a different sign-in method.',
+        'auth/user-disabled':                   'This account has been disabled. Contact support.',
+        'auth/operation-not-allowed':           'Google Sign-In is not enabled. Contact the admin.',
+        'auth/unauthorized-domain':             'Domain not authorised. Contact the admin.',
+      };
+
+      window.__nltcPendingToast = {
+        msg:  msgMap[err.code] || `Google sign-in failed (${err.code || 'unknown'}). Please try again.`,
+        type: 'error'
+      };
+    }
+  }
+
+  /* Run it. DOM may not be ready yet so we queue on DOMContentLoaded. */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', handleRedirectResult);
+  } else {
+    handleRedirectResult();
+  }
+
+  /* ── Auth state — auto redirect if already logged in ── */
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+    /* Don't auto-redirect if success overlay is already showing */
+    if (document.getElementById('successOv')?.classList.contains('show')) return;
+    /* Uncomment the lines below to enable auto-redirect on revisit:
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) {
+        const role = snap.data()?.role || 'student';
+        window.location.href = role === 'admin' ? 'admin.html' : 'dashboard.html';
+      }
+    } catch(e) { console.warn('onAuthStateChanged error', e); }
+    */
+  });
 </script>
+
 <style>
+/* ═══════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════ */
 :root {
   --navy:      #0B1D3A;
   --navy-mid:  #142952;
@@ -136,587 +270,538 @@ body {
 }
 
 /* ── CANVAS ── */
-#bg-canvas {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+#bg-canvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+/* ── REDIRECT LOADING OVERLAY ── */
+.redirect-loading {
+  position: fixed; inset:0; z-index: 9998;
+  background: white;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 18px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
 }
+.redirect-loading.show { opacity:1; pointer-events:all; }
+.redirect-spinner {
+  width: 44px; height: 44px;
+  border: 3px solid var(--surface-2);
+  border-top-color: var(--navy);
+  border-radius: 50%;
+  animation: rot 0.75s linear infinite;
+}
+.redirect-loading p {
+  font-family:'DM Sans',sans-serif;
+  font-size: 0.9rem; color: var(--text-3);
+  font-weight: 500; letter-spacing: 0.01em;
+}
+.redirect-loading .rl-logo {
+  display:flex; align-items:center; gap:10px;
+  margin-bottom: 8px;
+}
+.redirect-loading .rl-logo-name {
+  font-family:'Syne',sans-serif;
+  font-size:1.3rem; font-weight:800; color:var(--navy);
+}
+.redirect-loading .rl-logo-name em { color:var(--gold); font-style:normal; }
 
 /* ── LAYOUT ── */
 .page {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  position: relative;
-  z-index: 1;
+  position: relative; z-index: 1;
 }
 
 /* ── LEFT PANEL ── */
 .left {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
   padding: 48px 56px;
-  position: relative;
-  overflow: hidden;
+  position: relative; overflow: hidden;
 }
-
 .left::before {
-  content: '';
-  position: absolute; inset: 0;
+  content:'';
+  position:absolute; inset:0;
   background: linear-gradient(155deg, rgba(20,41,82,0.55) 0%, rgba(11,29,58,0.30) 100%);
   border-right: 1px solid rgba(255,255,255,0.06);
 }
-
 .left-inner {
-  position: relative; z-index: 1;
-  display: flex; flex-direction: column;
-  align-items: center; text-align: center;
-  max-width: 420px; gap: 0;
+  position:relative; z-index:1;
+  display:flex; flex-direction:column;
+  align-items:center; text-align:center;
+  max-width:420px; gap:0;
 }
 
 /* LOGO */
 .logo-wrap {
-  display: flex; align-items: center; gap: 14px;
-  margin-bottom: 36px;
-  text-decoration: none;
+  display:flex; align-items:center; gap:14px;
+  margin-bottom:36px; text-decoration:none;
 }
 .logo-img {
-  width: 56px; height: 54px;
-  object-fit: contain;
-  border-radius: 12px;
-  filter: drop-shadow(0 4px 16px rgba(240,165,0,0.3));
+  width:56px; height:54px; object-fit:contain;
+  border-radius:12px;
+  filter:drop-shadow(0 4px 16px rgba(240,165,0,0.3));
 }
-.logo-wordmark {
-  display: flex; flex-direction: column; align-items: flex-start;
-  gap: 0;
-}
+.logo-wordmark { display:flex; flex-direction:column; align-items:flex-start; gap:0; }
 .logo-name {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.6rem; font-weight: 800;
-  color: white; letter-spacing: -0.02em;
-  line-height: 1;
+  font-family:'Syne',sans-serif;
+  font-size:1.6rem; font-weight:800; color:white;
+  letter-spacing:-0.02em; line-height:1;
 }
-.logo-name em { color: var(--gold); font-style: normal; }
+.logo-name em { color:var(--gold); font-style:normal; }
 .logo-tag {
-  font-size: 0.65rem; font-weight: 500;
-  color: rgba(255,255,255,0.35);
-  letter-spacing: 0.12em; text-transform: uppercase;
-  margin-top: 3px;
+  font-size:0.65rem; font-weight:500;
+  color:rgba(255,255,255,0.35);
+  letter-spacing:0.12em; text-transform:uppercase; margin-top:3px;
 }
 
-/* LOTTIE CONTAINER */
+/* LOTTIE */
 .lottie-ring {
-  position: relative;
-  width: 290px; height: 290px;
-  margin: 0 auto 28px;
-  display: flex; align-items: center; justify-content: center;
+  position:relative; width:290px; height:290px;
+  margin:0 auto 28px;
+  display:flex; align-items:center; justify-content:center;
 }
 .lottie-ring::before {
-  content: '';
-  position: absolute; inset: -16px;
-  border-radius: 50%;
-  background: conic-gradient(from 180deg, rgba(240,165,0,0.18), transparent 60%, rgba(240,165,0,0.12), transparent);
-  animation: spin-ring 12s linear infinite;
+  content:'';
+  position:absolute; inset:-16px; border-radius:50%;
+  background:conic-gradient(from 180deg,rgba(240,165,0,0.18),transparent 60%,rgba(240,165,0,0.12),transparent);
+  animation:spin-ring 12s linear infinite;
 }
 .lottie-ring::after {
-  content: '';
-  position: absolute; inset: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(240,165,0,0.10) 0%, transparent 70%);
+  content:'';
+  position:absolute; inset:0; border-radius:50%;
+  background:radial-gradient(circle,rgba(240,165,0,0.10) 0%,transparent 70%);
 }
-@keyframes spin-ring { to { transform: rotate(360deg); } }
-
-.lottie-ring dotlottie-wc,
-.lottie-ring .lottie-fallback {
-  width: 260px; height: 260px;
-  position: relative; z-index: 2;
+@keyframes spin-ring { to { transform:rotate(360deg); } }
+.lottie-ring dotlottie-wc, .lottie-ring .lottie-fallback {
+  width:260px; height:260px; position:relative; z-index:2;
 }
-.lottie-fallback {
-  display: flex; align-items: center; justify-content: center;
-  font-size: 7rem;
-}
+.lottie-fallback { display:flex; align-items:center; justify-content:center; font-size:7rem; }
 
 .left-headline {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.75rem; font-weight: 800;
-  color: white; line-height: 1.2;
-  letter-spacing: -0.02em;
-  margin-bottom: 12px;
+  font-family:'Syne',sans-serif;
+  font-size:1.75rem; font-weight:800;
+  color:white; line-height:1.2;
+  letter-spacing:-0.02em; margin-bottom:12px;
 }
-.left-headline em { color: var(--gold); font-style: normal; }
-
+.left-headline em { color:var(--gold); font-style:normal; }
 .left-sub {
-  font-size: 0.875rem; color: rgba(255,255,255,0.42);
-  line-height: 1.75; margin-bottom: 32px; max-width: 340px;
+  font-size:0.875rem; color:rgba(255,255,255,0.42);
+  line-height:1.75; margin-bottom:32px; max-width:340px;
 }
 
 /* TRUST PILLS */
-.trust-row {
-  display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
-}
+.trust-row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
 .trust-pill {
-  display: flex; align-items: center; gap: 7px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 100px; padding: 7px 14px;
-  font-size: 0.71rem; font-weight: 500;
-  color: rgba(255,255,255,0.45);
-  backdrop-filter: blur(6px);
+  display:flex; align-items:center; gap:7px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:100px; padding:7px 14px;
+  font-size:0.71rem; font-weight:500;
+  color:rgba(255,255,255,0.45);
+  backdrop-filter:blur(6px);
 }
-.trust-pill i { color: var(--gold); font-size: 0.65rem; }
+.trust-pill i { color:var(--gold); font-size:0.65rem; }
 
 /* ── RIGHT PANEL ── */
 .right {
-  background: var(--white);
-  display: flex; align-items: center; justify-content: center;
-  padding: 40px 32px;
-  position: relative;
-  overflow: hidden;
+  background:var(--white);
+  display:flex; align-items:center; justify-content:center;
+  padding:40px 32px;
+  position:relative; overflow:hidden;
 }
 .right::before {
-  content: '';
-  position: absolute; top: -100px; right: -100px;
-  width: 300px; height: 300px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(240,165,0,0.06) 0%, transparent 70%);
-  pointer-events: none;
+  content:'';
+  position:absolute; top:-100px; right:-100px;
+  width:300px; height:300px; border-radius:50%;
+  background:radial-gradient(circle,rgba(240,165,0,0.06) 0%,transparent 70%);
+  pointer-events:none;
 }
 .right::after {
-  content: '';
-  position: absolute; bottom: -80px; left: -80px;
-  width: 240px; height: 240px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(11,29,58,0.04) 0%, transparent 70%);
-  pointer-events: none;
+  content:'';
+  position:absolute; bottom:-80px; left:-80px;
+  width:240px; height:240px; border-radius:50%;
+  background:radial-gradient(circle,rgba(11,29,58,0.04) 0%,transparent 70%);
+  pointer-events:none;
 }
-
-.card {
-  width: 100%; max-width: 440px;
-  position: relative; z-index: 1;
-}
+.card { width:100%; max-width:440px; position:relative; z-index:1; }
 
 /* ── ROLE SELECTOR ── */
-.role-selector {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 10px; margin-bottom: 24px;
-}
+.role-selector { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:24px; }
 .role-btn {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 8px; padding: 16px 12px;
-  background: var(--surface);
-  border: 2px solid var(--border);
-  border-radius: var(--r-lg); cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
-  transition: all 0.22s;
-  position: relative; overflow: hidden;
+  display:flex; flex-direction:column; align-items:center;
+  gap:8px; padding:16px 12px;
+  background:var(--surface);
+  border:2px solid var(--border);
+  border-radius:var(--r-lg); cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+  transition:all 0.22s; position:relative; overflow:hidden;
 }
 .role-btn::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, var(--navy), var(--navy-3));
-  opacity: 0; transition: opacity 0.22s;
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,var(--navy),var(--navy-3));
+  opacity:0; transition:opacity 0.22s;
 }
-.role-btn.active {
-  border-color: var(--navy);
-  box-shadow: 0 4px 20px rgba(11,29,58,0.18);
-}
-.role-btn.active::before { opacity: 1; }
+.role-btn.active { border-color:var(--navy); box-shadow:0 4px 20px rgba(11,29,58,0.18); }
+.role-btn.active::before { opacity:1; }
 .role-btn-icon {
-  width: 40px; height: 40px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.1rem;
-  background: white;
-  position: relative; z-index: 1;
-  transition: all 0.22s;
-  box-shadow: var(--shadow-sm);
+  width:40px; height:40px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.1rem; background:white;
+  position:relative; z-index:1;
+  transition:all 0.22s; box-shadow:var(--shadow-sm);
 }
-.role-btn.active .role-btn-icon {
-  background: rgba(240,165,0,0.15);
-}
-.role-btn-icon i { color: var(--navy); transition: color 0.22s; }
-.role-btn.active .role-btn-icon i { color: var(--gold); }
+.role-btn.active .role-btn-icon { background:rgba(240,165,0,0.15); }
+.role-btn-icon i { color:var(--navy); transition:color 0.22s; }
+.role-btn.active .role-btn-icon i { color:var(--gold); }
 .role-btn-label {
-  font-size: 0.8rem; font-weight: 600;
-  color: var(--text-3);
-  position: relative; z-index: 1;
-  transition: color 0.22s;
+  font-size:0.8rem; font-weight:600; color:var(--text-3);
+  position:relative; z-index:1; transition:color 0.22s;
 }
-.role-btn.active .role-btn-label { color: white; }
+.role-btn.active .role-btn-label { color:white; }
 .role-btn-check {
-  position: absolute; top: 8px; right: 8px; z-index: 2;
-  width: 18px; height: 18px; border-radius: 50%;
-  background: var(--gold);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.55rem; color: var(--navy);
-  opacity: 0; transform: scale(0.5);
-  transition: all 0.22s;
+  position:absolute; top:8px; right:8px; z-index:2;
+  width:18px; height:18px; border-radius:50%;
+  background:var(--gold);
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.55rem; color:var(--navy);
+  opacity:0; transform:scale(0.5); transition:all 0.22s;
 }
-.role-btn.active .role-btn-check { opacity: 1; transform: scale(1); }
+.role-btn.active .role-btn-check { opacity:1; transform:scale(1); }
 
 /* ── TABS ── */
 .tabs {
-  display: flex;
-  background: var(--surface);
-  border-radius: var(--r-md);
-  padding: 4px; margin-bottom: 28px;
-  border: 1px solid var(--border);
+  display:flex; background:var(--surface);
+  border-radius:var(--r-md); padding:4px;
+  margin-bottom:28px; border:1px solid var(--border);
 }
 .tab {
-  flex: 1; padding: 9px 14px;
-  border: none; background: transparent;
-  border-radius: calc(var(--r-md) - 3px);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.875rem; font-weight: 600;
-  color: var(--text-3); cursor: pointer;
-  transition: all 0.22s;
+  flex:1; padding:9px 14px;
+  border:none; background:transparent;
+  border-radius:calc(var(--r-md) - 3px);
+  font-family:'DM Sans',sans-serif;
+  font-size:0.875rem; font-weight:600;
+  color:var(--text-3); cursor:pointer; transition:all 0.22s;
 }
-.tab.active {
-  background: var(--navy); color: white;
-  box-shadow: 0 2px 10px rgba(11,29,58,0.22);
-}
+.tab.active { background:var(--navy); color:white; box-shadow:0 2px 10px rgba(11,29,58,0.22); }
 
 /* ── PANELS ── */
-.panel { display: none; }
-.panel.active { display: block; animation: panelIn 0.3s ease; }
-@keyframes panelIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+.panel { display:none; }
+.panel.active { display:block; animation:panelIn 0.3s ease; }
+@keyframes panelIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
 
 .panel-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.5rem; font-weight: 800;
-  color: var(--navy); letter-spacing: -0.02em;
-  margin-bottom: 6px;
+  font-family:'Syne',sans-serif;
+  font-size:1.5rem; font-weight:800;
+  color:var(--navy); letter-spacing:-0.02em; margin-bottom:6px;
 }
 .panel-sub {
-  font-size: 0.84rem; color: var(--text-3);
-  line-height: 1.65; margin-bottom: 22px;
+  font-size:0.84rem; color:var(--text-3);
+  line-height:1.65; margin-bottom:22px;
 }
 
 /* ── GOOGLE BTN ── */
 .g-btn {
-  width: 100%; height: 46px;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--r-md);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.875rem; font-weight: 600;
-  cursor: pointer; color: var(--text-1);
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  transition: all 0.2s; margin-bottom: 16px;
+  width:100%; height:46px;
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:var(--r-md);
+  font-family:'DM Sans',sans-serif;
+  font-size:0.875rem; font-weight:600;
+  cursor:pointer; color:var(--text-1);
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  transition:all 0.2s; margin-bottom:16px;
+  position:relative; overflow:hidden;
 }
-.g-btn:hover {
-  background: white; border-color: rgba(11,29,58,0.2);
-  box-shadow: var(--shadow-sm);
+.g-btn:hover { background:white; border-color:rgba(11,29,58,0.2); box-shadow:var(--shadow-sm); }
+.g-btn:disabled { opacity:0.6; cursor:not-allowed; pointer-events:none; }
+.g-btn .g-spin {
+  width:18px; height:18px;
+  border:2.5px solid rgba(11,29,58,0.15);
+  border-top-color:var(--navy);
+  border-radius:50%;
+  animation:rot 0.7s linear infinite;
+  display:none; flex-shrink:0;
 }
-.g-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.g-svg { width: 20px; height: 20px; flex-shrink: 0; }
+.g-btn.loading .g-svg { display:none; }
+.g-btn.loading .g-spin { display:block; }
+.g-btn.loading .g-label { opacity:0.6; }
+.g-svg { width:20px; height:20px; flex-shrink:0; }
 
 /* DIVIDER */
 .divider {
-  display: flex; align-items: center; gap: 10px;
-  font-size: 0.72rem; font-weight: 600;
-  color: var(--text-3); margin-bottom: 16px;
+  display:flex; align-items:center; gap:10px;
+  font-size:0.72rem; font-weight:600; color:var(--text-3); margin-bottom:16px;
 }
-.divider::before, .divider::after {
-  content: ''; flex: 1; height: 1px; background: var(--border);
-}
+.divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border); }
 
 /* ── FORM ── */
-.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.fg { margin-bottom: 14px; }
-.fg label {
-  display: block; font-size: 0.75rem; font-weight: 600;
-  color: var(--text-2); margin-bottom: 6px; letter-spacing: 0.01em;
-}
-.iw { position: relative; }
+.frow { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.fg { margin-bottom:14px; }
+.fg label { display:block; font-size:0.75rem; font-weight:600; color:var(--text-2); margin-bottom:6px; letter-spacing:0.01em; }
+.iw { position:relative; }
 .iw i.icon {
-  position: absolute; left: 13px; top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-3); font-size: 0.8rem;
-  pointer-events: none; transition: color 0.2s;
+  position:absolute; left:13px; top:50%;
+  transform:translateY(-50%);
+  color:var(--text-3); font-size:0.8rem;
+  pointer-events:none; transition:color 0.2s;
 }
 .iw input, .iw select {
-  width: 100%; height: 46px;
-  padding: 0 13px 0 38px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--r-sm);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.875rem; color: var(--text-1);
-  background: var(--surface);
-  outline: none; transition: all 0.2s;
-  -webkit-appearance: none; appearance: none;
+  width:100%; height:46px;
+  padding:0 13px 0 38px;
+  border:1.5px solid var(--border);
+  border-radius:var(--r-sm);
+  font-family:'DM Sans',sans-serif;
+  font-size:0.875rem; color:var(--text-1);
+  background:var(--surface);
+  outline:none; transition:all 0.2s;
+  -webkit-appearance:none; appearance:none;
 }
-.iw select { cursor: pointer; padding-right: 36px; }
+.iw select { cursor:pointer; padding-right:36px; }
 .iw .arr {
-  position: absolute; right: 12px; top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-3); font-size: 0.7rem;
-  pointer-events: none;
+  position:absolute; right:12px; top:50%;
+  transform:translateY(-50%);
+  color:var(--text-3); font-size:0.7rem; pointer-events:none;
 }
 .iw .eye {
-  position: absolute; right: 12px; top: 50%;
-  transform: translateY(-50%);
-  background: none; border: none;
-  color: var(--text-3); font-size: 0.82rem;
-  cursor: pointer; padding: 4px;
-  transition: color 0.2s; display: flex;
+  position:absolute; right:12px; top:50%;
+  transform:translateY(-50%);
+  background:none; border:none;
+  color:var(--text-3); font-size:0.82rem;
+  cursor:pointer; padding:4px;
+  transition:color 0.2s; display:flex;
 }
-.iw .eye:hover { color: var(--navy); }
+.iw .eye:hover { color:var(--navy); }
 .iw input:focus, .iw select:focus {
-  border-color: var(--navy-mid);
-  background: white;
-  box-shadow: 0 0 0 3px rgba(11,29,58,0.07);
+  border-color:var(--navy-mid); background:white;
+  box-shadow:0 0 0 3px rgba(11,29,58,0.07);
 }
-.iw:focus-within i.icon { color: var(--navy); }
+.iw:focus-within i.icon { color:var(--navy); }
 .fe {
-  display: none; align-items: center; gap: 5px;
-  font-size: 0.7rem; color: var(--error);
-  font-weight: 500; margin-top: 4px;
+  display:none; align-items:center; gap:5px;
+  font-size:0.7rem; color:var(--error);
+  font-weight:500; margin-top:4px;
 }
-.fe.show { display: flex; }
-.iw input.err, .iw select.err { border-color: var(--error); }
+.fe.show { display:flex; }
+.iw input.err, .iw select.err { border-color:var(--error); }
 
 /* STRENGTH */
-.strength { margin-top: 6px; }
-.str-track {
-  height: 3px; background: var(--surface-2);
-  border-radius: 100px; overflow: hidden; margin-bottom: 4px;
-}
-.str-fill {
-  height: 100%; border-radius: 100px;
-  transition: width 0.3s ease, background 0.3s ease; width: 0;
-}
-.str-label { font-size: 0.68rem; font-weight: 500; color: var(--text-3); }
+.strength { margin-top:6px; }
+.str-track { height:3px; background:var(--surface-2); border-radius:100px; overflow:hidden; margin-bottom:4px; }
+.str-fill { height:100%; border-radius:100px; transition:width 0.3s ease,background 0.3s ease; width:0; }
+.str-label { font-size:0.68rem; font-weight:500; color:var(--text-3); }
 
 /* FORGOT */
-.forgot-row {
-  display: flex; justify-content: flex-end;
-  margin-top: -8px; margin-bottom: 14px;
-}
-.forgot { font-size: 0.78rem; font-weight: 600; color: var(--gold); text-decoration: none; }
-.forgot:hover { color: var(--navy); }
+.forgot-row { display:flex; justify-content:flex-end; margin-top:-8px; margin-bottom:14px; }
+.forgot { font-size:0.78rem; font-weight:600; color:var(--gold); text-decoration:none; }
+.forgot:hover { color:var(--navy); }
 
 /* CHECK ROW */
-.chk-row {
-  display: flex; align-items: flex-start; gap: 9px;
-  margin-bottom: 18px; margin-top: 2px;
-}
+.chk-row { display:flex; align-items:flex-start; gap:9px; margin-bottom:18px; margin-top:2px; }
 .chk-row input[type="checkbox"] {
-  width: 17px; height: 17px; min-width: 17px;
-  padding: 0; border-radius: 5px;
-  cursor: pointer; accent-color: var(--navy); margin-top: 2px;
+  width:17px; height:17px; min-width:17px; padding:0;
+  border-radius:5px; cursor:pointer; accent-color:var(--navy); margin-top:2px;
 }
-.chk-row span { font-size: 0.775rem; color: var(--text-3); line-height: 1.55; }
-.chk-row a { color: var(--navy); font-weight: 600; text-underline-offset: 2px; }
+.chk-row span { font-size:0.775rem; color:var(--text-3); line-height:1.55; }
+.chk-row a { color:var(--navy); font-weight:600; text-underline-offset:2px; }
 
 /* ── SUBMIT BTN ── */
 .sbtn {
-  width: 100%; height: 50px;
-  background: linear-gradient(135deg, var(--navy), var(--navy-3));
-  color: white; border: none;
-  border-radius: var(--r-md);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.925rem; font-weight: 600;
-  cursor: pointer; transition: all 0.25s;
-  display: flex; align-items: center; justify-content: center; gap: 9px;
-  box-shadow: 0 4px 18px rgba(11,29,58,0.22);
-  position: relative; overflow: hidden;
+  width:100%; height:50px;
+  background:linear-gradient(135deg,var(--navy),var(--navy-3));
+  color:white; border:none;
+  border-radius:var(--r-md);
+  font-family:'DM Sans',sans-serif;
+  font-size:0.925rem; font-weight:600;
+  cursor:pointer; transition:all 0.25s;
+  display:flex; align-items:center; justify-content:center; gap:9px;
+  box-shadow:0 4px 18px rgba(11,29,58,0.22);
+  position:relative; overflow:hidden;
 }
 .sbtn::after {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(135deg, var(--gold), var(--gold-2));
-  opacity: 0; transition: opacity 0.25s;
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg,var(--gold),var(--gold-2));
+  opacity:0; transition:opacity 0.25s;
 }
-.sbtn:hover::after { opacity: 1; }
-.sbtn:hover { color: var(--navy); transform: translateY(-1px); box-shadow: 0 8px 28px rgba(11,29,58,0.2), 0 4px 18px rgba(240,165,0,0.28); }
-.sbtn:disabled { opacity: 0.65; cursor: not-allowed; transform: none; pointer-events: none; }
-.sbtn > * { position: relative; z-index: 1; }
+.sbtn:hover::after { opacity:1; }
+.sbtn:hover { color:var(--navy); transform:translateY(-1px); box-shadow:0 8px 28px rgba(11,29,58,0.2),0 4px 18px rgba(240,165,0,0.28); }
+.sbtn:disabled { opacity:0.65; cursor:not-allowed; transform:none; pointer-events:none; }
+.sbtn > * { position:relative; z-index:1; }
 .sbtn .spin {
-  width: 18px; height: 18px;
-  border: 2.5px solid rgba(255,255,255,0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: rot 0.7s linear infinite;
-  display: none;
+  width:18px; height:18px;
+  border:2.5px solid rgba(255,255,255,0.3);
+  border-top-color:white; border-radius:50%;
+  animation:rot 0.7s linear infinite; display:none;
 }
-@keyframes rot { to { transform: rotate(360deg); } }
+@keyframes rot { to { transform:rotate(360deg); } }
 
-.alt-link {
-  text-align: center; margin-top: 16px;
-  font-size: 0.8rem; color: var(--text-3);
-}
-.alt-link a { color: var(--navy); font-weight: 700; }
+.alt-link { text-align:center; margin-top:16px; font-size:0.8rem; color:var(--text-3); }
+.alt-link a { color:var(--navy); font-weight:700; }
 
 /* ── SUCCESS OVERLAY ── */
 .success-ov {
-  position: absolute; inset: 0;
-  background: white;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 40px 32px; z-index: 20;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.4s ease;
-  text-align: center;
+  position:absolute; inset:0; background:white;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:40px 32px; z-index:20;
+  opacity:0; pointer-events:none;
+  transition:opacity 0.4s ease; text-align:center;
 }
-.success-ov.show { opacity: 1; pointer-events: all; }
+.success-ov.show { opacity:1; pointer-events:all; }
 .suc-icon {
-  width: 80px; height: 80px; border-radius: 50%;
-  background: linear-gradient(135deg, #E6FAF1, #B8F0D4);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2.2rem; color: var(--success);
-  margin-bottom: 20px;
-  box-shadow: 0 8px 30px rgba(18,183,106,0.2);
-  animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  width:80px; height:80px; border-radius:50%;
+  background:linear-gradient(135deg,#E6FAF1,#B8F0D4);
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.2rem; color:var(--success); margin-bottom:20px;
+  box-shadow:0 8px 30px rgba(18,183,106,0.2);
+  animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
 }
-@keyframes popIn { from { transform:scale(0.4); opacity:0; } to { transform:scale(1); opacity:1; } }
+@keyframes popIn { from{transform:scale(0.4);opacity:0} to{transform:scale(1);opacity:1} }
 .suc-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.4rem; font-weight: 800;
-  color: var(--navy); margin-bottom: 8px;
+  font-family:'Syne',sans-serif;
+  font-size:1.4rem; font-weight:800; color:var(--navy); margin-bottom:8px;
 }
-.suc-msg {
-  font-size: 0.875rem; color: var(--text-3);
-  line-height: 1.7; margin-bottom: 28px; max-width: 310px;
-}
+.suc-msg { font-size:0.875rem; color:var(--text-3); line-height:1.7; margin-bottom:28px; max-width:310px; }
 .suc-cta {
-  padding: 12px 32px;
-  background: var(--gold); color: var(--navy);
-  border: none; border-radius: var(--r-md);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.9rem; font-weight: 700; cursor: pointer;
-  transition: all 0.2s;
-  display: inline-flex; align-items: center; gap: 8px;
+  padding:12px 32px;
+  background:var(--gold); color:var(--navy);
+  border:none; border-radius:var(--r-md);
+  font-family:'DM Sans',sans-serif;
+  font-size:0.9rem; font-weight:700; cursor:pointer;
+  transition:all 0.2s;
+  display:inline-flex; align-items:center; gap:8px;
 }
-.suc-cta:hover { background: var(--gold-2); transform: translateY(-1px); }
+.suc-cta:hover { background:var(--gold-2); transform:translateY(-1px); }
 
 /* ── TOAST ── */
 #toasts {
-  position: fixed; top: 20px; right: 20px; z-index: 9999;
-  display: flex; flex-direction: column; gap: 9px;
-  pointer-events: none;
+  position:fixed; top:20px; right:20px; z-index:9999;
+  display:flex; flex-direction:column; gap:9px; pointer-events:none;
 }
 .toast {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 16px; border-radius: var(--r-md);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.83rem; font-weight: 500;
-  max-width: 320px; pointer-events: all;
-  box-shadow: var(--shadow-md);
-  animation: tIn 0.3s ease;
+  display:flex; align-items:center; gap:10px;
+  padding:12px 16px; border-radius:var(--r-md);
+  font-family:'DM Sans',sans-serif;
+  font-size:0.83rem; font-weight:500;
+  max-width:320px; pointer-events:all;
+  box-shadow:var(--shadow-md);
+  animation:tIn 0.3s ease;
 }
-.toast.success { background: #0D3D25; color: white; border-left: 4px solid var(--success); }
-.toast.error   { background: #3D1212; color: white; border-left: 4px solid var(--error); }
-.toast.info    { background: var(--navy); color: white; border-left: 4px solid var(--gold); }
-.toast i { font-size: 0.85rem; flex-shrink: 0; }
-.toast.success i { color: var(--success); }
-.toast.error i   { color: var(--error); }
-.toast.info i    { color: var(--gold); }
-.t-out { animation: tOut 0.3s ease forwards; }
-@keyframes tIn { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:none; } }
-@keyframes tOut { to { opacity:0; transform:translateX(20px); } }
+.toast.success { background:#0D3D25; color:white; border-left:4px solid var(--success); }
+.toast.error   { background:#3D1212; color:white; border-left:4px solid var(--error); }
+.toast.info    { background:var(--navy); color:white; border-left:4px solid var(--gold); }
+.toast i { font-size:0.85rem; flex-shrink:0; }
+.toast.success i { color:var(--success); }
+.toast.error i   { color:var(--error); }
+.toast.info i    { color:var(--gold); }
+.t-out { animation:tOut 0.3s ease forwards; }
+@keyframes tIn  { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:none} }
+@keyframes tOut { to{opacity:0;transform:translateX(20px)} }
 
 /* ── FORGOT MODAL ── */
 .modal-bg {
-  position: fixed; inset: 0; z-index: 1000;
-  background: rgba(11,29,58,0.65);
-  backdrop-filter: blur(6px);
-  display: flex; align-items: center; justify-content: center;
-  padding: 24px; opacity: 0; pointer-events: none;
-  transition: opacity 0.3s;
+  position:fixed; inset:0; z-index:1000;
+  background:rgba(11,29,58,0.65);
+  backdrop-filter:blur(6px);
+  display:flex; align-items:center; justify-content:center;
+  padding:24px; opacity:0; pointer-events:none; transition:opacity 0.3s;
 }
-.modal-bg.open { opacity: 1; pointer-events: all; }
+.modal-bg.open { opacity:1; pointer-events:all; }
 .modal-card {
-  background: white; border-radius: var(--r-xl);
-  padding: 36px; max-width: 400px; width: 100%;
-  box-shadow: var(--shadow-lg);
-  transform: translateY(20px);
-  transition: transform 0.3s;
-  position: relative;
+  background:white; border-radius:var(--r-xl);
+  padding:36px; max-width:400px; width:100%;
+  box-shadow:var(--shadow-lg);
+  transform:translateY(20px); transition:transform 0.3s; position:relative;
 }
-.modal-bg.open .modal-card { transform: none; }
+.modal-bg.open .modal-card { transform:none; }
 .modal-x {
-  position: absolute; top: 14px; right: 14px;
-  width: 34px; height: 34px; border-radius: 50%;
-  background: var(--surface); border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text-3); font-size: 0.82rem;
-  transition: all 0.2s;
+  position:absolute; top:14px; right:14px;
+  width:34px; height:34px; border-radius:50%;
+  background:var(--surface); border:none; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--text-3); font-size:0.82rem; transition:all 0.2s;
 }
-.modal-x:hover { background: var(--navy); color: white; }
+.modal-x:hover { background:var(--navy); color:white; }
 
-/* ── ADMIN BADGE ── */
+/* ── ADMIN NOTE ── */
 .admin-note {
-  display: flex; align-items: center; gap: 9px;
-  padding: 11px 14px;
-  background: linear-gradient(135deg, rgba(11,29,58,0.05), rgba(240,165,0,0.06));
-  border: 1px solid rgba(240,165,0,0.25);
-  border-radius: var(--r-sm); margin-bottom: 18px;
-  font-size: 0.77rem; color: var(--text-2); font-weight: 500;
-  display: none;
+  display:none; align-items:center; gap:9px;
+  padding:11px 14px;
+  background:linear-gradient(135deg,rgba(11,29,58,0.05),rgba(240,165,0,0.06));
+  border:1px solid rgba(240,165,0,0.25);
+  border-radius:var(--r-sm); margin-bottom:18px;
+  font-size:0.77rem; color:var(--text-2); font-weight:500;
 }
-.admin-note.show { display: flex; }
-.admin-note i { color: var(--gold); font-size: 0.8rem; flex-shrink: 0; }
+.admin-note.show { display:flex; }
+.admin-note i { color:var(--gold); font-size:0.8rem; flex-shrink:0; }
 
 /* ── MOBILE BRAND ── */
 .mobile-brand {
-  display: none;
-  align-items: center; justify-content: center; gap: 12px;
-  margin-bottom: 24px;
+  display:none; align-items:center; justify-content:center; gap:12px; margin-bottom:24px;
 }
-.mobile-brand .mb-icon {
-  width: 44px; height: 42px; object-fit: contain; border-radius: 10px;
-}
-.mobile-brand .mb-name {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.3rem; font-weight: 800; color: var(--navy);
-}
-.mobile-brand .mb-name em { color: var(--gold); font-style: normal; }
+.mobile-brand .mb-icon { width:44px; height:42px; object-fit:contain; border-radius:10px; }
+.mobile-brand .mb-name { font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:800; color:var(--navy); }
+.mobile-brand .mb-name em { color:var(--gold); font-style:normal; }
 
-/* ── ROLE BADGE IN FORM ── */
+/* ── ROLE BADGE ── */
 .current-role-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 4px 10px; border-radius: 100px;
-  font-size: 0.7rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.06em;
-  margin-bottom: 6px;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 10px; border-radius:100px;
+  font-size:0.7rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;
 }
-.crb-student { background: #EFF8FF; color: #1570EF; }
-.crb-admin   { background: var(--gold-pale); color: #A07000; }
+.crb-student { background:#EFF8FF; color:#1570EF; }
+.crb-admin   { background:var(--gold-pale); color:#A07000; }
 
 /* ── ANIMATIONS ── */
-.fade-up {
-  opacity: 0; transform: translateY(20px);
-  animation: fu 0.55s cubic-bezier(0.4,0,0.2,1) forwards;
-}
-@keyframes fu { to { opacity:1; transform:none; } }
-.d1 { animation-delay: 0.08s; }
-.d2 { animation-delay: 0.16s; }
-.d3 { animation-delay: 0.24s; }
-.d4 { animation-delay: 0.32s; }
-.d5 { animation-delay: 0.40s; }
+.fade-up { opacity:0; transform:translateY(20px); animation:fu 0.55s cubic-bezier(0.4,0,0.2,1) forwards; }
+@keyframes fu { to{opacity:1;transform:none} }
+.d1{animation-delay:0.08s} .d2{animation-delay:0.16s} .d3{animation-delay:0.24s}
+.d4{animation-delay:0.32s} .d5{animation-delay:0.40s}
 
 /* ── RESPONSIVE ── */
-@media (max-width: 900px) {
-  .page { grid-template-columns: 1fr; }
-  .left { display: none; }
-  .right { min-height: 100vh; padding: 28px 20px; }
-  .mobile-brand { display: flex; }
+@media(max-width:900px){
+  .page{grid-template-columns:1fr}
+  .left{display:none}
+  .right{min-height:100vh;padding:28px 20px}
+  .mobile-brand{display:flex}
 }
-@media (max-width: 520px) {
-  .frow { grid-template-columns: 1fr; gap: 0; }
-  .role-selector { grid-template-columns: 1fr 1fr; }
-  #toasts { right: 12px; left: 12px; top: 12px; }
-  .toast { max-width: 100%; }
-  .right { padding: 20px 14px; }
+@media(max-width:520px){
+  .frow{grid-template-columns:1fr;gap:0}
+  .role-selector{grid-template-columns:1fr 1fr}
+  #toasts{right:12px;left:12px;top:12px}
+  .toast{max-width:100%}
+  .right{padding:20px 14px}
 }
-@media (max-width: 360px) {
-  .panel-title { font-size: 1.3rem; }
-  .role-selector { gap: 8px; }
+@media(max-width:360px){
+  .panel-title{font-size:1.3rem}
+  .role-selector{gap:8px}
 }
 </style>
 </head>
 <body>
+
+<!-- TOAST CONTAINER -->
 <div id="toasts"></div>
+
+<!-- BACKGROUND CANVAS -->
 <canvas id="bg-canvas"></canvas>
 
-<!-- FORGOT MODAL -->
+<!-- ══════════════════════════════════════════════════════════════
+     REDIRECT LOADING OVERLAY
+     Shown while getRedirectResult() is resolving after Google
+     redirects back to this page.
+══════════════════════════════════════════════════════════════ -->
+<div class="redirect-loading" id="redirectLoading">
+  <div class="rl-logo">
+    <div class="rl-logo-name">NL<em>TC</em></div>
+  </div>
+  <div class="redirect-spinner"></div>
+  <p>Completing Google Sign-In…</p>
+</div>
+
+<!-- FORGOT PASSWORD MODAL -->
 <div class="modal-bg" id="forgotBg">
   <div class="modal-card">
     <button class="modal-x" onclick="closeForgot()"><i class="fas fa-times"></i></button>
@@ -744,9 +829,10 @@ body {
 <!-- MAIN PAGE -->
 <div class="page">
 
-  <!-- LEFT -->
+  <!-- ── LEFT PANEL ── -->
   <div class="left">
     <div class="left-inner">
+
       <a href="index.html" class="logo-wrap fade-up">
         <img src="NLTC.png" alt="NLTC Logo" class="logo-img"
              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
@@ -777,17 +863,17 @@ body {
         <div class="trust-pill"><i class="fas fa-trophy"></i>94% Pass Rate</div>
         <div class="trust-pill"><i class="fas fa-mobile-alt"></i>iOS & Android</div>
       </div>
+
     </div>
   </div>
 
-  <!-- RIGHT -->
+  <!-- ── RIGHT PANEL ── -->
   <div class="right">
     <div class="card">
 
       <!-- Mobile logo -->
       <div class="mobile-brand fade-up">
-        <img src="NLTC.png" alt="NLTC" class="mb-icon"
-             onerror="this.style.display='none'">
+        <img src="NLTC.png" alt="NLTC" class="mb-icon" onerror="this.style.display='none'">
         <div class="mb-name">NL<em>TC</em></div>
       </div>
 
@@ -807,12 +893,13 @@ body {
 
       <!-- TABS -->
       <div class="tabs fade-up d1">
-        <button class="tab active" id="tab-in" onclick="switchTab('in')">Sign In</button>
-        <button class="tab" id="tab-up" onclick="switchTab('up')">Create Account</button>
+        <button class="tab active" id="tab-in"  onclick="switchTab('in')">Sign In</button>
+        <button class="tab"        id="tab-up"  onclick="switchTab('up')">Create Account</button>
       </div>
 
-      <!-- ===== LOGIN PANEL ===== -->
+      <!-- ═══════════ LOGIN PANEL ═══════════ -->
       <div class="panel active" id="panel-in">
+
         <div class="current-role-badge crb-student" id="badge-in-student">
           <i class="fas fa-graduation-cap"></i> Student Login
         </div>
@@ -822,12 +909,19 @@ body {
 
         <div class="admin-note" id="adminNote-in">
           <i class="fas fa-lock"></i>
-          Admin accounts are pre-authorized. Contact your Super Admin if you need access.
+          Admin accounts are pre-authorised. Contact your Super Admin if you need access.
         </div>
 
+        <!-- Google button -->
         <button class="g-btn" id="gLoginBtn" onclick="doGoogle()">
-          <svg class="g-svg" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-          Continue with Google
+          <div class="g-spin"></div>
+          <svg class="g-svg" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          <span class="g-label">Continue with Google</span>
         </button>
         <div class="divider">or continue with email</div>
 
@@ -861,8 +955,9 @@ body {
         <p class="alt-link">No account? <a href="#" onclick="switchTab('up');return false;">Create one free</a></p>
       </div>
 
-      <!-- ===== SIGNUP PANEL ===== -->
+      <!-- ═══════════ SIGNUP PANEL ═══════════ -->
       <div class="panel" id="panel-up">
+
         <div class="current-role-badge crb-student" id="badge-up-student">
           <i class="fas fa-graduation-cap"></i> Student Registration
         </div>
@@ -875,9 +970,16 @@ body {
           New admin accounts are restricted. An existing Super Admin must invite you first.
         </div>
 
+        <!-- Google button -->
         <button class="g-btn" id="gSignupBtn" onclick="doGoogle()">
-          <svg class="g-svg" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-          Continue with Google
+          <div class="g-spin"></div>
+          <svg class="g-svg" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          <span class="g-label">Continue with Google</span>
         </button>
         <div class="divider">or sign up with email</div>
 
@@ -900,6 +1002,7 @@ body {
               <div class="fe" id="su-lastErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
             </div>
           </div>
+
           <div class="fg">
             <label>Email Address *</label>
             <div class="iw">
@@ -908,6 +1011,7 @@ body {
             </div>
             <div class="fe" id="su-emailErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
           </div>
+
           <div class="fg">
             <label>Phone Number</label>
             <div class="iw">
@@ -917,7 +1021,7 @@ body {
             <div class="fe" id="su-phoneErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
           </div>
 
-          <!-- Admin-only field: admin code -->
+          <!-- Admin-only: invite code -->
           <div class="fg" id="adminCodeField" style="display:none;">
             <label>Admin Invite Code *</label>
             <div class="iw">
@@ -974,7 +1078,8 @@ body {
             <label>Password *</label>
             <div class="iw">
               <i class="fas fa-lock icon"></i>
-              <input type="password" id="su-pass" placeholder="Min. 8 characters" autocomplete="new-password" required oninput="checkStr(this.value)">
+              <input type="password" id="su-pass" placeholder="Min. 8 characters"
+                     autocomplete="new-password" required oninput="checkStr(this.value)">
               <button type="button" class="eye" onclick="toggleEye('su-pass',this)" tabindex="-1"><i class="fas fa-eye"></i></button>
             </div>
             <div class="strength">
@@ -986,7 +1091,8 @@ body {
 
           <div class="chk-row">
             <input type="checkbox" id="su-terms" required>
-            <span>I agree to NLTC's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. I consent to receiving exam updates via SMS and email.</span>
+            <span>I agree to NLTC's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+              I consent to receiving exam updates via SMS and email.</span>
           </div>
 
           <button type="submit" class="sbtn" id="suBtnId">
@@ -1009,56 +1115,61 @@ body {
         </button>
       </div>
 
-    </div>
-  </div>
-</div>
+    </div><!-- /.card -->
+  </div><!-- /.right -->
+</div><!-- /.page -->
 
-<!-- Lottie WC loader -->
+<!-- Lottie WC -->
 <script type="module" src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.10/dist/dotlottie-wc.js"></script>
 
 <script>
-/* ─────────────────────────────────────────────
-   STATE
-───────────────────────────────────────────── */
-let currentRole = 'student'; // 'student' | 'admin'
-let currentTab  = 'in';      // 'in' | 'up'
+/* ═══════════════════════════════════════════════════════
+   APP STATE
+═══════════════════════════════════════════════════════ */
+let currentRole    = 'student'; // 'student' | 'admin'
+let currentTab     = 'in';      // 'in' | 'up'
 let redirectTarget = 'dashboard.html';
 
-// Admin invite code — change this to a real secret
+/* Admin invite code — keep this server-side in production */
 const ADMIN_INVITE_CODE = 'NLTC-ADMIN-2025';
 
-/* ─────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
+   Expose showSuccess to the Firebase module script so
+   handleRedirectResult() can call it after DOM is ready
+═══════════════════════════════════════════════════════ */
+window.__nltcShowSuccess = showSuccess;
+
+/* ═══════════════════════════════════════════════════════
    ROLE MANAGEMENT
-───────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function setRole(role) {
   currentRole = role;
-  document.getElementById('role-student').classList.toggle('active', role === 'student');
-  document.getElementById('role-admin').classList.toggle('active', role === 'admin');
-
   const isAdmin = role === 'admin';
 
-  // badges
-  document.getElementById('badge-in-student').style.display = isAdmin ? 'none' : '';
-  document.getElementById('badge-in-admin').style.display   = isAdmin ? '' : 'none';
-  document.getElementById('badge-up-student').style.display = isAdmin ? 'none' : '';
-  document.getElementById('badge-up-admin').style.display   = isAdmin ? '' : 'none';
+  document.getElementById('role-student').classList.toggle('active', !isAdmin);
+  document.getElementById('role-admin').classList.toggle('active',   isAdmin);
 
-  // admin notes
+  /* badges */
+  document.getElementById('badge-in-student').style.display = isAdmin ? 'none' : '';
+  document.getElementById('badge-in-admin').style.display   = isAdmin ? ''     : 'none';
+  document.getElementById('badge-up-student').style.display = isAdmin ? 'none' : '';
+  document.getElementById('badge-up-admin').style.display   = isAdmin ? ''     : 'none';
+
+  /* admin notes */
   document.getElementById('adminNote-in').classList.toggle('show', isAdmin);
   document.getElementById('adminNote-up').classList.toggle('show', isAdmin);
 
-  // admin-only fields
-  document.getElementById('adminCodeField').style.display = isAdmin ? '' : 'none';
-  document.getElementById('studentFields').style.display = isAdmin ? 'none' : '';
+  /* field visibility */
+  document.getElementById('adminCodeField').style.display = isAdmin ? ''     : 'none';
+  document.getElementById('studentFields').style.display  = isAdmin ? 'none' : '';
 
-  // exam required attr
   const examEl = document.getElementById('su-exam');
   if (examEl) examEl.required = !isAdmin;
 }
 
-/* ─────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    TAB MANAGEMENT
-───────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function switchTab(t) {
   currentTab = t;
   document.getElementById('tab-in').classList.toggle('active', t === 'in');
@@ -1068,21 +1179,24 @@ function switchTab(t) {
   clearErrs();
 }
 
-/* ─────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    TOAST
-───────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function toast(msg, type = 'info') {
   const icons = { success:'fa-check-circle', error:'fa-times-circle', info:'fa-info-circle' };
   const t = document.createElement('div');
   t.className = `toast ${type}`;
-  t.innerHTML = `<i class="fas ${icons[type]}"></i><span>${msg}</span>`;
+  t.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span>${msg}</span>`;
   document.getElementById('toasts').appendChild(t);
-  setTimeout(() => { t.classList.add('t-out'); setTimeout(() => t.remove(), 350); }, 4500);
+  setTimeout(() => {
+    t.classList.add('t-out');
+    setTimeout(() => t.remove(), 350);
+  }, 5000);
 }
 
-/* ─────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    ERROR HELPERS
-───────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function showErr(id, msg) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -1098,9 +1212,9 @@ function clearErrs() {
   document.querySelectorAll('input.err, select.err').forEach(e => e.classList.remove('err'));
 }
 
-/* ─────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    EYE TOGGLE
-───────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function toggleEye(id, btn) {
   const inp = document.getElementById(id);
   const ico = btn.querySelector('i');
@@ -1109,121 +1223,147 @@ function toggleEye(id, btn) {
   ico.classList.toggle('fa-eye-slash');
 }
 
-/* ─────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    PASSWORD STRENGTH
-───────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function checkStr(v) {
   const fill = document.getElementById('strFill');
   const lbl  = document.getElementById('strLabel');
-  if (!v) { fill.style.width = '0'; lbl.textContent = 'Enter a password'; lbl.style.color = 'var(--text-3)'; return; }
+  if (!v) {
+    fill.style.width = '0';
+    lbl.textContent  = 'Enter a password';
+    lbl.style.color  = 'var(--text-3)';
+    return;
+  }
   let s = 0;
-  if (v.length >= 8) s++;
-  if (/[A-Z]/.test(v)) s++;
-  if (/[0-9]/.test(v)) s++;
+  if (v.length >= 8)          s++;
+  if (/[A-Z]/.test(v))        s++;
+  if (/[0-9]/.test(v))        s++;
   if (/[^A-Za-z0-9]/.test(v)) s++;
-  const lvl = [
-    { w:'18%', c:'#F04438', l:'Very weak' },
-    { w:'38%', c:'#F79009', l:'Weak' },
-    { w:'62%', c:'#FEC84B', l:'Fair' },
-    { w:'84%', c:'#12B76A', l:'Strong' },
-    { w:'100%',c:'#039855',l:'Very strong' }
-  ][s] || { w:'0%', c:'#e0e0e0', l:'Enter a password' };
-  fill.style.width = lvl.w;
+  const levels = [
+    { w:'18%',  c:'#F04438', l:'Very weak'    },
+    { w:'38%',  c:'#F79009', l:'Weak'         },
+    { w:'62%',  c:'#FEC84B', l:'Fair'         },
+    { w:'84%',  c:'#12B76A', l:'Strong'       },
+    { w:'100%', c:'#039855', l:'Very strong'  }
+  ];
+  const lvl = levels[s] || levels[0];
+  fill.style.width      = lvl.w;
   fill.style.background = lvl.c;
-  lbl.style.color = lvl.c;
-  lbl.textContent = lvl.l;
+  lbl.style.color       = lvl.c;
+  lbl.textContent       = lvl.l;
 }
 
-/* ─────────────────────────────────────────────
-   LOADING HELPERS
-───────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   BUTTON LOADING HELPERS
+═══════════════════════════════════════════════════════ */
 function setBtnLoading(btnId, spinId, icoId, txtId, loading, txt) {
   const btn = document.getElementById(btnId);
   const sp  = document.getElementById(spinId);
   const ic  = document.getElementById(icoId);
   const tx  = document.getElementById(txtId);
+  if (!btn) return;
   btn.disabled = loading;
-  sp.style.display = loading ? 'block' : 'none';
-  ic.style.display = loading ? 'none' : '';
-  if (txt) tx.textContent = txt;
+  if (sp) sp.style.display  = loading ? 'block' : 'none';
+  if (ic) ic.style.display  = loading ? 'none'  : '';
+  if (tx && txt) tx.textContent = txt;
 }
 
-/* ─────────────────────────────────────────────
+function setGBtnLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.classList.toggle('loading', loading);
+}
+
+/* ═══════════════════════════════════════════════════════
    SUCCESS OVERLAY
-───────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function showSuccess(title, msg, ctaLabel, target) {
-  document.getElementById('sucTitle').textContent   = title;
-  document.getElementById('sucMsg').textContent     = msg;
-  document.getElementById('sucCtaLbl').textContent  = ctaLabel;
+  document.getElementById('sucTitle').textContent  = title;
+  document.getElementById('sucMsg').textContent    = msg;
+  document.getElementById('sucCtaLbl').textContent = ctaLabel;
   redirectTarget = target;
+
+  /* Hide redirect loader if it's still showing */
+  const loader = document.getElementById('redirectLoading');
+  if (loader) loader.classList.remove('show');
+
   document.getElementById('successOv').classList.add('show');
+
+  /* Auto-redirect after 3 s */
+  setTimeout(redirect, 3000);
 }
 
 function redirect() {
   window.location.href = redirectTarget;
 }
 
-/* ─────────────────────────────────────────────
-   ROLE-BASED REDIRECT
-───────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   ROLE-BASED REDIRECT TARGET
+═══════════════════════════════════════════════════════ */
 function getRedirectTarget(role) {
   return role === 'admin' ? 'admin.html' : 'dashboard.html';
 }
 
-/* ─────────────────────────────────────────────
-   GOOGLE SIGN IN
-───────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   GOOGLE SIGN-IN  (signInWithRedirect — no popup)
+   We save the intended role to sessionStorage before
+   redirecting so we can check it on return.
+═══════════════════════════════════════════════════════ */
 async function doGoogle() {
-  const btns = ['gLoginBtn','gSignupBtn'];
-  btns.forEach(id => { const b = document.getElementById(id); if(b) b.disabled = true; });
+  /* Save current role selection across the redirect */
+  sessionStorage.setItem('nltc_intended_role', currentRole);
+
+  /* Show loading state on both Google buttons */
+  setGBtnLoading('gLoginBtn',  true);
+  setGBtnLoading('gSignupBtn', true);
+
   try {
-    const { user, data, isNew } = await window.__nltcGoogle();
-
-    // Check role match
-    const storedRole = data?.role || 'student';
-
-    if (currentRole === 'admin' && storedRole !== 'admin') {
-      toast('This account does not have admin privileges.', 'error');
-      btns.forEach(id => { const b = document.getElementById(id); if(b) b.disabled = false; });
-      return;
-    }
-
-    const target = getRedirectTarget(storedRole);
-    const fname  = user.displayName?.split(' ')[0] || 'User';
-
-    toast(`Welcome${isNew ? '' : ' back'}, ${fname}! 🎉`, 'success');
-    showSuccess(
-      isNew ? 'Account Created! 🚀' : `Welcome Back! 👋`,
-      isNew
-        ? `Hi ${fname}! Your NLTC account is ready. Let's get you to your dashboard.`
-        : `Good to see you again, ${fname}! Taking you to your dashboard.`,
-      storedRole === 'admin' ? 'Go to Admin Panel' : 'Go to Dashboard',
-      target
-    );
+    await window.__nltcGoogleRedirect();
+    /* Browser navigates away — nothing below runs */
   } catch(err) {
-    if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
-      toast('Google sign-in failed. Please try again.', 'error');
-      console.error(err);
-    }
-  } finally {
-    btns.forEach(id => { const b = document.getElementById(id); if(b) b.disabled = false; });
+    /* Only reached if redirect itself throws (very rare) */
+    setGBtnLoading('gLoginBtn',  false);
+    setGBtnLoading('gSignupBtn', false);
+    sessionStorage.removeItem('nltc_intended_role');
+
+    const ignored = [
+      'auth/popup-closed-by-user',
+      'auth/cancelled-popup-request',
+      'auth/user-cancelled',
+      'auth/redirect-cancelled-by-user'
+    ];
+    if (ignored.includes(err.code)) return;
+
+    console.error('[NLTC Google Redirect Error]', err.code, err.message, err);
+
+    const msgMap = {
+      'auth/network-request-failed': 'Network error. Please check your connection and try again.',
+      'auth/operation-not-allowed':  'Google Sign-In is not enabled. Contact the administrator.',
+      'auth/unauthorized-domain':    'This domain is not authorised. Contact the administrator.',
+    };
+    toast(msgMap[err.code] || `Sign-in failed (${err.code || 'unknown'}). Please try again.`, 'error');
   }
 }
 
-/* ─────────────────────────────────────────────
-   EMAIL LOGIN
-───────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   EMAIL / PASSWORD LOGIN
+═══════════════════════════════════════════════════════ */
 async function doLogin(e) {
   e.preventDefault();
   clearErrs();
+
   const email = document.getElementById('li-email').value.trim();
   const pass  = document.getElementById('li-pass').value;
   let ok = true;
-  if (!email) { showErr('li-emailErr','Email is required'); ok = false; }
-  if (!pass)  { showErr('li-passErr','Password is required'); ok = false; }
+
+  if (!email) { showErr('li-emailErr', 'Email is required'); ok = false; }
+  if (!pass)  { showErr('li-passErr',  'Password is required'); ok = false; }
   if (!ok) return;
 
   setBtnLoading('liBtnId','liSpin','liIco','liTxt', true, 'Signing in…');
+
   try {
     const { user, data } = await window.__nltcLogin(email, pass);
     const storedRole = data?.role || 'student';
@@ -1232,61 +1372,63 @@ async function doLogin(e) {
       toast('This account does not have admin privileges.', 'error');
       return;
     }
-    if (currentRole === 'student' && storedRole === 'admin') {
-      // Allow — admin can also use student login path
-    }
 
     const target = getRedirectTarget(storedRole);
     const fname  = data?.firstName || user.displayName?.split(' ')[0] || 'User';
+
     toast(`Welcome back, ${fname}! 🎉`, 'success');
     showSuccess(
-      `Welcome Back! 👋`,
+      'Welcome Back! 👋',
       `Signed in as ${user.email}. Redirecting you now.`,
       storedRole === 'admin' ? 'Go to Admin Panel' : 'Go to Dashboard',
       target
     );
   } catch(err) {
     const map = {
-      'auth/user-not-found':     ['li-emailErr', 'No account found with this email'],
-      'auth/wrong-password':     ['li-passErr',  'Incorrect password'],
-      'auth/invalid-credential': ['li-passErr',  'Incorrect email or password'],
-      'auth/invalid-email':      ['li-emailErr', 'Invalid email address'],
-      'auth/too-many-requests':  [null,           'Too many attempts. Try again later.'],
+      'auth/user-not-found':       ['li-emailErr', 'No account found with this email'],
+      'auth/wrong-password':       ['li-passErr',  'Incorrect password'],
+      'auth/invalid-credential':   ['li-passErr',  'Incorrect email or password'],
+      'auth/invalid-email':        ['li-emailErr', 'Invalid email address'],
+      'auth/user-disabled':        [null,          'This account has been disabled. Contact support.'],
+      'auth/too-many-requests':    [null,          'Too many failed attempts. Please wait and try again.'],
+      'auth/network-request-failed': [null,        'Network error. Check your connection and try again.'],
     };
     const m = map[err.code];
     if (m && m[0]) showErr(m[0], m[1]);
-    else toast(m ? m[1] : 'Sign in failed. Please try again.', 'error');
+    else toast(m ? m[1] : `Sign in failed (${err.code || 'unknown'}). Please try again.`, 'error');
+    console.error('[NLTC Login Error]', err.code, err.message);
   } finally {
     setBtnLoading('liBtnId','liSpin','liIco','liTxt', false, 'Sign In');
   }
 }
 
-/* ─────────────────────────────────────────────
-   EMAIL SIGNUP
-───────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   EMAIL / PASSWORD SIGNUP
+═══════════════════════════════════════════════════════ */
 async function doSignup(e) {
   e.preventDefault();
   clearErrs();
-  const first  = document.getElementById('su-first').value.trim();
-  const last   = document.getElementById('su-last').value.trim();
-  const email  = document.getElementById('su-email').value.trim();
-  const phone  = document.getElementById('su-phone').value.trim();
-  const pass   = document.getElementById('su-pass').value;
-  const terms  = document.getElementById('su-terms').checked;
+
+  const first = document.getElementById('su-first').value.trim();
+  const last  = document.getElementById('su-last').value.trim();
+  const email = document.getElementById('su-email').value.trim();
+  const phone = document.getElementById('su-phone').value.trim();
+  const pass  = document.getElementById('su-pass').value;
+  const terms = document.getElementById('su-terms').checked;
 
   let ok = true;
-  if (!first) { showErr('su-firstErr','First name required'); ok = false; }
-  if (!last)  { showErr('su-lastErr','Last name required'); ok = false; }
+  if (!first)                                          { showErr('su-firstErr','First name required'); ok = false; }
+  if (!last)                                           { showErr('su-lastErr', 'Last name required'); ok = false; }
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('su-emailErr','Valid email required'); ok = false; }
-  if (phone && !/^0[789][01]\d{8}$/.test(phone)) { showErr('su-phoneErr','Enter a valid Nigerian number'); ok = false; }
-  if (pass.length < 8) { showErr('su-passErr','Minimum 8 characters'); ok = false; }
-  if (!terms) { toast('Please accept the Terms & Privacy Policy', 'error'); ok = false; }
+  if (phone && !/^0[789][01]\d{8}$/.test(phone))      { showErr('su-phoneErr','Enter a valid Nigerian number (e.g. 08012345678)'); ok = false; }
+  if (pass.length < 8)                                 { showErr('su-passErr', 'Minimum 8 characters'); ok = false; }
+  if (!terms)                                          { toast('Please accept the Terms & Privacy Policy', 'error'); ok = false; }
 
   let assignedRole = 'student';
 
   if (currentRole === 'admin') {
     const code = document.getElementById('su-admincode').value.trim();
-    if (!code) { showErr('su-admincodeErr','Invite code required for admin signup'); ok = false; }
+    if (!code)                     { showErr('su-admincodeErr','Invite code is required for admin signup'); ok = false; }
     else if (code !== ADMIN_INVITE_CODE) { showErr('su-admincodeErr','Invalid invite code'); ok = false; }
     else assignedRole = 'admin';
   } else {
@@ -1297,6 +1439,7 @@ async function doSignup(e) {
   if (!ok) return;
 
   setBtnLoading('suBtnId','suSpin','suIco','suTxt', true, 'Creating account…');
+
   try {
     const extras = {
       firstName:   first,
@@ -1306,16 +1449,18 @@ async function doSignup(e) {
       role:        assignedRole,
       plan:        assignedRole === 'admin' ? 'admin' : 'free',
     };
+
     if (assignedRole === 'student') {
       extras.targetExam = document.getElementById('su-exam').value;
       extras.state      = document.getElementById('su-state').value || '';
     }
 
-    const { user } = await window.__nltcSignup(email, pass, extras);
+    await window.__nltcSignup(email, pass, extras);
     const target = getRedirectTarget(assignedRole);
+
     toast(`Account created! Welcome, ${first} 🎉`, 'success');
     showSuccess(
-      assignedRole === 'admin' ? 'Admin Account Created! 🛡️' : `Welcome to NLTC! 🚀`,
+      assignedRole === 'admin' ? 'Admin Account Created! 🛡️' : 'Welcome to NLTC! 🚀',
       assignedRole === 'admin'
         ? `Hi ${first}! Your admin account is ready.`
         : `Hi ${first}! Your free account is ready. Start your exam prep!`,
@@ -1324,21 +1469,23 @@ async function doSignup(e) {
     );
   } catch(err) {
     const map = {
-      'auth/email-already-in-use': ['su-emailErr','An account exists with this email'],
+      'auth/email-already-in-use': ['su-emailErr','An account already exists with this email'],
       'auth/invalid-email':        ['su-emailErr','Invalid email address'],
-      'auth/weak-password':        ['su-passErr', 'Password too weak (min 8 chars)'],
+      'auth/weak-password':        ['su-passErr', 'Password too weak — use at least 8 characters'],
+      'auth/network-request-failed': [null,       'Network error. Check your connection and try again.'],
     };
     const m = map[err.code];
-    if (m) showErr(m[0], m[1]);
-    else toast('Registration failed. Please try again.', 'error');
+    if (m && m[0]) showErr(m[0], m[1]);
+    else toast(m ? m[1] : `Registration failed (${err.code || 'unknown'}). Please try again.`, 'error');
+    console.error('[NLTC Signup Error]', err.code, err.message);
   } finally {
     setBtnLoading('suBtnId','suSpin','suIco','suTxt', false, 'Create Account');
   }
 }
 
-/* ─────────────────────────────────────────────
-   FORGOT PASSWORD
-───────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   FORGOT PASSWORD MODAL
+═══════════════════════════════════════════════════════ */
 function openForgot(e) { e && e.preventDefault(); document.getElementById('forgotBg').classList.add('open'); }
 function closeForgot()  { document.getElementById('forgotBg').classList.remove('open'); }
 
@@ -1357,85 +1504,92 @@ async function handleReset() {
     const map = {
       'auth/user-not-found': 'No account found with this email',
       'auth/invalid-email':  'Enter a valid email address',
+      'auth/network-request-failed': 'Network error. Please try again.',
     };
-    showErr('resetEmailErr', map[err.code] || 'Could not send reset link. Try again.');
+    showErr('resetEmailErr', map[err.code] || 'Could not send reset link. Please try again.');
+    console.error('[NLTC Reset Error]', err.code, err.message);
   } finally {
     setBtnLoading('resetBtn','resetSpin','resetIco','resetTxt', false, 'Send Reset Link');
   }
 }
 
-/* ─────────────────────────────────────────────
-   CLOSE MODAL ON OVERLAY CLICK
-───────────────────────────────────────────── */
+/* Close modal on overlay click */
 document.getElementById('forgotBg').addEventListener('click', function(e) {
   if (e.target === this) closeForgot();
 });
 
-/* ─────────────────────────────────────────────
-   AUTH STATE — auto-redirect if already logged in
-───────────────────────────────────────────── */
-window.__nltcAuthReady = async function(user) {
-  try {
-    const db = window.__nltcDb;
-    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    const snap = await getDoc(doc(db, 'users', user.uid));
-    if (snap.exists()) {
-      const role = snap.data()?.role || 'student';
-      // Only auto-redirect if not currently signing up
-      if (document.getElementById('successOv').classList.contains('show')) return;
-      // Uncomment to enable auto-redirect:
-      // window.location.href = getRedirectTarget(role);
-    }
-  } catch(e) {}
-};
+/* ═══════════════════════════════════════════════════════
+   PROCESS ANY PENDING TOAST (set by redirect handler
+   before DOM was fully ready)
+═══════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.__nltcPendingToast) {
+    setTimeout(() => {
+      toast(window.__nltcPendingToast.msg, window.__nltcPendingToast.type);
+      window.__nltcPendingToast = null;
+    }, 400);
+  }
+});
 
-/* ─────────────────────────────────────────────
-   BACKGROUND CANVAS (particles)
-───────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   BACKGROUND CANVAS PARTICLES
+═══════════════════════════════════════════════════════ */
 (function() {
   const canvas = document.getElementById('bg-canvas');
-  const ctx = canvas.getContext('2d');
+  const ctx    = canvas.getContext('2d');
   let W, H, pts;
   const N = 55, MAX_D = 110, SPD = 0.3;
+
   function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-  function ri(a,b) { return Math.random()*(b-a)+a; }
+  function ri(a, b) { return Math.random() * (b - a) + a; }
+
   function init() {
     resize();
-    pts = Array.from({length:N}, () => ({
-      x:ri(0,W), y:ri(0,H),
-      vx:ri(-SPD,SPD), vy:ri(-SPD,SPD),
-      r:ri(0.7,1.8),
-      gold: Math.random()<0.18
+    pts = Array.from({ length: N }, () => ({
+      x: ri(0, W), y: ri(0, H),
+      vx: ri(-SPD, SPD), vy: ri(-SPD, SPD),
+      r: ri(0.7, 1.8),
+      gold: Math.random() < 0.18
     }));
   }
+
   function tick() {
-    ctx.clearRect(0,0,W,H);
+    ctx.clearRect(0, 0, W, H);
     pts.forEach(p => {
       p.x += p.vx; p.y += p.vy;
-      if(p.x<0)p.x=W; if(p.x>W)p.x=0;
-      if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+      if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
     });
-    for(let i=0;i<pts.length;i++) {
-      for(let j=i+1;j<pts.length;j++) {
-        const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
-        const d=Math.sqrt(dx*dx+dy*dy);
-        if(d<MAX_D) {
-          const a=0.09*(1-d/MAX_D);
-          ctx.strokeStyle = (pts[i].gold||pts[j].gold) ? `rgba(240,165,0,${a*0.55})` : `rgba(255,255,255,${a})`;
-          ctx.lineWidth=0.5;
-          ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y); ctx.stroke();
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) {
+        const dx = pts[i].x - pts[j].x;
+        const dy = pts[i].y - pts[j].y;
+        const d  = Math.sqrt(dx * dx + dy * dy);
+        if (d < MAX_D) {
+          const a = 0.09 * (1 - d / MAX_D);
+          ctx.strokeStyle = (pts[i].gold || pts[j].gold)
+            ? `rgba(240,165,0,${a * 0.55})`
+            : `rgba(255,255,255,${a})`;
+          ctx.lineWidth = 0.5;
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x, pts[i].y);
+          ctx.lineTo(pts[j].x, pts[j].y);
+          ctx.stroke();
         }
       }
     }
     pts.forEach(p => {
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       ctx.fillStyle = p.gold ? 'rgba(240,165,0,0.5)' : 'rgba(255,255,255,0.22)';
       ctx.fill();
     });
     requestAnimationFrame(tick);
   }
-  window.addEventListener('resize', ()=>{resize();init();});
-  init(); tick();
+
+  window.addEventListener('resize', () => { resize(); init(); });
+  init();
+  tick();
 })();
 </script>
 </body>
