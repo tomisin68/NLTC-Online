@@ -62,7 +62,6 @@ button{font-family:var(--font-body);cursor:pointer;border:none;background:none;}
 .plan-pro{background:rgba(240,165,0,.2);color:var(--gold);}
 .plan-elite{background:rgba(122,90,248,.25);color:#B79FFF;}
 
-/* XP Bar */
 .sb-xp{padding:10px 22px 12px;border-bottom:1px solid rgba(255,255,255,.06);}
 .sb-xp-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
 .sb-xp-label{font-size:.68rem;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.08em;}
@@ -91,7 +90,6 @@ button{font-family:var(--font-body);cursor:pointer;border:none;background:none;}
 .sb-logout{width:100%;padding:9px 12px;background:rgba(240,68,56,.07);border:1px solid rgba(240,68,56,.15);border-radius:var(--r-sm);color:var(--error);font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;}
 .sb-logout:hover{background:rgba(240,68,56,.15);}
 
-/* Overlay */
 .sb-overlay{display:none;position:fixed;inset:0;background:rgba(11,29,58,.6);z-index:290;backdrop-filter:blur(3px);}
 .sb-overlay.show{display:block;}
 
@@ -134,7 +132,6 @@ button{font-family:var(--font-body);cursor:pointer;border:none;background:none;}
 .page-hdr{margin-bottom:18px;}
 .page-hdr h2{font-family:var(--font-head);font-size:1.3rem;font-weight:800;color:var(--navy);}
 .page-hdr p{font-size:.83rem;color:var(--text-3);margin-top:3px;}
-.page-hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap;}
 
 /* ═══════════════════════════════════════════
    STAT CARDS
@@ -299,32 +296,19 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
 .video-meta{font-size:.7rem;color:var(--text-3);}
 .video-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
 
-/* CBT */
-.cbt-wrap{max-width:700px;margin:0 auto;}
-.cbt-q-card{background:white;border-radius:var(--r-lg);border:1px solid var(--border);padding:22px;margin-bottom:14px;}
-.cbt-q-num{font-size:.72rem;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
-.cbt-q-text{font-size:.95rem;font-weight:600;color:var(--navy);line-height:1.6;margin-bottom:18px;}
-.cbt-options{display:flex;flex-direction:column;gap:9px;}
-.cbt-opt{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r-sm);cursor:pointer;transition:all .18s;font-size:.875rem;color:var(--text-1);font-weight:500;width:100%;text-align:left;background:var(--surface);}
-.cbt-opt:hover{border-color:var(--navy);background:white;}
-.cbt-opt.selected{border-color:var(--navy);background:rgba(11,29,58,.04);font-weight:700;}
-.cbt-opt.correct{border-color:var(--success);background:var(--success-bg);color:#039855;}
-.cbt-opt.wrong{border-color:var(--error);background:var(--error-bg);color:#D92D20;}
-.cbt-opt-letter{width:28px;height:28px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;flex-shrink:0;transition:all .18s;}
-.cbt-opt.selected .cbt-opt-letter{background:var(--navy);color:white;}
-.cbt-opt.correct .cbt-opt-letter{background:var(--success);color:white;}
-.cbt-opt.wrong .cbt-opt-letter{background:var(--error);color:white;}
-.cbt-progress-bar{height:5px;background:var(--surface-2);border-radius:100px;margin-bottom:18px;overflow:hidden;}
-.cbt-progress-fill{height:100%;background:linear-gradient(90deg,var(--navy),var(--gold));border-radius:100px;transition:width .4s ease;}
-.cbt-timer{display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:700;color:var(--text-2);}
-.cbt-timer.warning{color:var(--error);}
-.cbt-result-card{background:white;border-radius:var(--r-xl);border:1px solid var(--border);padding:32px;text-align:center;max-width:500px;margin:0 auto;}
-.cbt-score-ring{width:100px;height:100px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:1.8rem;font-weight:800;margin:0 auto 16px;position:relative;}
-.score-great{background:var(--success-bg);color:var(--success);border:3px solid var(--success);}
-.score-good{background:var(--gold-pale);color:var(--gold);border:3px solid var(--gold);}
-.score-poor{background:var(--error-bg);color:var(--error);border:3px solid var(--error);}
+/* ═══════════════════════════════════════════
+   CBT LAUNCH CARDS
+═══════════════════════════════════════════ */
+.cbt-launch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;max-width:820px;margin-bottom:20px;}
+.cbt-launch-card{background:white;border-radius:var(--r-lg);border:1px solid var(--border);box-shadow:var(--shadow-sm);cursor:pointer;transition:all .2s;text-align:center;padding:24px 18px;}
+.cbt-launch-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:rgba(11,29,58,.14);}
+.cbt-launch-icon{font-size:2.2rem;margin-bottom:10px;}
+.cbt-launch-name{font-family:var(--font-head);font-size:.92rem;font-weight:700;color:var(--navy);margin-bottom:4px;}
+.cbt-launch-meta{font-size:.74rem;color:var(--text-3);margin-bottom:10px;}
 
-/* Leaderboard */
+/* ═══════════════════════════════════════════
+   LEADERBOARD
+═══════════════════════════════════════════ */
 .lb-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);}
 .lb-row:last-child{border-bottom:none;}
 .lb-rank{width:28px;font-family:var(--font-head);font-size:.9rem;font-weight:800;color:var(--text-3);text-align:center;flex-shrink:0;}
@@ -338,7 +322,9 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
 .lb-xp{font-family:var(--font-head);font-size:.84rem;font-weight:800;color:var(--gold);white-space:nowrap;}
 .lb-me{background:rgba(240,165,0,.06);border-radius:var(--r-sm);padding:0 6px;margin:-2px -6px;}
 
-/* Schedule */
+/* ═══════════════════════════════════════════
+   SCHEDULE
+═══════════════════════════════════════════ */
 .sched-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
 .sched-item:last-child{border-bottom:none;}
 .sched-date{width:46px;height:46px;border-radius:10px;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
@@ -349,33 +335,42 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
 .sched-meta{font-size:.7rem;color:var(--text-3);margin-top:2px;}
 .sched-date-today .sched-date{background:var(--error);}
 
-/* Announcement */
+/* ═══════════════════════════════════════════
+   ANNOUNCEMENTS
+═══════════════════════════════════════════ */
 .annc-item{padding:13px 16px;background:var(--surface);border-radius:var(--r-md);border:1px solid var(--border);margin-bottom:9px;}
 .annc-item:last-child{margin-bottom:0;}
-.annc-cat{display:inline-flex;align-items:center;gap:5px;font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;}
 .annc-title{font-size:.86rem;font-weight:700;color:var(--navy);margin-bottom:4px;}
 .annc-text{font-size:.78rem;color:var(--text-2);line-height:1.6;}
 .annc-time{font-size:.68rem;color:var(--text-3);margin-top:5px;}
 
-/* Achievement chips */
+/* ═══════════════════════════════════════════
+   ACHIEVEMENTS
+═══════════════════════════════════════════ */
 .achievement-chip{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;background:var(--gold-pale);border:1px solid rgba(240,165,0,.2);border-radius:var(--r-sm);margin:4px;}
 .achievement-chip.locked{background:var(--surface-2);border-color:var(--border);opacity:.5;}
 .ach-icon{font-size:1.2rem;}
 .ach-label{font-size:.76rem;font-weight:700;color:#A07000;}
 .achievement-chip.locked .ach-label{color:var(--text-3);}
 
-/* Upgrade banner */
+/* ═══════════════════════════════════════════
+   UPGRADE BANNER
+═══════════════════════════════════════════ */
 .upgrade-banner{background:linear-gradient(135deg,var(--navy),var(--navy-3));border-radius:var(--r-lg);padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px;}
 .ub-text h3{font-family:var(--font-head);font-size:1rem;font-weight:800;color:white;margin-bottom:3px;}
 .ub-text p{font-size:.8rem;color:rgba(255,255,255,.5);line-height:1.5;}
 
-/* Filter bar */
+/* ═══════════════════════════════════════════
+   FILTER BAR
+═══════════════════════════════════════════ */
 .filter-bar{display:flex;align-items:center;gap:9px;margin-bottom:14px;flex-wrap:wrap;}
 .filter-input{height:38px;padding:0 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:var(--font-body);font-size:.82rem;color:var(--text-1);background:white;outline:none;transition:border-color .2s;-webkit-appearance:none;}
 .filter-input:focus{border-color:var(--navy);}
 .filter-select{height:38px;padding:0 30px 0 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:var(--font-body);font-size:.82rem;color:var(--text-1);background:white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%237A90B0' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;}
 
-/* Settings */
+/* ═══════════════════════════════════════════
+   SETTINGS
+═══════════════════════════════════════════ */
 .settings-section{background:white;border-radius:var(--r-lg);border:1px solid var(--border);margin-bottom:14px;}
 .settings-section-hdr{padding:14px 18px;border-bottom:1px solid var(--border);font-family:var(--font-head);font-size:.88rem;font-weight:700;color:var(--navy);}
 .settings-section-body{padding:18px;}
@@ -422,10 +417,12 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
   .videos-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
   .upgrade-banner{flex-direction:column;}
   #vpVideo{max-height:50vw;}
+  .cbt-launch-grid{grid-template-columns:1fr 1fr;}
 }
 @media(max-width:420px){
   .stats-grid{grid-template-columns:1fr 1fr;}
   .videos-grid{grid-template-columns:1fr 1fr;}
+  .cbt-launch-grid{grid-template-columns:1fr 1fr;}
 }
 </style>
 </head>
@@ -551,7 +548,7 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
     <i class="fas fa-search"></i>
     <input type="text" id="globalSearch" placeholder="Search lessons, subjects…" oninput="handleSearch(this.value)">
   </div>
-  <div class="topbar-actions" style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+  <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
     <div class="tb-streak" id="tbStreak"><i class="fas fa-fire"></i> <span id="streakCount">0</span></div>
     <button class="tb-btn" onclick="showView('announcements',null)" title="Announcements">
       <i class="fas fa-bell"></i>
@@ -564,9 +561,8 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
 <main class="main">
 <div class="content">
 
-<!-- HOME -->
+<!-- ───────────────────── HOME ───────────────────── -->
 <div class="view active" id="view-home">
-  <!-- Upgrade banner (hidden for Pro/Elite) -->
   <div class="upgrade-banner" id="upgradeBanner">
     <div class="ub-text">
       <h3>🔓 Unlock Full Access</h3>
@@ -602,7 +598,38 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
           <div class="loading"><div class="spinner"></div></div>
         </div>
       </div>
-      <!-- CBT Progress chart -->
+      <!-- CBT quick launch from home -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📝 Quick CBT Practice</div>
+          <button class="card-action" onclick="showView('cbt',null)">All Subjects <i class="fas fa-arrow-right"></i></button>
+        </div>
+        <div class="card-body" style="padding:14px;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;">
+            <div onclick="openCBTPage()" style="cursor:pointer;background:linear-gradient(135deg,var(--navy),var(--navy-3));border-radius:var(--r-md);padding:14px;text-align:center;transition:transform .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+              <div style="font-size:1.4rem;margin-bottom:5px;">🎓</div>
+              <div style="font-family:var(--font-head);font-size:.78rem;font-weight:700;color:white;">JAMB Simulation</div>
+              <div style="font-size:.67rem;color:rgba(255,255,255,.45);margin-top:2px;">4 subjects · 2hrs</div>
+            </div>
+            <div onclick="openCBTPage('Mathematics')" style="cursor:pointer;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:14px;text-align:center;transition:transform .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+              <div style="font-size:1.4rem;margin-bottom:5px;">📐</div>
+              <div style="font-family:var(--font-head);font-size:.78rem;font-weight:700;color:var(--navy);">Mathematics</div>
+              <div style="font-size:.67rem;color:var(--text-3);margin-top:2px;">JAMB · 40 Qs</div>
+            </div>
+            <div onclick="openCBTPage('English Language')" style="cursor:pointer;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:14px;text-align:center;transition:transform .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+              <div style="font-size:1.4rem;margin-bottom:5px;">📖</div>
+              <div style="font-family:var(--font-head);font-size:.78rem;font-weight:700;color:var(--navy);">English</div>
+              <div style="font-size:.67rem;color:var(--text-3);margin-top:2px;">JAMB · 60 Qs</div>
+            </div>
+            <div onclick="openCBTPage('Physics')" style="cursor:pointer;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:14px;text-align:center;transition:transform .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+              <div style="font-size:1.4rem;margin-bottom:5px;">⚡</div>
+              <div style="font-family:var(--font-head);font-size:.78rem;font-weight:700;color:var(--navy);">Physics</div>
+              <div style="font-size:.67rem;color:var(--text-3);margin-top:2px;">WAEC · 50 Qs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- CBT Performance Chart -->
       <div class="card">
         <div class="card-header"><div class="card-title">📊 CBT Performance</div></div>
         <div class="card-body"><div style="height:180px;"><canvas id="cbtChart"></canvas></div></div>
@@ -614,7 +641,7 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
         <div class="card-header"><div class="card-title">🏆 Achievements</div></div>
         <div class="card-body" style="padding:12px 14px;"><div id="achievementsWrap"><div class="loading"><div class="spinner"></div></div></div></div>
       </div>
-      <!-- Top leaderboard -->
+      <!-- Mini Leaderboard -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">🥇 Leaderboard</div>
@@ -624,7 +651,7 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
           <div class="loading"><div class="spinner"></div></div>
         </div>
       </div>
-      <!-- Upcoming classes -->
+      <!-- Upcoming Classes -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">📅 Upcoming Classes</div>
@@ -638,7 +665,7 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
   </div>
 </div>
 
-<!-- LESSONS -->
+<!-- ───────────────────── LESSONS ───────────────────── -->
 <div class="view" id="view-lessons">
   <div class="page-hdr"><h2>🎬 Video Lessons</h2><p>Learn at your pace with expert-taught sessions</p></div>
   <div class="filter-bar">
@@ -659,99 +686,87 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
   <div id="lessonsCount" style="font-size:.78rem;color:var(--text-3);margin-top:10px;text-align:right;"></div>
 </div>
 
-<!-- CBT -->
+<!-- ───────────────────── CBT ───────────────────── -->
 <div class="view" id="view-cbt">
-  <div id="cbt-setup">
-    <div class="page-hdr"><h2>📝 CBT Practice</h2><p>Simulate exam conditions with past questions</p></div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;max-width:800px;">
-      <div class="card" style="cursor:pointer;" onclick="startCBT('Mathematics','JAMB / UTME')">
-        <div class="card-body" style="text-align:center;padding:24px;">
-          <div style="font-size:2.2rem;margin-bottom:10px;">📐</div>
-          <div style="font-family:var(--font-head);font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:4px;">Mathematics</div>
-          <div style="font-size:.75rem;color:var(--text-3);">JAMB / UTME · 40 Questions</div>
-          <div class="badge badge-blue" style="margin-top:10px;">Start Session</div>
-        </div>
-      </div>
-      <div class="card" style="cursor:pointer;" onclick="startCBT('English Language','JAMB / UTME')">
-        <div class="card-body" style="text-align:center;padding:24px;">
-          <div style="font-size:2.2rem;margin-bottom:10px;">📖</div>
-          <div style="font-family:var(--font-head);font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:4px;">English Language</div>
-          <div style="font-size:.75rem;color:var(--text-3);">JAMB / UTME · 60 Questions</div>
-          <div class="badge badge-blue" style="margin-top:10px;">Start Session</div>
-        </div>
-      </div>
-      <div class="card" style="cursor:pointer;" onclick="startCBT('Chemistry','WAEC SSCE')">
-        <div class="card-body" style="text-align:center;padding:24px;">
-          <div style="font-size:2.2rem;margin-bottom:10px;">⚗️</div>
-          <div style="font-family:var(--font-head);font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:4px;">Chemistry</div>
-          <div style="font-size:.75rem;color:var(--text-3);">WAEC SSCE · 50 Questions</div>
-          <div class="badge badge-gold" style="margin-top:10px;">Start Session</div>
-        </div>
-      </div>
-      <div class="card" style="cursor:pointer;" onclick="startCBT('Physics','WAEC SSCE')">
-        <div class="card-body" style="text-align:center;padding:24px;">
-          <div style="font-size:2.2rem;margin-bottom:10px;">⚡</div>
-          <div style="font-family:var(--font-head);font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:4px;">Physics</div>
-          <div style="font-size:.75rem;color:var(--text-3);">WAEC SSCE · 50 Questions</div>
-          <div class="badge badge-gold" style="margin-top:10px;">Start Session</div>
-        </div>
-      </div>
-      <div class="card" style="cursor:pointer;" onclick="startCBT('Biology','NECO')">
-        <div class="card-body" style="text-align:center;padding:24px;">
-          <div style="font-size:2.2rem;margin-bottom:10px;">🌿</div>
-          <div style="font-family:var(--font-head);font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:4px;">Biology</div>
-          <div style="font-size:.75rem;color:var(--text-3);">NECO · 50 Questions</div>
-          <div class="badge badge-green" style="margin-top:10px;">Start Session</div>
-        </div>
-      </div>
-      <div class="card" style="cursor:pointer;" onclick="startCBT('Economics','WAEC SSCE')">
-        <div class="card-body" style="text-align:center;padding:24px;">
-          <div style="font-size:2.2rem;margin-bottom:10px;">📈</div>
-          <div style="font-family:var(--font-head);font-size:.95rem;font-weight:700;color:var(--navy);margin-bottom:4px;">Economics</div>
-          <div style="font-size:.75rem;color:var(--text-3);">WAEC SSCE · 50 Questions</div>
-          <div class="badge badge-green" style="margin-top:10px;">Start Session</div>
-        </div>
-      </div>
+  <div class="page-hdr"><h2>📝 CBT Practice</h2><p>Simulate exam conditions with live questions — powered by ALOC</p></div>
+
+  <!-- Launch cards -->
+  <div class="cbt-launch-grid">
+    <div class="cbt-launch-card" onclick="openCBTPage()">
+      <div style="position:absolute;top:12px;right:12px;"><span class="badge badge-red" style="font-size:.6rem;">HOT</span></div>
+      <div class="cbt-launch-icon">🎓</div>
+      <div class="cbt-launch-name">Full JAMB Simulation</div>
+      <div class="cbt-launch-meta">4 subjects · 180 questions · 2 hours</div>
+      <span class="badge badge-blue">Launch Now</span>
     </div>
-    <div class="card" style="margin-top:18px;max-width:800px;">
-      <div class="card-header"><div class="card-title">📊 Past Sessions</div></div>
-      <div class="card-body" style="padding:0;"><div class="table-wrap"><table>
-        <thead><tr><th>Subject</th><th>Exam</th><th>Score</th><th>Date</th></tr></thead>
-        <tbody id="cbtHistory"><tr><td colspan="4"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
-      </table></div></div>
+    <div class="cbt-launch-card" onclick="openCBTPage('Mathematics')" style="position:relative;">
+      <div class="cbt-launch-icon">📐</div>
+      <div class="cbt-launch-name">Mathematics</div>
+      <div class="cbt-launch-meta">JAMB / UTME · 40 Questions</div>
+      <span class="badge badge-blue">Start</span>
+    </div>
+    <div class="cbt-launch-card" onclick="openCBTPage('English Language')" style="position:relative;">
+      <div class="cbt-launch-icon">📖</div>
+      <div class="cbt-launch-name">English Language</div>
+      <div class="cbt-launch-meta">JAMB / UTME · 60 Questions</div>
+      <span class="badge badge-blue">Start</span>
+    </div>
+    <div class="cbt-launch-card" onclick="openCBTPage('Chemistry')" style="position:relative;">
+      <div class="cbt-launch-icon">⚗️</div>
+      <div class="cbt-launch-name">Chemistry</div>
+      <div class="cbt-launch-meta">WAEC SSCE · 50 Questions</div>
+      <span class="badge badge-gold">Start</span>
+    </div>
+    <div class="cbt-launch-card" onclick="openCBTPage('Physics')" style="position:relative;">
+      <div class="cbt-launch-icon">⚡</div>
+      <div class="cbt-launch-name">Physics</div>
+      <div class="cbt-launch-meta">WAEC SSCE · 50 Questions</div>
+      <span class="badge badge-gold">Start</span>
+    </div>
+    <div class="cbt-launch-card" onclick="openCBTPage('Biology')" style="position:relative;">
+      <div class="cbt-launch-icon">🌿</div>
+      <div class="cbt-launch-name">Biology</div>
+      <div class="cbt-launch-meta">NECO · 50 Questions</div>
+      <span class="badge badge-green">Start</span>
+    </div>
+    <div class="cbt-launch-card" onclick="openCBTPage('Economics')" style="position:relative;">
+      <div class="cbt-launch-icon">📈</div>
+      <div class="cbt-launch-name">Economics</div>
+      <div class="cbt-launch-meta">WAEC SSCE · 50 Questions</div>
+      <span class="badge badge-green">Start</span>
+    </div>
+    <div class="cbt-launch-card" onclick="openCBTPage('Government')" style="position:relative;">
+      <div class="cbt-launch-icon">🏛️</div>
+      <div class="cbt-launch-name">Government</div>
+      <div class="cbt-launch-meta">WAEC SSCE · 50 Questions</div>
+      <span class="badge badge-green">Start</span>
     </div>
   </div>
-  <!-- Active CBT session -->
-  <div id="cbt-session" style="display:none;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
-      <div>
-        <div style="font-family:var(--font-head);font-size:1.1rem;font-weight:800;color:var(--navy);" id="cbtSessionTitle">CBT Session</div>
-        <div style="font-size:.78rem;color:var(--text-3);margin-top:2px;">Answer all questions carefully</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div class="cbt-timer" id="cbtTimer"><i class="fas fa-clock"></i> <span id="cbtTimerVal">45:00</span></div>
-        <button class="btn-outline btn-sm" onclick="endCBTEarly()"><i class="fas fa-stop"></i> Submit</button>
-      </div>
+
+  <!-- Past sessions -->
+  <div class="card" style="max-width:820px;">
+    <div class="card-header">
+      <div class="card-title">📊 Past Sessions</div>
+      <button class="btn-outline btn-sm" onclick="loadCBTHistory()"><i class="fas fa-sync"></i> Refresh</button>
     </div>
-    <div class="cbt-progress-bar"><div class="cbt-progress-fill" id="cbtProgressFill" style="width:0%"></div></div>
-    <div style="font-size:.78rem;color:var(--text-3);margin-bottom:16px;">Question <span id="cbtQNum">1</span> of <span id="cbtQTotal">0</span></div>
-    <div class="cbt-wrap" id="cbtQuestionArea"></div>
-    <div style="display:flex;justify-content:space-between;margin-top:16px;max-width:700px;">
-      <button class="btn-outline" id="cbtPrevBtn" onclick="cbtNav(-1)" disabled><i class="fas fa-chevron-left"></i> Previous</button>
-      <button class="btn-navy" id="cbtNextBtn" onclick="cbtNav(1)">Next <i class="fas fa-chevron-right"></i></button>
+    <div class="card-body" style="padding:0;">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Subject</th><th>Exam</th><th>Score</th><th>Date</th></tr></thead>
+          <tbody id="cbtHistory"><tr><td colspan="4"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
+        </table>
+      </div>
     </div>
   </div>
-  <!-- CBT Result -->
-  <div id="cbt-result" style="display:none;"></div>
 </div>
 
-<!-- LIVE CLASSES -->
+<!-- ───────────────────── LIVE CLASSES ───────────────────── -->
 <div class="view" id="view-live">
   <div class="page-hdr"><h2>📡 Live Classes</h2><p>Join real-time sessions with your teachers</p></div>
   <div id="liveSessionsList"><div class="loading"><div class="spinner"></div></div></div>
 </div>
 
-<!-- LEADERBOARD -->
+<!-- ───────────────────── LEADERBOARD ───────────────────── -->
 <div class="view" id="view-leaderboard">
   <div class="page-hdr"><h2>🏆 National Leaderboard</h2><p>Top students across all subjects and states</p></div>
   <div class="dash-grid">
@@ -772,19 +787,19 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
   </div>
 </div>
 
-<!-- ANNOUNCEMENTS -->
+<!-- ───────────────────── ANNOUNCEMENTS ───────────────────── -->
 <div class="view" id="view-announcements">
   <div class="page-hdr"><h2>📢 Announcements</h2><p>Important updates from NLTC</p></div>
   <div id="announcementsList"><div class="loading"><div class="spinner"></div></div></div>
 </div>
 
-<!-- SCHEDULE -->
+<!-- ───────────────────── SCHEDULE ───────────────────── -->
 <div class="view" id="view-schedule">
   <div class="page-hdr"><h2>📅 Class Schedule</h2><p>Upcoming live and recorded sessions</p></div>
   <div id="scheduleList"><div class="loading"><div class="spinner"></div></div></div>
 </div>
 
-<!-- SETTINGS -->
+<!-- ───────────────────── SETTINGS ───────────────────── -->
 <div class="view" id="view-settings">
   <div class="page-hdr"><h2>⚙️ Settings</h2></div>
   <div style="max-width:680px;">
@@ -847,7 +862,7 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
 </div><!-- /content -->
 </main>
 
-<!-- UPGRADE MODAL -->
+<!-- ═══════════ UPGRADE MODAL ═══════════ -->
 <div style="display:none;position:fixed;inset:0;background:rgba(11,29,58,.55);z-index:500;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px;" id="upgradeModal">
   <div style="background:white;border-radius:var(--r-xl);padding:32px;width:500px;max-width:100%;box-shadow:0 24px 60px rgba(11,29,58,.18);animation:viewIn .25s ease;">
     <div style="text-align:center;margin-bottom:24px;">
@@ -876,7 +891,7 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
   </div>
 </div>
 
-<!-- ═══════════ FIREBASE + LOGIC ═══════════ -->
+<!-- ═══════════ FIREBASE + APP LOGIC ═══════════ -->
 <script type="module">
 import { initializeApp }     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -885,7 +900,7 @@ import {
   query, orderBy, limit, where, serverTimestamp, onSnapshot, increment
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* ── CONFIG ────────────────────────────────── */
+/* ── CONFIG ── */
 const FIREBASE_CONFIG = {
   apiKey:"AIzaSyA9vzT1TBpTdRJUfyYm51goS-5HfL3FcbU",
   authDomain:"nltc-online.firebaseapp.com",
@@ -894,253 +909,280 @@ const FIREBASE_CONFIG = {
   messagingSenderId:"267993935158",
   appId:"1:267993935158:web:723c13b2564b817fbc9797"
 };
-const AGORA_APP_ID = '5eae75b2cc3d48cc84446b94d3877f88';
-// ⚠️ Change this to your Render URL once deployed
-const BACKEND_URL  = 'https://nltc-backend.onrender.com';
+const AGORA_APP_ID  = '5eae75b2cc3d48cc84446b94d3877f88';
+const BACKEND_URL   = 'https://nltc-backend.onrender.com';
+const CBT_PAGE      = 'cbt.html'; // path to your cbt.html file
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-/* ── STATE ─────────────────────────────────── */
+/* ── STATE ── */
 let currentUser = null, userData = null;
-let allVideos   = [], allQuestions = [];
+let allVideos   = [];
 let agoraClient = null, lvChatUnsub = null, lvViewerUnsub = null;
 let currentLiveSessionId = null;
-let cbtState    = { questions:[], answers:[], current:0, timer:null, subject:'', exam:'' };
 let selectedPlan = 'pro';
 
-/* ── HELPERS ───────────────────────────────── */
+/* ── HELPERS ── */
 const AV_COLORS = ['#E67E22','#2E86AB','#6C3483','#117A65','#922B21','#1B4F72','#1E8449','#00796B'];
 const LEVEL_NAMES = ['Starter','Scholar','Explorer','Achiever','Champion','Elite','Legend'];
+
 function xpToLevel(xp) {
-  const thresholds = [0,500,1500,3500,7000,12000,20000];
-  let lvl = 0;
-  for (let i=0;i<thresholds.length;i++) { if (xp>=thresholds[i]) lvl=i+1; }
-  return Math.min(lvl, LEVEL_NAMES.length);
+  const t=[0,500,1500,3500,7000,12000,20000]; let l=0;
+  for(let i=0;i<t.length;i++){if(xp>=t[i])l=i+1;}
+  return Math.min(l,LEVEL_NAMES.length);
 }
 function xpProgressInLevel(xp) {
-  const thresholds = [0,500,1500,3500,7000,12000,20000,999999];
-  for (let i=0;i<thresholds.length-1;i++) {
-    if (xp<thresholds[i+1]) return (xp-thresholds[i])/(thresholds[i+1]-thresholds[i]);
-  }
+  const t=[0,500,1500,3500,7000,12000,20000,999999];
+  for(let i=0;i<t.length-1;i++){if(xp<t[i+1])return(xp-t[i])/(t[i+1]-t[i]);}
   return 1;
 }
-function formatDate(ts) {
-  if (!ts) return '—';
-  const d = ts.seconds ? new Date(ts.seconds*1000) : new Date(ts);
+function formatDate(ts){
+  if(!ts)return'—';
+  const d=ts.seconds?new Date(ts.seconds*1000):new Date(ts);
   return d.toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'});
 }
-function timeAgo(ts) {
-  if (!ts) return '—';
-  const diff = Date.now() - (ts.seconds ? ts.seconds*1000 : new Date(ts).getTime());
-  if (diff<60000) return 'Just now';
-  if (diff<3600000) return Math.floor(diff/60000)+'m ago';
-  if (diff<86400000) return Math.floor(diff/3600000)+'h ago';
+function timeAgo(ts){
+  if(!ts)return'—';
+  const diff=Date.now()-(ts.seconds?ts.seconds*1000:new Date(ts).getTime());
+  if(diff<60000)return'Just now';
+  if(diff<3600000)return Math.floor(diff/60000)+'m ago';
+  if(diff<86400000)return Math.floor(diff/3600000)+'h ago';
   return Math.floor(diff/86400000)+'d ago';
 }
-function schedDay(ts) {
-  const d = ts.seconds ? new Date(ts.seconds*1000) : new Date(ts);
-  return { day:d.getDate(), mon:d.toLocaleString('default',{month:'short'}).toUpperCase(), isToday:d.toDateString()===new Date().toDateString() };
+function schedDay(ts){
+  const d=ts.seconds?new Date(ts.seconds*1000):new Date(ts);
+  return{day:d.getDate(),mon:d.toLocaleString('default',{month:'short'}).toUpperCase(),isToday:d.toDateString()===new Date().toDateString()};
 }
 
-async function backendFetch(method, path, body=null) {
-  if (!currentUser) throw new Error('Not signed in');
-  const token = await currentUser.getIdToken();
-  const opts = { method, headers:{ 'Authorization':`Bearer ${token}`, 'Content-Type':'application/json' } };
-  if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(`${BACKEND_URL}/api${path}`, opts);
-  const data = await res.json().catch(()=>({}));
-  if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+async function backendFetch(method,path,body=null){
+  if(!currentUser)throw new Error('Not signed in');
+  const token=await currentUser.getIdToken();
+  const opts={method,headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'}};
+  if(body)opts.body=JSON.stringify(body);
+  const res=await fetch(`${BACKEND_URL}/api${path}`,opts);
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok)throw new Error(data.error||`Request failed (${res.status})`);
   return data;
 }
 
-/* ── AUTH ──────────────────────────────────── */
-onAuthStateChanged(auth, async (user) => {
-  if (!user) { window.location.href = 'auth.html'; return; }
-  currentUser = user;
-  try {
-    const snap = await getDoc(doc(db,'users',user.uid));
-    userData = snap.exists() ? snap.data() : {};
-  } catch(e) { userData = {}; }
+/* ── CBT PAGE INTEGRATION ── */
+window.openCBTPage = function(subject, mode) {
+  const map = {
+    'Mathematics':'mathematics','English Language':'english','Chemistry':'chemistry',
+    'Physics':'physics','Biology':'biology','Economics':'economics',
+    'Government':'government','Geography':'geography','Literature':'literature',
+    'Accounting':'accounting','History':'history','Commerce':'commerce'
+  };
+  if (subject) {
+    const key = map[subject] || subject.toLowerCase().replace(/\s+/g,'');
+    // Always use 'practice' (20 Qs, no timer) when launching a single subject from dashboard
+    const resolvedMode = mode || 'practice';
+    try { sessionStorage.setItem('nltc_cbt_preset', JSON.stringify({ key, mode: resolvedMode })); } catch(e) {}
+  }
+  // Add cache-busting param so browser always loads latest cbt.html
+  window.location.href = CBT_PAGE + '?v=' + Date.now();
+};
+
+// Receive score back from cbt.html when student returns
+window.addEventListener('message',(e)=>{
+  if(!e.data||e.data.type!=='nltc_cbt_score')return;
+  const{score,correct,total}=e.data;
+  if(userData&&score>0){
+    const xpGain=Math.round(score*0.5);
+    userData.xp=(userData.xp||0)+xpGain;
+    renderUserUI();
+    try{updateDoc(doc(db,'users',currentUser.uid),{xp:increment(xpGain)}).catch(()=>{});}catch(e){}
+  }
+  showToast(`CBT complete! Score: ${score}%`,'success');
+  loadCBTHistory();
+});
+
+// Check localStorage for score from last CBT visit
+(function checkLastCBT(){
+  try{
+    const raw=localStorage.getItem('nltc_last_cbt');
+    if(!raw)return;
+    const d=JSON.parse(raw);
+    if(!d.timestamp)return;
+    if(Date.now()-d.timestamp<45000){
+      showToast(`Last CBT: ${d.score}% — ${d.correct}/${d.total} correct`,'success');
+      loadCBTHistory();
+    }
+    localStorage.removeItem('nltc_last_cbt');
+  }catch(e){}
+})();
+
+/* ── AUTH ── */
+onAuthStateChanged(auth,async(user)=>{
+  if(!user){window.location.href='auth.html';return;}
+  currentUser=user;
+  try{
+    const snap=await getDoc(doc(db,'users',user.uid));
+    userData=snap.exists()?snap.data():{};
+  }catch(e){userData={};}
   renderUserUI();
-  await Promise.all([loadVideos(), loadLiveSessions(), loadSchedule(), loadAnnouncements()]);
+  await Promise.all([loadVideos(),loadLiveSessions(),loadSchedule(),loadAnnouncements()]);
   loadCBTHistory();
   loadLeaderboard();
   renderAchievements();
   loadMiniLeaderboard();
   subscribeToActiveLive();
   renderCBTChart();
-  document.getElementById('settEmail').textContent = user.email || '—';
+  document.getElementById('settEmail').textContent=user.email||'—';
   prefillSettings();
 });
 
-function renderUserUI() {
-  const fn   = userData.firstName || currentUser.displayName?.split(' ')[0] || 'Student';
-  const ln   = userData.lastName  || currentUser.displayName?.split(' ').slice(1).join(' ') || '';
-  const init = `${fn[0]||''}${ln[0]||''}`.toUpperCase() || '?';
-  const xp   = userData.xp || 0;
-  const streak = userData.streak || 0;
-  const plan   = userData.plan || 'free';
-  const lvl  = xpToLevel(xp);
-  const pct  = xpProgressInLevel(xp)*100;
+function renderUserUI(){
+  const fn=userData.firstName||currentUser.displayName?.split(' ')[0]||'Student';
+  const ln=userData.lastName||currentUser.displayName?.split(' ').slice(1).join(' ')||'';
+  const init=`${fn[0]||''}${ln[0]||''}`.toUpperCase()||'?';
+  const xp=userData.xp||0;
+  const streak=userData.streak||0;
+  const plan=userData.plan||'free';
+  const lvl=xpToLevel(xp);
+  const pct=xpProgressInLevel(xp)*100;
 
-  document.getElementById('sbAvatar').textContent = init;
-  document.getElementById('sbName').textContent   = `${fn} ${ln}`.trim();
-  document.getElementById('sbXpVal').textContent  = `${xp.toLocaleString()} XP`;
-  document.getElementById('sbXpFill').style.width = pct+'%';
-  document.getElementById('sbLevel').textContent  = `Level ${lvl} — ${LEVEL_NAMES[lvl-1]||'Legend'}`;
-  document.getElementById('streakCount').textContent = streak;
-  document.getElementById('tbStreak').style.display = streak>0 ? '' : 'none';
+  document.getElementById('sbAvatar').textContent=init;
+  document.getElementById('sbName').textContent=`${fn} ${ln}`.trim();
+  document.getElementById('sbXpVal').textContent=`${xp.toLocaleString()} XP`;
+  document.getElementById('sbXpFill').style.width=pct+'%';
+  document.getElementById('sbLevel').textContent=`Level ${lvl} — ${LEVEL_NAMES[lvl-1]||'Legend'}`;
+  document.getElementById('streakCount').textContent=streak;
+  document.getElementById('tbStreak').style.display=streak>0?'':'none';
+  document.getElementById('st-xp').textContent=xp.toLocaleString();
+  document.getElementById('st-streak').textContent=streak;
 
-  // Stat cards
-  document.getElementById('st-xp').textContent     = xp.toLocaleString();
-  document.getElementById('st-streak').textContent = streak;
+  const planEl=document.getElementById('sbPlan');
+  if(plan==='elite'){planEl.className='sb-user-plan plan-elite';planEl.innerHTML='<i class="fas fa-gem"></i> Elite';}
+  else if(plan==='pro'){planEl.className='sb-user-plan plan-pro';planEl.innerHTML='<i class="fas fa-crown"></i> Pro';}
+  else{planEl.className='sb-user-plan plan-free';planEl.innerHTML='<i class="fas fa-star"></i> Free';}
 
-  // Plan badge
-  const planEl = document.getElementById('sbPlan');
-  if (plan==='elite') { planEl.className='sb-user-plan plan-elite'; planEl.innerHTML='<i class="fas fa-gem"></i> Elite'; }
-  else if (plan==='pro') { planEl.className='sb-user-plan plan-pro'; planEl.innerHTML='<i class="fas fa-crown"></i> Pro'; }
-  else { planEl.className='sb-user-plan plan-free'; planEl.innerHTML='<i class="fas fa-star"></i> Free'; }
-
-  // Hide upgrade banner for paid users
-  if (plan==='pro'||plan==='elite') {
-    document.getElementById('upgradeBanner').style.display = 'none';
-    document.getElementById('sbUpgrade').style.display = 'none';
-    const settBtn = document.getElementById('settUpgradeBtn');
-    if (settBtn) settBtn.style.display = 'none';
+  if(plan==='pro'||plan==='elite'){
+    document.getElementById('upgradeBanner').style.display='none';
+    document.getElementById('sbUpgrade').style.display='none';
+    const s=document.getElementById('settUpgradeBtn');if(s)s.style.display='none';
   }
 
-  // Settings plan info
-  const planLabels = {free:'Free Starter',pro:'Pro Scholar',elite:'Elite Bundle'};
-  document.getElementById('settPlan').textContent = planLabels[plan]||'Free Starter';
-  document.getElementById('settPlanDesc').textContent = plan==='elite'?'You have full access to all features':plan==='pro'?'You have access to all lessons and live classes':'Upgrade for unlimited access';
+  const planLabels={free:'Free Starter',pro:'Pro Scholar',elite:'Elite Bundle'};
+  document.getElementById('settPlan').textContent=planLabels[plan]||'Free Starter';
+  document.getElementById('settPlanDesc').textContent=plan==='elite'?'You have full access to all features':plan==='pro'?'You have access to all lessons and live classes':'Upgrade for unlimited access';
 }
 
-/* ── VIDEO LESSONS ─────────────────────────── */
-window.loadVideos = async function() {
-  try {
+/* ── VIDEO LESSONS ── */
+window.loadVideos=async function(){
+  try{
     let snap;
-    try { snap = await getDocs(query(collection(db,'videos'), orderBy('createdAt','desc'))); }
-    catch(e) { snap = await getDocs(collection(db,'videos')); }
-    allVideos = snap.docs.map(d=>({id:d.id,...d.data()}));
+    try{snap=await getDocs(query(collection(db,'videos'),orderBy('createdAt','desc')));}
+    catch(e){snap=await getDocs(collection(db,'videos'));}
+    allVideos=snap.docs.map(d=>({id:d.id,...d.data()}));
     allVideos.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-  } catch(e) { allVideos = []; }
+  }catch(e){allVideos=[];}
   renderVideos(allVideos);
   renderRecentLessons();
 };
 
-function canAccessVideo(v) {
-  const plan = userData?.plan || 'free';
-  if (!v.access || v.access==='free') return true;
-  if (v.access==='pro')   return plan==='pro'||plan==='elite';
-  if (v.access==='elite') return plan==='elite';
+function canAccessVideo(v){
+  const plan=userData?.plan||'free';
+  if(!v.access||v.access==='free')return true;
+  if(v.access==='pro')return plan==='pro'||plan==='elite';
+  if(v.access==='elite')return plan==='elite';
   return false;
 }
 
-function renderVideos(videos) {
-  const grid = document.getElementById('lessonsGrid');
-  if (!videos.length) { grid.innerHTML='<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">🎬</div><div class="empty-title">No lessons yet</div><div class="empty-sub">Check back soon for new content</div></div>'; document.getElementById('lessonsCount').textContent=''; return; }
-  const encStr = s => encodeURIComponent(s||'');
-  grid.innerHTML = videos.map(v => {
-    const canAccess = canAccessVideo(v);
-    const examBadge = v.examType ? `<span class="badge badge-red" style="font-size:.6rem;">${v.examType}</span>` : '';
-    const subjBadge = v.subject  ? `<span class="badge badge-blue" style="font-size:.6rem;">${v.subject}</span>` : '';
-    const thumb = v.thumbnailUrl ? `<img src="${v.thumbnailUrl}" alt="${v.title||''}" loading="lazy">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;background:var(--navy);">🎬</div>`;
-    return `<div class="video-card" onclick="${canAccess ? `openVideoPlayer('${encStr(v.title)}','${v.videoUrl||''}','${encStr(v.subject)}','${encStr(v.teacher)}','${v.id}')` : 'openUpgradeModal()'}">
-      <div class="video-thumb">
-        ${thumb}
-        ${canAccess ? '<div class="video-thumb-ov"><i class="fas fa-play"></i></div>' : '<div class="video-lock"><i class="fas fa-lock"></i><span>Pro Only</span></div>'}
-      </div>
-      <div class="video-info">
-        <div class="video-title">${v.title||'Untitled'}</div>
-        <div class="video-meta">${v.teacher||'—'} · ${formatDate(v.createdAt)}</div>
-        <div class="video-tags">${subjBadge}${examBadge}</div>
-      </div>
+function renderVideos(videos){
+  const grid=document.getElementById('lessonsGrid');
+  if(!videos.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">🎬</div><div class="empty-title">No lessons yet</div><div class="empty-sub">Check back soon for new content</div></div>';document.getElementById('lessonsCount').textContent='';return;}
+  const enc=s=>encodeURIComponent(s||'');
+  grid.innerHTML=videos.map(v=>{
+    const canAccess=canAccessVideo(v);
+    const examBadge=v.examType?`<span class="badge badge-red" style="font-size:.6rem;">${v.examType}</span>`:'';
+    const subjBadge=v.subject?`<span class="badge badge-blue" style="font-size:.6rem;">${v.subject}</span>`:'';
+    const thumb=v.thumbnailUrl?`<img src="${v.thumbnailUrl}" alt="${v.title||''}" loading="lazy">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;background:var(--navy);">🎬</div>`;
+    return`<div class="video-card" onclick="${canAccess?`openVideoPlayer('${enc(v.title)}','${v.videoUrl||''}','${enc(v.subject)}','${enc(v.teacher)}','${v.id}')` :'openUpgradeModal()'}">
+      <div class="video-thumb">${thumb}${canAccess?'<div class="video-thumb-ov"><i class="fas fa-play"></i></div>':'<div class="video-lock"><i class="fas fa-lock"></i><span>Pro Only</span></div>'}</div>
+      <div class="video-info"><div class="video-title">${v.title||'Untitled'}</div><div class="video-meta">${v.teacher||'—'} · ${formatDate(v.createdAt)}</div><div class="video-tags">${subjBadge}${examBadge}</div></div>
     </div>`;
   }).join('');
-  document.getElementById('lessonsCount').textContent = `${videos.length} lesson${videos.length!==1?'s':''}`;
+  document.getElementById('lessonsCount').textContent=`${videos.length} lesson${videos.length!==1?'s':''}`;
 }
 
-function renderRecentLessons() {
-  const grid = document.getElementById('recentLessonsGrid');
-  const recent = allVideos.slice(0,4);
-  if (!recent.length) { grid.innerHTML='<div class="empty-state" style="padding:16px;"><div class="empty-title">No lessons yet</div></div>'; return; }
-  const encStr = s => encodeURIComponent(s||'');
-  grid.style.display='grid'; grid.style.gridTemplateColumns='repeat(auto-fill,minmax(180px,1fr))'; grid.style.gap='12px';
-  grid.innerHTML = recent.map(v => {
-    const canAccess = canAccessVideo(v);
-    const thumb = v.thumbnailUrl ? `<img src="${v.thumbnailUrl}" alt="" loading="lazy">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:var(--navy);">🎬</div>`;
-    return `<div class="video-card" onclick="${canAccess ? `openVideoPlayer('${encStr(v.title)}','${v.videoUrl||''}','${encStr(v.subject)}','${encStr(v.teacher)}','${v.id}')` : 'openUpgradeModal()'}">
-      <div class="video-thumb" style="height:100px;">${thumb}${canAccess ? '<div class="video-thumb-ov"><i class="fas fa-play"></i></div>' : '<div class="video-lock"><i class="fas fa-lock"></i><span>Pro</span></div>'}</div>
+function renderRecentLessons(){
+  const grid=document.getElementById('recentLessonsGrid');
+  const recent=allVideos.slice(0,4);
+  if(!recent.length){grid.innerHTML='<div class="empty-state" style="padding:16px;"><div class="empty-title">No lessons yet</div></div>';return;}
+  const enc=s=>encodeURIComponent(s||'');
+  grid.style.display='grid';grid.style.gridTemplateColumns='repeat(auto-fill,minmax(180px,1fr))';grid.style.gap='12px';
+  grid.innerHTML=recent.map(v=>{
+    const canAccess=canAccessVideo(v);
+    const thumb=v.thumbnailUrl?`<img src="${v.thumbnailUrl}" alt="" loading="lazy">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:var(--navy);">🎬</div>`;
+    return`<div class="video-card" onclick="${canAccess?`openVideoPlayer('${enc(v.title)}','${v.videoUrl||''}','${enc(v.subject)}','${enc(v.teacher)}','${v.id}')` :'openUpgradeModal()'}">
+      <div class="video-thumb" style="height:100px;">${thumb}${canAccess?'<div class="video-thumb-ov"><i class="fas fa-play"></i></div>':'<div class="video-lock"><i class="fas fa-lock"></i><span>Pro</span></div>'}</div>
       <div class="video-info"><div class="video-title">${v.title||'Untitled'}</div><div class="video-meta">${v.subject||'—'}</div></div>
     </div>`;
   }).join('');
 }
 
-window.filterLessons = function() {
-  const search  = (document.getElementById('lessonSearch').value||'').toLowerCase();
-  const subject = document.getElementById('lessonSubject').value;
-  const exam    = document.getElementById('lessonExam').value;
-  renderVideos(allVideos.filter(v =>
-    (!subject || v.subject===subject) &&
-    (!exam    || v.examType===exam)   &&
-    (!search  || (v.title||'').toLowerCase().includes(search)||(v.subject||'').toLowerCase().includes(search))
+window.filterLessons=function(){
+  const search=(document.getElementById('lessonSearch').value||'').toLowerCase();
+  const subject=document.getElementById('lessonSubject').value;
+  const exam=document.getElementById('lessonExam').value;
+  renderVideos(allVideos.filter(v=>
+    (!subject||v.subject===subject)&&(!exam||v.examType===exam)&&
+    (!search||(v.title||'').toLowerCase().includes(search)||(v.subject||'').toLowerCase().includes(search))
   ));
 };
 
-window.handleSearch = function(val) {
-  if (!val.trim()) return;
-  showView('lessons', document.querySelector('.sb-link[onclick*="lessons"]'));
-  document.getElementById('lessonSearch').value = val;
+window.handleSearch=function(val){
+  if(!val.trim())return;
+  showView('lessons',document.querySelector('.sb-link[onclick*="lessons"]'));
+  document.getElementById('lessonSearch').value=val;
   filterLessons();
 };
 
-/* ── VIDEO PLAYER ──────────────────────────── */
-const vpSpeeds=[0.5,0.75,1,1.25,1.5,2]; let vpSpeedIdx=2;
+/* ── VIDEO PLAYER ── */
+const vpSpeeds=[0.5,0.75,1,1.25,1.5,2];let vpSpeedIdx=2;
 
-window.openVideoPlayer = function(title, url, subject, teacher, videoId) {
-  if (!url || url==='undefined') { showToast('Video not available','error'); return; }
-  const dec = s => decodeURIComponent((s||'').replace(/\+/g,' '));
-  const video = document.getElementById('vpVideo');
-  video.src = url;
-  document.getElementById('vpTitle').textContent    = dec(title)||'Lesson';
-  document.getElementById('vpInfoTitle').textContent= dec(title)||'Lesson';
-  document.getElementById('vpInfoMeta').textContent = `${dec(subject)||'—'} · ${dec(teacher)||'—'}`;
+window.openVideoPlayer=function(title,url,subject,teacher,videoId){
+  if(!url||url==='undefined'){showToast('Video not available','error');return;}
+  const dec=s=>decodeURIComponent((s||'').replace(/\+/g,' '));
+  const video=document.getElementById('vpVideo');
+  video.src=url;
+  document.getElementById('vpTitle').textContent=dec(title)||'Lesson';
+  document.getElementById('vpInfoTitle').textContent=dec(title)||'Lesson';
+  document.getElementById('vpInfoMeta').textContent=`${dec(subject)||'—'} · ${dec(teacher)||'—'}`;
   document.getElementById('videoPlayerOverlay').classList.add('show');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow='hidden';
   video.load();
-  // Touch support
-  const wrap = document.getElementById('vpWrap');
+  const wrap=document.getElementById('vpWrap');
   let touchTimer;
-  wrap.addEventListener('touchstart', ()=>{ wrap.classList.add('touch-active'); clearTimeout(touchTimer); touchTimer=setTimeout(()=>wrap.classList.remove('touch-active'),3000); },{passive:true});
-  // Award XP for watching
-  if (videoId) backendFetch('POST','/gamification/xp',{action:'watch_lesson',meta:{videoId}}).then(r=>{ if(r.xpEarned){ showToast(`+${r.xpEarned} XP for watching!`,'success'); userData.xp=(userData.xp||0)+r.xpEarned; renderUserUI(); } }).catch(()=>{});
+  wrap.addEventListener('touchstart',()=>{wrap.classList.add('touch-active');clearTimeout(touchTimer);touchTimer=setTimeout(()=>wrap.classList.remove('touch-active'),3000);},{passive:true});
+  if(videoId)backendFetch('POST','/gamification/xp',{action:'watch_lesson',meta:{videoId}}).then(r=>{if(r.xpEarned){showToast(`+${r.xpEarned} XP for watching!`,'success');userData.xp=(userData.xp||0)+r.xpEarned;renderUserUI();}}).catch(()=>{});
 };
 
-window.closeVideoPlayer = function() {
-  const v=document.getElementById('vpVideo'); v.pause(); v.src='';
+window.closeVideoPlayer=function(){
+  const v=document.getElementById('vpVideo');v.pause();v.src='';
   document.getElementById('videoPlayerOverlay').classList.remove('show');
   document.body.style.overflow='';
-  vpSpeedIdx=2; document.getElementById('vpSpdBtn').textContent='1×';
+  vpSpeedIdx=2;document.getElementById('vpSpdBtn').textContent='1×';
   document.getElementById('vpPlayBtn').innerHTML='<i class="fas fa-play"></i>';
 };
-
-window.vpToggle=()=>{ const v=document.getElementById('vpVideo'),b=document.getElementById('vpPlayBtn'); v.paused?(v.play(),b.innerHTML='<i class="fas fa-pause"></i>'):(v.pause(),b.innerHTML='<i class="fas fa-play"></i>'); };
-window.vpSkip=s=>{ const v=document.getElementById('vpVideo'); v.currentTime=Math.max(0,Math.min(v.duration||0,v.currentTime+s)); };
-window.vpMute=()=>{ const v=document.getElementById('vpVideo'); v.muted=!v.muted; document.getElementById('vpMuteBtn').innerHTML=v.muted?'<i class="fas fa-volume-mute"></i>':'<i class="fas fa-volume-up"></i>'; };
-window.vpVolumeSet=val=>{ document.getElementById('vpVideo').volume=parseFloat(val); };
-window.vpCycleSpeed=()=>{ vpSpeedIdx=(vpSpeedIdx+1)%vpSpeeds.length; const v=document.getElementById('vpVideo'); v.playbackRate=vpSpeeds[vpSpeedIdx]; document.getElementById('vpSpdBtn').textContent=vpSpeeds[vpSpeedIdx]+'×'; };
-window.vpFullscreen=()=>{ const c=document.getElementById('vpWrap'); document.fullscreenElement?document.exitFullscreen?.():c.requestFullscreen?.(); };
+window.vpToggle=()=>{const v=document.getElementById('vpVideo'),b=document.getElementById('vpPlayBtn');v.paused?(v.play(),b.innerHTML='<i class="fas fa-pause"></i>'):(v.pause(),b.innerHTML='<i class="fas fa-play"></i>');};
+window.vpSkip=s=>{const v=document.getElementById('vpVideo');v.currentTime=Math.max(0,Math.min(v.duration||0,v.currentTime+s));};
+window.vpMute=()=>{const v=document.getElementById('vpVideo');v.muted=!v.muted;document.getElementById('vpMuteBtn').innerHTML=v.muted?'<i class="fas fa-volume-mute"></i>':'<i class="fas fa-volume-up"></i>';};
+window.vpVolumeSet=val=>{document.getElementById('vpVideo').volume=parseFloat(val);};
+window.vpCycleSpeed=()=>{vpSpeedIdx=(vpSpeedIdx+1)%vpSpeeds.length;const v=document.getElementById('vpVideo');v.playbackRate=vpSpeeds[vpSpeedIdx];document.getElementById('vpSpdBtn').textContent=vpSpeeds[vpSpeedIdx]+'×';};
+window.vpFullscreen=()=>{const c=document.getElementById('vpWrap');document.fullscreenElement?document.exitFullscreen?.():c.requestFullscreen?.();};
 
 (function(){
-  const v=document.getElementById('vpVideo'), fill=document.getElementById('vpFill'), buf=document.getElementById('vpBuf'), time=document.getElementById('vpTime'), prog=document.getElementById('vpProgress');
+  const v=document.getElementById('vpVideo'),fill=document.getElementById('vpFill'),buf=document.getElementById('vpBuf'),time=document.getElementById('vpTime'),prog=document.getElementById('vpProgress');
   function fmt(s){return`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;}
-  v.addEventListener('timeupdate',()=>{ if(!v.duration)return; const p=v.currentTime/v.duration*100; fill.style.width=p+'%'; time.textContent=`${fmt(v.currentTime)} / ${fmt(v.duration)}`; });
-  v.addEventListener('progress',()=>{ if(v.duration&&v.buffered.length) buf.style.width=(v.buffered.end(v.buffered.length-1)/v.duration*100)+'%'; });
-  v.addEventListener('ended',()=>{ document.getElementById('vpPlayBtn').innerHTML='<i class="fas fa-play"></i>'; });
-  prog.addEventListener('click',e=>{ if(!v.duration)return; const r=prog.getBoundingClientRect(); v.currentTime=((e.clientX-r.left)/r.width)*v.duration; });
-  prog.addEventListener('touchstart',e=>{ if(!v.duration)return; const r=prog.getBoundingClientRect(); v.currentTime=((e.touches[0].clientX-r.left)/r.width)*v.duration; },{passive:true});
+  v.addEventListener('timeupdate',()=>{if(!v.duration)return;const p=v.currentTime/v.duration*100;fill.style.width=p+'%';time.textContent=`${fmt(v.currentTime)} / ${fmt(v.duration)}`;});
+  v.addEventListener('progress',()=>{if(v.duration&&v.buffered.length)buf.style.width=(v.buffered.end(v.buffered.length-1)/v.duration*100)+'%';});
+  v.addEventListener('ended',()=>{document.getElementById('vpPlayBtn').innerHTML='<i class="fas fa-play"></i>';});
+  prog.addEventListener('click',e=>{if(!v.duration)return;const r=prog.getBoundingClientRect();v.currentTime=((e.clientX-r.left)/r.width)*v.duration;});
+  prog.addEventListener('touchstart',e=>{if(!v.duration)return;const r=prog.getBoundingClientRect();v.currentTime=((e.touches[0].clientX-r.left)/r.width)*v.duration;},{passive:true});
   document.addEventListener('keydown',e=>{
     if(!document.getElementById('videoPlayerOverlay').classList.contains('show'))return;
     if(['Space','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
@@ -1152,188 +1194,56 @@ window.vpFullscreen=()=>{ const c=document.getElementById('vpWrap'); document.fu
   });
 })();
 
-/* ── CBT PRACTICE ──────────────────────────── */
-window.startCBT = async function(subject, exam) {
-  showToast('Loading questions…','info');
-  try {
+/* ── CBT HISTORY (from Firestore) ── */
+window.loadCBTHistory=async function(){
+  const tbody=document.getElementById('cbtHistory');
+  if(!tbody)return;
+  try{
     let snap;
-    try {
-      snap = await getDocs(query(collection(db,'questions'), where('subject','==',subject), where('examType','==',exam), limit(40)));
-    } catch(e) {
-      snap = await getDocs(query(collection(db,'questions'), where('subject','==',subject), limit(40)));
-    }
-    let qs = snap.docs.map(d=>({id:d.id,...d.data()}));
-    if (!qs.length) {
-      // Try without exam filter
-      try { const s2=await getDocs(query(collection(db,'questions'),where('subject','==',subject),limit(40))); qs=s2.docs.map(d=>({id:d.id,...d.data()})); } catch(e){}
-    }
-    if (!qs.length) { showToast('No questions found for this subject yet','error'); return; }
-    // Shuffle
-    qs = qs.sort(()=>Math.random()-.5).slice(0,Math.min(40,qs.length));
-    allQuestions = qs;
-    cbtState = { questions:qs, answers:new Array(qs.length).fill(null), current:0, subject, exam, startTime:Date.now() };
-    document.getElementById('cbt-setup').style.display   = 'none';
-    document.getElementById('cbt-session').style.display = 'block';
-    document.getElementById('cbt-result').style.display  = 'none';
-    document.getElementById('cbtSessionTitle').textContent = `${subject} — ${exam}`;
-    document.getElementById('cbtQTotal').textContent = qs.length;
-    startCBTTimer(qs.length*75); // 75s per question
-    renderCBTQuestion();
-    // Award XP for joining
-    backendFetch('POST','/gamification/xp',{action:'complete_cbt',meta:{subject}}).catch(()=>{});
-  } catch(e) { showToast(`Could not load questions: ${e.message}`,'error'); }
-};
-
-function startCBTTimer(seconds) {
-  let remaining = seconds;
-  cbtState.timer = setInterval(()=>{
-    remaining--;
-    const m=Math.floor(remaining/60), s=remaining%60;
-    const el = document.getElementById('cbtTimerVal');
-    el.textContent = `${m}:${String(s).padStart(2,'0')}`;
-    document.getElementById('cbtTimer').classList.toggle('warning', remaining<60);
-    if (remaining<=0) { clearInterval(cbtState.timer); submitCBT(); }
-  },1000);
-}
-
-function renderCBTQuestion() {
-  const q   = cbtState.questions[cbtState.current];
-  const ans = cbtState.answers[cbtState.current];
-  const total = cbtState.questions.length;
-  const pct = ((cbtState.current+1)/total)*100;
-  document.getElementById('cbtQNum').textContent = cbtState.current+1;
-  document.getElementById('cbtProgressFill').style.width = pct+'%';
-  document.getElementById('cbtPrevBtn').disabled = cbtState.current===0;
-  document.getElementById('cbtNextBtn').innerHTML = cbtState.current===total-1 ? 'Submit <i class="fas fa-check"></i>' : 'Next <i class="fas fa-chevron-right"></i>';
-
-  const opts = q.options || {};
-  document.getElementById('cbtQuestionArea').innerHTML = `
-    <div class="cbt-q-card">
-      <div class="cbt-q-num">Question ${cbtState.current+1}</div>
-      <div class="cbt-q-text">${q.question||q.text||'—'}</div>
-      <div class="cbt-options">
-        ${['A','B','C','D'].map(letter=>{
-          const text = opts[letter]||opts[letter.toLowerCase()]||'—';
-          const selected = ans===letter;
-          return `<button class="cbt-opt${selected?' selected':''}" onclick="selectCBTAnswer('${letter}')">
-            <div class="cbt-opt-letter">${letter}</div>
-            <span>${text}</span>
-          </button>`;
-        }).join('')}
-      </div>
-    </div>`;
-}
-
-window.selectCBTAnswer = function(letter) {
-  cbtState.answers[cbtState.current] = letter;
-  renderCBTQuestion();
-};
-
-window.cbtNav = function(dir) {
-  const next = cbtState.current + dir;
-  if (next >= cbtState.questions.length) { endCBTEarly(); return; }
-  if (next < 0) return;
-  cbtState.current = next;
-  renderCBTQuestion();
-};
-
-window.endCBTEarly = function() { clearInterval(cbtState.timer); submitCBT(); };
-
-async function submitCBT() {
-  clearInterval(cbtState.timer);
-  const qs = cbtState.questions, ans = cbtState.answers;
-  let correct = 0;
-  qs.forEach((q,i)=>{ if(ans[i]===q.correctAnswer) correct++; });
-  const score = Math.round((correct/qs.length)*100);
-  const elapsed = Math.round((Date.now()-cbtState.startTime)/1000);
-
-  // Save to backend
-  try {
-    const result = await backendFetch('POST','/gamification/cbt-session',{
-      subject:cbtState.subject, exam:cbtState.exam, score, correct, total:qs.length
-    });
-    if (result.xpEarned) { userData.xp=(userData.xp||0)+result.xpEarned; renderUserUI(); }
-    showToast(`Session saved! +${result.xpEarned||0} XP`,'success');
-  } catch(e) {
-    // Fallback: save directly to Firestore
-    try { await addDoc(collection(db,'users',currentUser.uid,'results'),{exam:cbtState.exam,subject:cbtState.subject,score,total:qs.length,correct,elapsed,submittedAt:serverTimestamp()}); } catch(fe){}
-  }
-
-  // Show results
-  const cls = score>=70?'score-great':score>=50?'score-good':'score-poor';
-  const msg = score>=70?'Excellent work! 🎉':score>=50?'Good effort! Keep studying 📚':'Keep practicing, you\'ll get there! 💪';
-  document.getElementById('cbt-session').style.display = 'none';
-  document.getElementById('cbt-result').style.display = 'block';
-  document.getElementById('cbt-result').innerHTML = `
-    <div class="cbt-result-card">
-      <div class="cbt-score-ring ${cls}">${score}%</div>
-      <div style="font-family:var(--font-head);font-size:1.2rem;font-weight:800;color:var(--navy);margin-bottom:6px;">${msg}</div>
-      <div style="font-size:.84rem;color:var(--text-2);margin-bottom:18px;line-height:1.7;">
-        You answered <strong>${correct} out of ${qs.length}</strong> correctly<br>
-        Subject: ${cbtState.subject} · ${cbtState.exam}
-      </div>
-      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-        <button class="btn-outline" onclick="showCBTSetup()"><i class="fas fa-redo"></i> Try Again</button>
-        <button class="btn-navy" onclick="showView('cbt',null);showCBTSetup()"><i class="fas fa-th-large"></i> Choose Subject</button>
-      </div>
-    </div>`;
-  loadCBTHistory();
-}
-
-window.showCBTSetup = function() {
-  document.getElementById('cbt-setup').style.display   = 'block';
-  document.getElementById('cbt-session').style.display = 'none';
-  document.getElementById('cbt-result').style.display  = 'none';
-};
-
-async function loadCBTHistory() {
-  const tbody = document.getElementById('cbtHistory');
-  try {
-    let snap;
-    try { snap = await getDocs(query(collection(db,'users',currentUser.uid,'results'),orderBy('submittedAt','desc'),limit(10))); }
-    catch(e) { snap = await getDocs(collection(db,'users',currentUser.uid,'results')); }
-    const results = snap.docs.map(d=>({id:d.id,...d.data()}));
+    try{snap=await getDocs(query(collection(db,'users',currentUser.uid,'results'),orderBy('submittedAt','desc'),limit(10)));}
+    catch(e){snap=await getDocs(collection(db,'users',currentUser.uid,'results'));}
+    const results=snap.docs.map(d=>({id:d.id,...d.data()}));
     results.sort((a,b)=>(b.submittedAt?.seconds||0)-(a.submittedAt?.seconds||0));
-    document.getElementById('st-cbt').textContent = results.length;
-    if (!results.length) { tbody.innerHTML='<tr><td colspan="4"><div class="empty-state" style="padding:16px;"><div class="empty-title">No sessions yet</div><div class="empty-sub">Start a CBT practice above</div></div></td></tr>'; return; }
-    tbody.innerHTML = results.map(r=>{
-      const cls = (r.score||0)>=70?'badge-green':(r.score||0)>=50?'badge-gold':'badge-red';
-      return `<tr><td>${r.subject||'—'}</td><td style="color:var(--text-3);font-size:.78rem;">${r.exam||'—'}</td><td><span class="badge ${cls}">${r.score||0}%</span></td><td style="color:var(--text-3);">${timeAgo(r.submittedAt)}</td></tr>`;
+    document.getElementById('st-cbt').textContent=results.length;
+    if(!results.length){tbody.innerHTML='<tr><td colspan="4"><div class="empty-state" style="padding:16px;"><div class="empty-title">No sessions yet</div><div class="empty-sub">Click any subject above to start</div></div></td></tr>';return;}
+    tbody.innerHTML=results.map(r=>{
+      const cls=(r.score||0)>=70?'badge-green':(r.score||0)>=50?'badge-gold':'badge-red';
+      return`<tr><td>${r.subject||'—'}</td><td style="color:var(--text-3);font-size:.78rem;">${r.exam||'—'}</td><td><span class="badge ${cls}">${r.score||0}%</span></td><td style="color:var(--text-3);">${timeAgo(r.submittedAt)}</td></tr>`;
     }).join('');
-  } catch(e) { tbody.innerHTML='<tr><td colspan="4" style="color:var(--text-3);text-align:center;padding:16px;">Could not load history</td></tr>'; }
-}
+  }catch(e){tbody.innerHTML='<tr><td colspan="4" style="color:var(--text-3);text-align:center;padding:16px;">Could not load history</td></tr>';}
+};
 
-function renderCBTChart() {
-  const ctx = document.getElementById('cbtChart'); if (!ctx) return;
-  if (window._cbtChart) window._cbtChart.destroy();
-  window._cbtChart = new Chart(ctx, {
+function renderCBTChart(){
+  const ctx=document.getElementById('cbtChart');if(!ctx)return;
+  if(window._cbtChart)window._cbtChart.destroy();
+  window._cbtChart=new Chart(ctx,{
     type:'line',
     data:{labels:['Session 1','Session 2','Session 3','Session 4','Session 5'],datasets:[{data:[0,0,0,0,0],fill:true,backgroundColor:'rgba(11,29,58,.06)',borderColor:'#0B1D3A',borderWidth:2,tension:.4,pointBackgroundColor:'#F0A500',pointRadius:4}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:11}}},y:{min:0,max:100,grid:{color:'rgba(0,0,0,.04)'},ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:11}}}}}
   });
 }
 
-/* ── LIVE CLASSES ──────────────────────────── */
-async function loadLiveSessions() {
-  try {
+/* ── LIVE CLASSES ── */
+async function loadLiveSessions(){
+  try{
     let snap;
-    try { snap = await getDocs(query(collection(db,'liveSessions'),orderBy('createdAt','desc'),limit(20))); }
-    catch(e) { snap = await getDocs(collection(db,'liveSessions')); }
-    const sessions = snap.docs.map(d=>({id:d.id,...d.data()}));
+    try{snap=await getDocs(query(collection(db,'liveSessions'),orderBy('createdAt','desc'),limit(20)));}
+    catch(e){snap=await getDocs(collection(db,'liveSessions'));}
+    const sessions=snap.docs.map(d=>({id:d.id,...d.data()}));
     sessions.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
     renderLiveSessions(sessions);
     renderLiveNow(sessions.filter(s=>s.status==='live'));
-  } catch(e) { console.error('Load live sessions:',e); }
+  }catch(e){console.error('Live sessions:',e);}
 }
 
-function renderLiveSessions(sessions) {
-  const el = document.getElementById('liveSessionsList');
-  if (!sessions.length) { el.innerHTML='<div class="empty-state"><div class="empty-icon">📡</div><div class="empty-title">No live sessions right now</div><div class="empty-sub">Check back soon or view the schedule</div></div>'; return; }
-  el.innerHTML = sessions.map(s => {
-    const isLive = s.status==='live';
-    const badge = isLive ? '<span class="badge badge-live">● LIVE</span>' : '<span class="badge badge-gray">Ended</span>';
-    const btn = isLive && canAccessLive() ? `<button class="btn-live btn-sm" onclick="joinLiveClass('${s.id}','${encodeURIComponent(s.title||'')}','${s.channel||''}')"><i class="fas fa-play-circle"></i> Join</button>` : isLive ? `<button class="btn-gold btn-sm" onclick="openUpgradeModal()"><i class="fas fa-crown"></i> Upgrade</button>` : '';
-    return `<div class="card" style="margin-bottom:12px;">
+function renderLiveSessions(sessions){
+  const el=document.getElementById('liveSessionsList');
+  if(!sessions.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📡</div><div class="empty-title">No live sessions right now</div><div class="empty-sub">Check back soon or view the schedule</div></div>';return;}
+  el.innerHTML=sessions.map(s=>{
+    const isLive=s.status==='live';
+    const badge=isLive?'<span class="badge badge-live">● LIVE</span>':'<span class="badge badge-gray">Ended</span>';
+    const btn=isLive&&canAccessLive()?`<button class="btn-live btn-sm" onclick="joinLiveClass('${s.id}','${encodeURIComponent(s.title||'')}','${s.channel||''}')"><i class="fas fa-play-circle"></i> Join</button>`:isLive?`<button class="btn-gold btn-sm" onclick="openUpgradeModal()"><i class="fas fa-crown"></i> Upgrade</button>`:'';
+    return`<div class="card" style="margin-bottom:12px;">
       <div class="card-body" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
         <div style="width:44px;height:44px;background:${isLive?'var(--error)':'var(--surface-2)'};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">${isLive?'📡':'📹'}</div>
         <div style="flex:1;min-width:0;">
@@ -1346,89 +1256,83 @@ function renderLiveSessions(sessions) {
   }).join('');
 }
 
-function renderLiveNow(liveSessions) {
-  const el = document.getElementById('liveNowList');
-  if (!liveSessions.length) { el.innerHTML='<div class="empty-state" style="padding:16px;"><div class="empty-icon">📡</div><div class="empty-title">No live classes right now</div></div>'; return; }
-  el.innerHTML = liveSessions.map(s=>`
+function renderLiveNow(liveSessions){
+  const el=document.getElementById('liveNowList');
+  if(!liveSessions.length){el.innerHTML='<div class="empty-state" style="padding:16px;"><div class="empty-icon">📡</div><div class="empty-title">No live classes right now</div></div>';return;}
+  el.innerHTML=liveSessions.map(s=>`
     <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
       <div style="width:36px;height:36px;background:var(--error);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;">📡</div>
       <div style="flex:1;min-width:0;"><div style="font-size:.84rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.title}</div><div style="font-size:.7rem;color:var(--text-3);">${s.subject||'—'} · 👥 ${s.viewerCount||0}</div></div>
-      ${canAccessLive() ? `<button class="btn-live btn-sm" onclick="joinLiveClass('${s.id}','${encodeURIComponent(s.title||'')}','${s.channel||''}')"><i class="fas fa-play"></i> Join</button>` : `<button class="btn-gold btn-sm" onclick="openUpgradeModal()"><i class="fas fa-crown"></i></button>`}
+      ${canAccessLive()?`<button class="btn-live btn-sm" onclick="joinLiveClass('${s.id}','${encodeURIComponent(s.title||'')}','${s.channel||''}')"><i class="fas fa-play"></i> Join</button>`:`<button class="btn-gold btn-sm" onclick="openUpgradeModal()"><i class="fas fa-crown"></i></button>`}
     </div>`).join('');
 }
 
-function canAccessLive() {
-  const plan = userData?.plan||'free';
+function canAccessLive(){
+  const plan=userData?.plan||'free';
   return plan==='pro'||plan==='elite';
 }
 
-function subscribeToActiveLive() {
-  const q = query(collection(db,'liveSessions'),where('status','==','live'));
-  onSnapshot(q, snap=>{
-    const hasLive = !snap.empty;
-    document.getElementById('liveDot').style.display = hasLive ? 'block' : 'none';
+function subscribeToActiveLive(){
+  const q=query(collection(db,'liveSessions'),where('status','==','live'));
+  onSnapshot(q,snap=>{
+    const hasLive=!snap.empty;
+    document.getElementById('liveDot').style.display=hasLive?'block':'none';
     renderLiveNow(snap.docs.map(d=>({id:d.id,...d.data()})));
   });
 }
 
-window.joinLiveClass = async function(sessionId, title, channel) {
-  if (!canAccessLive()) { openUpgradeModal(); return; }
-  const dec = s=>decodeURIComponent(s||'');
-  document.getElementById('lvTitle').textContent    = dec(title)||'Live Class';
-  document.getElementById('lvViewers').textContent  = '0';
-  document.getElementById('lvNoVideo').style.display= 'flex';
+window.joinLiveClass=async function(sessionId,title,channel){
+  if(!canAccessLive()){openUpgradeModal();return;}
+  const dec=s=>decodeURIComponent(s||'');
+  document.getElementById('lvTitle').textContent=dec(title)||'Live Class';
+  document.getElementById('lvViewers').textContent='0';
+  document.getElementById('lvNoVideo').style.display='flex';
   document.getElementById('liveViewerOverlay').classList.add('show');
-  document.body.style.overflow = 'hidden';
-  currentLiveSessionId = sessionId;
+  document.body.style.overflow='hidden';
+  currentLiveSessionId=sessionId;
 
-  // Subscribe to chat
-  const chatQ = query(collection(db,'liveSessions',sessionId,'messages'),orderBy('createdAt','asc'),limit(100));
-  lvChatUnsub = onSnapshot(chatQ, snap=>{
-    const msgs = document.getElementById('lvChatMsgs');
-    msgs.innerHTML = snap.docs.map(d=>{ const m=d.data(); return `<div class="lv-chat-msg"><strong>${m.senderName||'User'}</strong>: ${m.text||''}</div>`; }).join('');
-    msgs.scrollTop = msgs.scrollHeight;
+  const chatQ=query(collection(db,'liveSessions',sessionId,'messages'),orderBy('createdAt','asc'),limit(100));
+  lvChatUnsub=onSnapshot(chatQ,snap=>{
+    const msgs=document.getElementById('lvChatMsgs');
+    msgs.innerHTML=snap.docs.map(d=>{const m=d.data();return`<div class="lv-chat-msg"><strong>${m.senderName||'User'}</strong>: ${m.text||''}</div>`;}).join('');
+    msgs.scrollTop=msgs.scrollHeight;
   });
 
-  // Subscribe to viewer count
-  lvViewerUnsub = onSnapshot(doc(db,'liveSessions',sessionId), snap=>{
-    if (snap.exists()) document.getElementById('lvViewers').textContent = snap.data().viewerCount||0;
+  lvViewerUnsub=onSnapshot(doc(db,'liveSessions',sessionId),snap=>{
+    if(snap.exists())document.getElementById('lvViewers').textContent=snap.data().viewerCount||0;
   });
 
-  // Join Agora as audience
-  try {
+  try{
     showToast('Connecting to live class…','info');
-    const tokenData = await backendFetch('POST','/agora/token',{channelName:channel,role:'audience'});
-    agoraClient = AgoraRTC.createClient({mode:'rtc',codec:'vp8'});
+    const tokenData=await backendFetch('POST','/agora/token',{channelName:channel,role:'audience'});
+    agoraClient=AgoraRTC.createClient({mode:'rtc',codec:'vp8'});
     agoraClient.on('user-published',async(user,mediaType)=>{
       await agoraClient.subscribe(user,mediaType);
-      if (mediaType==='video') {
+      if(mediaType==='video'){
         document.getElementById('lvNoVideo').style.display='none';
-        const el = document.getElementById('lvRemoteVideo');
-        el.innerHTML='';
-        const videoEl=document.createElement('div');
-        videoEl.style.cssText='width:100%;height:100%;';
-        el.appendChild(videoEl);
-        user.videoTrack.play(videoEl);
+        const el=document.getElementById('lvRemoteVideo');el.innerHTML='';
+        const videoEl=document.createElement('div');videoEl.style.cssText='width:100%;height:100%;';
+        el.appendChild(videoEl);user.videoTrack.play(videoEl);
       }
-      if (mediaType==='audio') user.audioTrack.play();
+      if(mediaType==='audio')user.audioTrack.play();
     });
-    agoraClient.on('user-left',()=>{ document.getElementById('lvNoVideo').style.display='flex'; document.getElementById('lvRemoteVideo').innerHTML=''; });
+    agoraClient.on('user-left',()=>{document.getElementById('lvNoVideo').style.display='flex';document.getElementById('lvRemoteVideo').innerHTML='';});
     agoraClient.on('token-privilege-will-expire',async()=>{
-      const r = await backendFetch('POST','/agora/token',{channelName:channel,role:'audience'});
+      const r=await backendFetch('POST','/agora/token',{channelName:channel,role:'audience'});
       await agoraClient.renewToken(r.token);
     });
-    await agoraClient.join(tokenData.appId||AGORA_APP_ID, channel, tokenData.token, tokenData.uid);
-    try { await updateDoc(doc(db,'liveSessions',sessionId),{viewerCount:increment(1)}); } catch(e){}
+    await agoraClient.join(tokenData.appId||AGORA_APP_ID,channel,tokenData.token,tokenData.uid);
+    try{await updateDoc(doc(db,'liveSessions',sessionId),{viewerCount:increment(1)});}catch(e){}
     showToast('Connected to live class!','success');
-  } catch(e) { showToast(`Could not join stream: ${e.message}`,'error'); console.error(e); }
+  }catch(e){showToast(`Could not join stream: ${e.message}`,'error');console.error(e);}
 };
 
-window.leaveLiveClass = async function() {
-  if (agoraClient) { try { await agoraClient.leave(); } catch(e){} agoraClient=null; }
-  if (lvChatUnsub)  { lvChatUnsub();  lvChatUnsub=null; }
-  if (lvViewerUnsub){ lvViewerUnsub(); lvViewerUnsub=null; }
-  if (currentLiveSessionId) {
-    try { await updateDoc(doc(db,'liveSessions',currentLiveSessionId),{viewerCount:increment(-1)}); } catch(e){}
+window.leaveLiveClass=async function(){
+  if(agoraClient){try{await agoraClient.leave();}catch(e){}agoraClient=null;}
+  if(lvChatUnsub){lvChatUnsub();lvChatUnsub=null;}
+  if(lvViewerUnsub){lvViewerUnsub();lvViewerUnsub=null;}
+  if(currentLiveSessionId){
+    try{await updateDoc(doc(db,'liveSessions',currentLiveSessionId),{viewerCount:increment(-1)});}catch(e){}
     currentLiveSessionId=null;
   }
   document.getElementById('liveViewerOverlay').classList.remove('show');
@@ -1437,134 +1341,125 @@ window.leaveLiveClass = async function() {
   document.body.style.overflow='';
 };
 
-window.lvSendMsg = async function() {
-  const input=document.getElementById('lvChatInput'), text=input.value.trim();
-  if (!text||!currentLiveSessionId) return; input.value='';
-  const name = `${userData.firstName||'Student'} ${userData.lastName||''}`.trim();
-  try { await addDoc(collection(db,'liveSessions',currentLiveSessionId,'messages'),{text,senderId:currentUser.uid,senderName:name,createdAt:serverTimestamp()}); }
-  catch(e) { showToast('Could not send message','error'); }
+window.lvSendMsg=async function(){
+  const input=document.getElementById('lvChatInput'),text=input.value.trim();
+  if(!text||!currentLiveSessionId)return;input.value='';
+  const name=`${userData.firstName||'Student'} ${userData.lastName||''}`.trim();
+  try{await addDoc(collection(db,'liveSessions',currentLiveSessionId,'messages'),{text,senderId:currentUser.uid,senderName:name,createdAt:serverTimestamp()});}
+  catch(e){showToast('Could not send message','error');}
 };
 
-/* ── LEADERBOARD ───────────────────────────── */
-async function loadLeaderboard() {
-  try {
-    const data = await backendFetch('GET','/gamification/leaderboard?limit=50').catch(()=>null);
-    const rankData = await backendFetch('GET','/gamification/rank').catch(()=>null);
-    if (data?.leaderboard) {
-      renderLeaderboard(data.leaderboard, 'fullLeaderboard');
-      renderLeaderboard(data.leaderboard.slice(0,5), 'miniLeaderboard');
-    } else {
-      // Fallback: read directly from Firestore
+/* ── LEADERBOARD ── */
+async function loadLeaderboard(){
+  try{
+    const data=await backendFetch('GET','/gamification/leaderboard?limit=50').catch(()=>null);
+    const rankData=await backendFetch('GET','/gamification/rank').catch(()=>null);
+    if(data?.leaderboard){
+      renderLeaderboard(data.leaderboard,'fullLeaderboard');
+      renderLeaderboard(data.leaderboard.slice(0,5),'miniLeaderboard');
+    }else{
       let snap;
-      try { snap=await getDocs(query(collection(db,'users'),where('role','==','student'),orderBy('xp','desc'),limit(50))); }
-      catch(e) { snap=await getDocs(query(collection(db,'users'),orderBy('xp','desc'),limit(50))); }
-      const lb = snap.docs.map(d=>({id:d.id,...d.data()})).filter(u=>!u.role||u.role==='student');
+      try{snap=await getDocs(query(collection(db,'users'),where('role','==','student'),orderBy('xp','desc'),limit(50)));}
+      catch(e){snap=await getDocs(query(collection(db,'users'),orderBy('xp','desc'),limit(50)));}
+      const lb=snap.docs.map(d=>({id:d.id,...d.data()})).filter(u=>!u.role||u.role==='student');
       renderLeaderboard(lb,'fullLeaderboard');
       renderLeaderboard(lb.slice(0,5),'miniLeaderboard');
-      const myRank = lb.findIndex(u=>u.id===currentUser.uid)+1;
-      if (myRank>0) updateMyRank(myRank, lb.length);
+      const myRank=lb.findIndex(u=>u.id===currentUser.uid)+1;
+      if(myRank>0)updateMyRank(myRank,lb.length);
     }
-    if (rankData?.rank) updateMyRank(rankData.rank);
-  } catch(e) { console.error('Leaderboard:', e); }
+    if(rankData?.rank)updateMyRank(rankData.rank);
+  }catch(e){console.error('Leaderboard:',e);}
 }
 
-window.loadLeaderboard = loadLeaderboard;
+window.loadLeaderboard=loadLeaderboard;
 
-function updateMyRank(rank, total) {
-  document.getElementById('st-rank').textContent   = `#${rank}`;
-  document.getElementById('myRankBig').textContent = `#${rank}`;
-  const msg = rank<=3?'🏆 Amazing! You\'re in the Top 3!':rank<=10?'🔥 Top 10! Keep it up!':rank<=50?'📈 Top 50! Great progress!':'Keep studying to climb higher!';
-  document.getElementById('myRankMsg').textContent = msg;
+function updateMyRank(rank){
+  document.getElementById('st-rank').textContent=`#${rank}`;
+  document.getElementById('myRankBig').textContent=`#${rank}`;
+  const msg=rank<=3?'🏆 Amazing! You\'re in the Top 3!':rank<=10?'🔥 Top 10! Keep it up!':rank<=50?'📈 Top 50! Great progress!':'Keep studying to climb higher!';
+  document.getElementById('myRankMsg').textContent=msg;
 }
 
-function renderLeaderboard(data, containerId) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  if (!data.length) { el.innerHTML='<div class="empty-state" style="padding:16px;"><div class="empty-title">No data yet</div></div>'; return; }
+function renderLeaderboard(data,containerId){
+  const el=document.getElementById(containerId);if(!el)return;
+  if(!data.length){el.innerHTML='<div class="empty-state" style="padding:16px;"><div class="empty-title">No data yet</div></div>';return;}
   const medals=['🥇','🥈','🥉'];
-  el.innerHTML = data.map((s,i)=>{
-    const name = `${s.firstName||''} ${s.lastName||''}`.trim() || s.displayName || 'Student';
-    const init = `${(s.firstName||name)[0]||'?'}`.toUpperCase();
-    const isMe = (s.id||s.uid)===currentUser.uid;
-    return `<div class="lb-row${isMe?' lb-me':''}">
+  el.innerHTML=data.map((s,i)=>{
+    const name=`${s.firstName||''} ${s.lastName||''}`.trim()||s.displayName||'Student';
+    const init=`${(s.firstName||name)[0]||'?'}`.toUpperCase();
+    const isMe=(s.id||s.uid)===currentUser.uid;
+    return`<div class="lb-row${isMe?' lb-me':''}">
       <div class="lb-rank${i<3?' r'+(i+1):''}">${i<3?medals[i]:i+1}</div>
       <div class="lb-av" style="background:${AV_COLORS[i%AV_COLORS.length]};">${init}</div>
-      <div class="lb-name">
-        <div class="lb-name-text">${name}${isMe?' (You)':''}</div>
-        <div class="lb-sub">${s.state||'Nigeria'} · ${s.targetExam||'—'}</div>
-      </div>
+      <div class="lb-name"><div class="lb-name-text">${name}${isMe?' (You)':''}</div><div class="lb-sub">${s.state||'Nigeria'} · ${s.targetExam||'—'}</div></div>
       <div class="lb-xp">${(s.xp||0).toLocaleString()} XP</div>
     </div>`;
   }).join('');
 }
 
-/* ── ANNOUNCEMENTS ─────────────────────────── */
-async function loadAnnouncements() {
-  try {
+function loadMiniLeaderboard(){ loadLeaderboard(); }
+
+/* ── ANNOUNCEMENTS ── */
+async function loadAnnouncements(){
+  try{
     let snap;
-    try { snap=await getDocs(query(collection(db,'broadcasts'),orderBy('createdAt','desc'),limit(20))); }
-    catch(e) { snap=await getDocs(collection(db,'broadcasts')); }
-    const items = snap.docs.map(d=>({id:d.id,...d.data()}));
+    try{snap=await getDocs(query(collection(db,'broadcasts'),orderBy('createdAt','desc'),limit(20)));}
+    catch(e){snap=await getDocs(collection(db,'broadcasts'));}
+    const items=snap.docs.map(d=>({id:d.id,...d.data()}));
     items.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-    if (items.length) {
-      document.getElementById('anncBadge').style.display = 'flex';
-      document.getElementById('anncBadge').textContent   = items.length;
-      document.getElementById('notifDot').style.display  = 'block';
+    if(items.length){
+      document.getElementById('anncBadge').style.display='flex';
+      document.getElementById('anncBadge').textContent=items.length;
+      document.getElementById('notifDot').style.display='block';
     }
-    const el = document.getElementById('announcementsList');
-    if (!items.length) { el.innerHTML='<div class="empty-state"><div class="empty-icon">📢</div><div class="empty-title">No announcements yet</div></div>'; return; }
-    const catColors = {'JAMB':'var(--error)','WAEC':'#2E90FA','NECO':'var(--gold)','General':'var(--navy)','Platform Update':'#7A5AF8'};
-    const catBadge  = {'JAMB':'badge-red','WAEC':'badge-blue','NECO':'badge-gold','General':'badge-gray','Platform Update':'badge-teal'};
-    el.innerHTML = items.map(b=>`
+    const el=document.getElementById('announcementsList');
+    if(!items.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📢</div><div class="empty-title">No announcements yet</div></div>';return;}
+    const catBadge={'JAMB':'badge-red','WAEC':'badge-blue','NECO':'badge-gold','General':'badge-gray','Platform Update':'badge-teal'};
+    el.innerHTML=items.map(b=>`
       <div class="annc-item">
-        <div class="annc-cat"><span class="badge ${catBadge[b.category]||'badge-gray'}" style="margin:0;">${b.category||'General'}</span></div>
+        <div style="margin-bottom:5px;"><span class="badge ${catBadge[b.category]||'badge-gray'}">${b.category||'General'}</span></div>
         <div class="annc-title">${b.title||'—'}</div>
         <div class="annc-text">${b.message||''}</div>
         <div class="annc-time">${timeAgo(b.createdAt)} · To: ${b.sentTo||'All Students'}</div>
       </div>`).join('');
-  } catch(e) { console.error('Announcements:', e); }
+  }catch(e){console.error('Announcements:',e);}
 }
 
-/* ── SCHEDULE ──────────────────────────────── */
-async function loadSchedule() {
-  try {
+/* ── SCHEDULE ── */
+async function loadSchedule(){
+  try{
     let snap;
-    try { snap=await getDocs(query(collection(db,'schedule'),orderBy('scheduledAt','desc'),limit(20))); }
-    catch(e) { snap=await getDocs(collection(db,'schedule')); }
-    const classes = snap.docs.map(d=>({id:d.id,...d.data()}));
+    try{snap=await getDocs(query(collection(db,'schedule'),orderBy('scheduledAt','asc'),limit(20)));}
+    catch(e){snap=await getDocs(collection(db,'schedule'));}
+    const classes=snap.docs.map(d=>({id:d.id,...d.data()}));
     classes.sort((a,b)=>(a.scheduledAt?.seconds||0)-(b.scheduledAt?.seconds||0));
-    renderSchedule(classes, 'scheduleList');
+    renderSchedule(classes,'scheduleList');
     renderSchedule(classes.filter(c=>{
-      if (!c.scheduledAt?.seconds) return false;
-      const d = new Date(c.scheduledAt.seconds*1000);
-      return d.getTime() > Date.now()-3600000;
-    }).slice(0,3), 'upcomingClasses');
-  } catch(e) { console.error('Schedule:', e); }
+      if(!c.scheduledAt?.seconds)return false;
+      return new Date(c.scheduledAt.seconds*1000).getTime()>Date.now()-3600000;
+    }).slice(0,3),'upcomingClasses');
+  }catch(e){console.error('Schedule:',e);}
 }
 
-function renderSchedule(classes, containerId) {
-  const el = document.getElementById(containerId);
-  if (!el) return;
-  if (!classes.length) { el.innerHTML='<div class="empty-state" style="padding:16px;"><div class="empty-icon">📅</div><div class="empty-title">No upcoming classes</div></div>'; return; }
-  el.innerHTML = classes.map(c=>{
-    const when = c.scheduledAt?.seconds ? new Date(c.scheduledAt.seconds*1000) : null;
-    const {day,mon,isToday} = when ? schedDay(c.scheduledAt) : {day:'?',mon:'—',isToday:false};
-    const timeStr = when ? when.toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'}) : '—';
-    return `<div class="sched-item${isToday?' sched-date-today':''}">
+function renderSchedule(classes,containerId){
+  const el=document.getElementById(containerId);if(!el)return;
+  if(!classes.length){el.innerHTML='<div class="empty-state" style="padding:16px;"><div class="empty-icon">📅</div><div class="empty-title">No upcoming classes</div></div>';return;}
+  el.innerHTML=classes.map(c=>{
+    const when=c.scheduledAt?.seconds?new Date(c.scheduledAt.seconds*1000):null;
+    const{day,mon,isToday}=when?schedDay(c.scheduledAt):{day:'?',mon:'—',isToday:false};
+    const timeStr=when?when.toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'}):'—';
+    return`<div class="sched-item${isToday?' sched-date-today':''}">
       <div class="sched-date"><div class="sched-day">${day}</div><div class="sched-mon">${mon}</div></div>
-      <div class="sched-info">
-        <div class="sched-title">${c.title||'—'}</div>
-        <div class="sched-meta">${timeStr} · ${c.subject||'—'} · ${c.teacher||'NLTC'} · ${c.duration||90} min</div>
-      </div>
+      <div class="sched-info"><div class="sched-title">${c.title||'—'}</div><div class="sched-meta">${timeStr} · ${c.subject||'—'} · ${c.teacher||'NLTC'} · ${c.duration||90} min</div></div>
       ${isToday?'<span class="badge badge-live">Today</span>':''}
     </div>`;
   }).join('');
 }
 
-/* ── ACHIEVEMENTS ──────────────────────────── */
-function renderAchievements() {
-  const achieved = userData?.achievements || [];
-  const all = [
+/* ── ACHIEVEMENTS ── */
+function renderAchievements(){
+  const achieved=userData?.achievements||[];
+  const all=[
     {id:'first_lesson',icon:'🎬',label:'First Lesson',desc:'Watch your first video'},
     {id:'streak_3',icon:'🔥',label:'3-Day Streak',desc:'Study 3 days in a row'},
     {id:'streak_7',icon:'⚡',label:'7-Day Streak',desc:'Study 7 days in a row'},
@@ -1572,117 +1467,120 @@ function renderAchievements() {
     {id:'top_10',icon:'🏆',label:'Top 10',desc:'Reach Top 10 nationwide'},
     {id:'xp_1000',icon:'⭐',label:'1,000 XP',desc:'Earn 1,000 XP'},
   ];
-  const el = document.getElementById('achievementsWrap');
-  el.innerHTML = all.map(a=>{
-    const locked = !achieved.includes(a.id);
-    return `<div class="achievement-chip${locked?' locked':''}"><div class="ach-icon">${a.icon}</div><div><div class="ach-label">${a.label}</div><div style="font-size:.65rem;color:${locked?'var(--text-3)':'var(--text-2)'};">${a.desc}</div></div></div>`;
+  const el=document.getElementById('achievementsWrap');
+  el.innerHTML=all.map(a=>{
+    const locked=!achieved.includes(a.id);
+    return`<div class="achievement-chip${locked?' locked':''}"><div class="ach-icon">${a.icon}</div><div><div class="ach-label">${a.label}</div><div style="font-size:.65rem;color:${locked?'var(--text-3)':'var(--text-2)'};">${a.desc}</div></div></div>`;
   }).join('');
 }
 
-/* ── SETTINGS ──────────────────────────────── */
-function prefillSettings() {
-  document.getElementById('sett-first').value = userData.firstName || '';
-  document.getElementById('sett-last').value  = userData.lastName  || '';
-  document.getElementById('sett-phone').value = userData.phone     || '';
-  const stateEl=document.getElementById('sett-state'), examEl=document.getElementById('sett-exam');
-  for(let i=0;i<stateEl.options.length;i++) if(stateEl.options[i].text===userData.state) stateEl.selectedIndex=i;
-  for(let i=0;i<examEl.options.length;i++) if(examEl.options[i].text===userData.targetExam) examEl.selectedIndex=i;
+/* ── SETTINGS ── */
+function prefillSettings(){
+  document.getElementById('sett-first').value=userData.firstName||'';
+  document.getElementById('sett-last').value=userData.lastName||'';
+  document.getElementById('sett-phone').value=userData.phone||'';
+  const stateEl=document.getElementById('sett-state'),examEl=document.getElementById('sett-exam');
+  for(let i=0;i<stateEl.options.length;i++)if(stateEl.options[i].text===userData.state)stateEl.selectedIndex=i;
+  for(let i=0;i<examEl.options.length;i++)if(examEl.options[i].text===userData.targetExam)examEl.selectedIndex=i;
 }
 
-window.saveProfile = async function() {
-  const data = {
-    firstName: document.getElementById('sett-first').value.trim(),
-    lastName:  document.getElementById('sett-last').value.trim(),
-    phone:     document.getElementById('sett-phone').value.trim(),
-    state:     document.getElementById('sett-state').value,
+window.saveProfile=async function(){
+  const data={
+    firstName:document.getElementById('sett-first').value.trim(),
+    lastName:document.getElementById('sett-last').value.trim(),
+    phone:document.getElementById('sett-phone').value.trim(),
+    state:document.getElementById('sett-state').value,
     targetExam:document.getElementById('sett-exam').value,
-    updatedAt: serverTimestamp()
+    updatedAt:serverTimestamp()
   };
-  try {
-    await updateDoc(doc(db,'users',currentUser.uid), data);
-    Object.assign(userData, data);
-    renderUserUI();
+  try{
+    await updateDoc(doc(db,'users',currentUser.uid),data);
+    Object.assign(userData,data);renderUserUI();
     showToast('Profile saved!','success');
-  } catch(e) { showToast(`Error: ${e.message}`,'error'); }
+  }catch(e){showToast(`Error: ${e.message}`,'error');}
 };
 
-/* ── PAYSTACK UPGRADE ──────────────────────── */
-window.selectPlan = function(plan) {
-  selectedPlan = plan;
-  document.getElementById('planProCard').style.borderColor   = plan==='pro'   ? 'var(--gold)':'var(--border)';
-  document.getElementById('planEliteCard').style.borderColor = plan==='elite' ? '#7A5AF8'   :'var(--border)';
+/* ── PAYSTACK UPGRADE ── */
+window.selectPlan=function(plan){
+  selectedPlan=plan;
+  document.getElementById('planProCard').style.borderColor=plan==='pro'?'var(--gold)':'var(--border)';
+  document.getElementById('planEliteCard').style.borderColor=plan==='elite'?'#7A5AF8':'var(--border)';
 };
-
-window.openUpgradeModal = function() {
-  selectPlan('pro');
-  document.getElementById('upgradeModal').style.display='flex';
-};
-window.closeUpgradeModal = function() {
-  document.getElementById('upgradeModal').style.display='none';
-};
-
-window.initiatePayment = async function() {
-  const btn = document.getElementById('upgradePay');
-  const errEl = document.getElementById('upgradeErr');
+window.openUpgradeModal=function(){selectPlan('pro');document.getElementById('upgradeModal').style.display='flex';};
+window.closeUpgradeModal=function(){document.getElementById('upgradeModal').style.display='none';};
+window.initiatePayment=async function(){
+  const btn=document.getElementById('upgradePay'),errEl=document.getElementById('upgradeErr');
   errEl.style.display='none';
-  btn.disabled=true; btn.innerHTML='<div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Processing…';
-  try {
-    const callbackUrl = `${window.location.origin}${window.location.pathname.replace(/[^/]*$/,'')}payment-success.html?plan=${selectedPlan}`;
-    const data = await backendFetch('POST','/paystack/initialize',{plan:selectedPlan,callbackUrl});
-    window.location.href = data.authorizationUrl;
-  } catch(e) {
-    errEl.textContent = e.message || 'Payment failed. Please try again.';
+  btn.disabled=true;btn.innerHTML='<div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Processing…';
+  try{
+    const callbackUrl=`${window.location.origin}${window.location.pathname.replace(/[^/]*$/,'')}payment-success.html?plan=${selectedPlan}`;
+    const data=await backendFetch('POST','/paystack/initialize',{plan:selectedPlan,callbackUrl});
+    window.location.href=data.authorizationUrl;
+  }catch(e){
+    errEl.textContent=e.message||'Payment failed. Please try again.';
     errEl.style.display='block';
-    btn.disabled=false; btn.innerHTML='<i class="fas fa-credit-card"></i> Pay with Paystack';
+    btn.disabled=false;btn.innerHTML='<i class="fas fa-credit-card"></i> Pay with Paystack';
   }
 };
 
-// Close upgrade modal on overlay click
-document.getElementById('upgradeModal').addEventListener('click', function(e){ if(e.target===this) closeUpgradeModal(); });
+document.getElementById('upgradeModal').addEventListener('click',function(e){if(e.target===this)closeUpgradeModal();});
 
-/* ── SIGN OUT ──────────────────────────────── */
-window.handleSignOut = async function() {
+/* ── SIGN OUT ── */
+window.handleSignOut=async function(){
   await leaveLiveClass().catch(()=>{});
-  try { await signOut(auth); window.location.href='auth.html'; }
-  catch(e) { showToast('Sign out failed','error'); }
+  try{await signOut(auth);window.location.href='auth.html';}
+  catch(e){showToast('Sign out failed','error');}
 };
 </script>
 
 <!-- ═══════════ UI SCRIPTS ═══════════ -->
 <script>
-function showToast(msg, type='info') {
+function showToast(msg,type='info'){
   const icons={success:'fa-check-circle',error:'fa-times-circle',info:'fa-info-circle'};
-  const t=document.createElement('div'); t.className=`toast ${type}`;
+  const t=document.createElement('div');t.className=`toast ${type}`;
   t.innerHTML=`<i class="fas ${icons[type]||'fa-info-circle'}" style="flex-shrink:0;margin-top:2px;"></i><span>${msg}</span>`;
   document.getElementById('toast-ct').appendChild(t);
-  setTimeout(()=>{ t.classList.add('toast-out'); setTimeout(()=>t.remove(),300); },4500);
+  setTimeout(()=>{t.classList.add('toast-out');setTimeout(()=>t.remove(),300);},4500);
 }
 window.showToast=showToast;
 
-function showView(name, btn) {
+function showView(name,btn){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const v=document.getElementById('view-'+name); if(v) v.classList.add('active');
+  const v=document.getElementById('view-'+name);if(v)v.classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
+  if(btn)btn.classList.add('active');
+  else{
+    // Auto-highlight sidebar link when navigating programmatically
+    document.querySelectorAll('.sb-link').forEach(b=>{
+      if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes(`'${name}'`))b.classList.add('active');
+    });
+  }
   const titles={home:'Dashboard',lessons:'Video Lessons',cbt:'CBT Practice',live:'Live Classes',leaderboard:'Leaderboard',announcements:'Announcements',schedule:'Schedule',settings:'Settings'};
-  document.getElementById('topbarTitle').textContent = titles[name]||'Dashboard';
+  document.getElementById('topbarTitle').textContent=titles[name]||'Dashboard';
   closeSidebar();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 window.showView=showView;
 
-function toggleSidebar() {
-  const s=document.getElementById('sidebar'), o=document.getElementById('sbOverlay');
-  s.classList.contains('open') ? (s.classList.remove('open'),o.classList.remove('show')) : (s.classList.add('open'),o.classList.add('show'));
+function toggleSidebar(){
+  const s=document.getElementById('sidebar'),o=document.getElementById('sbOverlay');
+  s.classList.contains('open')?(s.classList.remove('open'),o.classList.remove('show')):(s.classList.add('open'),o.classList.add('show'));
 }
-function closeSidebar() {
+function closeSidebar(){
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sbOverlay').classList.remove('show');
 }
-window.toggleSidebar=toggleSidebar; window.closeSidebar=closeSidebar;
+window.toggleSidebar=toggleSidebar;
+window.closeSidebar=closeSidebar;
 
-document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeSidebar(); window.closeVideoPlayer?.(); document.querySelectorAll('.modal-overlay.show,.live-viewer-overlay.show').forEach(m=>m.classList.remove('show')); } });
-window.addEventListener('resize', ()=>{ if(window.innerWidth>900) closeSidebar(); });
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeSidebar();
+    window.closeVideoPlayer?.();
+    document.querySelectorAll('.modal-overlay.show,.live-viewer-overlay.show').forEach(m=>m.classList.remove('show'));
+  }
+});
+window.addEventListener('resize',()=>{if(window.innerWidth>900)closeSidebar();});
 </script>
 </body>
 </html>

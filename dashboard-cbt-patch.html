@@ -1,0 +1,153 @@
+<!-- 
+  DASHBOARD INTEGRATION PATCH
+  ============================
+  Add this <script> block to your dashboard (index.html) just before the closing </body> tag.
+  It handles:
+    1. The CBT navigation button now opens cbt.html
+    2. Receiving score results back from cbt.html via postMessage
+    3. Also reads from localStorage if postMessage missed
+  
+  Also: Update your existing CBT sidebar link onclick to:
+    onclick="openCBTPage()"
+  
+  And replace the CBT card onclick calls in the dashboard with:
+    onclick="openCBTPage('Mathematics','JAMB / UTME')"
+  
+  The full replacement instructions are below.
+-->
+
+<!-- ═══ PASTE THIS BLOCK INTO dashboard index.html BEFORE </body> ═══ -->
+<script>
+/* ── CBT page integration ── */
+const CBT_PAGE = 'cbt.html'; // adjust path if needed
+
+window.openCBTPage = function(subject, exam) {
+  // Store context for cbt page to auto-select if desired
+  if (subject) {
+    const map = {
+      'Mathematics':'mathematics','English Language':'english','Chemistry':'chemistry',
+      'Physics':'physics','Biology':'biology','Economics':'economics',
+      'Government':'government','Literature':'literature'
+    };
+    const key = map[subject] || subject.toLowerCase().replace(/\s+/g,'');
+    try { sessionStorage.setItem('nltc_cbt_preset', JSON.stringify({ key, exam })); } catch(e){}
+  }
+  window.location.href = CBT_PAGE;
+};
+
+/* Receive score back from cbt.html */
+window.addEventListener('message', (e) => {
+  if (!e.data || e.data.type !== 'nltc_cbt_score') return;
+  const { score, correct, total } = e.data;
+  if (userData) {
+    userData.xp = (userData.xp || 0) + Math.round(score * 0.5);
+    renderUserUI();
+  }
+  showToast(`CBT completed! Score: ${score}%`, 'success');
+  loadCBTHistory();
+});
+
+/* Also check localStorage on page load for score from last CBT session */
+(function checkLastCBTScore() {
+  try {
+    const last = localStorage.getItem('nltc_last_cbt');
+    if (!last) return;
+    const data = JSON.parse(last);
+    if (!data.timestamp) return;
+    const age = Date.now() - data.timestamp;
+    if (age < 30000) { // only if within last 30 seconds (just came back)
+      showToast(`Last CBT: ${data.score}% — ${data.correct}/${data.total} correct`, 'success');
+      localStorage.removeItem('nltc_last_cbt');
+    }
+  } catch(e) {}
+})();
+</script>
+
+<!--
+  ════════════════════════════════════════════════════════════════
+  CHANGES TO MAKE IN YOUR EXISTING dashboard (index.html):
+  ════════════════════════════════════════════════════════════════
+
+  1. SIDEBAR CBT LINK — find this line:
+       <button class="sb-link" onclick="showView('cbt',this)">
+     Replace with:
+       <button class="sb-link" onclick="openCBTPage()">
+  
+  2. CBT SETUP CARDS — find all startCBT(...) onclick calls like:
+       onclick="startCBT('Mathematics','JAMB / UTME')"
+     Replace with:
+       onclick="openCBTPage('Mathematics','JAMB / UTME')"
+  
+  3. The "CBT Practice" view (view-cbt div) in dashboard can be simplified
+     since CBT now lives on its own page. You can either:
+     a) Keep it and add a redirect button, OR
+     b) Replace the entire view with a simple card that links out.
+     
+     Recommended replacement for view-cbt content:
+-->
+
+<!-- Replace your entire view-cbt div content with this: -->
+<div class="view" id="view-cbt">
+  <div class="page-hdr"><h2>📝 CBT Practice</h2><p>Simulate exam conditions with past questions from ALOC</p></div>
+  
+  <!-- Quick launch cards -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;max-width:800px;margin-bottom:20px;">
+    <div class="card" style="cursor:pointer;" onclick="openCBTPage('Mathematics','JAMB / UTME')">
+      <div class="card-body" style="text-align:center;padding:22px;">
+        <div style="font-size:2rem;margin-bottom:9px;">📐</div>
+        <div style="font-family:var(--font-head);font-size:.92rem;font-weight:700;color:var(--navy);margin-bottom:3px;">Mathematics</div>
+        <div style="font-size:.74rem;color:var(--text-3);">JAMB / UTME · 40 Questions</div>
+        <div class="badge badge-blue" style="margin-top:9px;">Start Session</div>
+      </div>
+    </div>
+    <div class="card" style="cursor:pointer;" onclick="openCBTPage('English Language','JAMB / UTME')">
+      <div class="card-body" style="text-align:center;padding:22px;">
+        <div style="font-size:2rem;margin-bottom:9px;">📖</div>
+        <div style="font-family:var(--font-head);font-size:.92rem;font-weight:700;color:var(--navy);margin-bottom:3px;">English Language</div>
+        <div style="font-size:.74rem;color:var(--text-3);">JAMB / UTME · 60 Questions</div>
+        <div class="badge badge-blue" style="margin-top:9px;">Start Session</div>
+      </div>
+    </div>
+    <div class="card" style="cursor:pointer;" onclick="openCBTPage('Chemistry','WAEC SSCE')">
+      <div class="card-body" style="text-align:center;padding:22px;">
+        <div style="font-size:2rem;margin-bottom:9px;">⚗️</div>
+        <div style="font-family:var(--font-head);font-size:.92rem;font-weight:700;color:var(--navy);margin-bottom:3px;">Chemistry</div>
+        <div style="font-size:.74rem;color:var(--text-3);">WAEC SSCE · 50 Questions</div>
+        <div class="badge badge-gold" style="margin-top:9px;">Start Session</div>
+      </div>
+    </div>
+    <div class="card" style="cursor:pointer;" onclick="openCBTPage('Physics','WAEC SSCE')">
+      <div class="card-body" style="text-align:center;padding:22px;">
+        <div style="font-size:2rem;margin-bottom:9px;">⚡</div>
+        <div style="font-family:var(--font-head);font-size:.92rem;font-weight:700;color:var(--navy);margin-bottom:3px;">Physics</div>
+        <div style="font-size:.74rem;color:var(--text-3);">WAEC SSCE · 50 Questions</div>
+        <div class="badge badge-gold" style="margin-top:9px;">Start Session</div>
+      </div>
+    </div>
+    <div class="card" style="cursor:pointer;" onclick="openCBTPage('Biology','NECO')">
+      <div class="card-body" style="text-align:center;padding:22px;">
+        <div style="font-size:2rem;margin-bottom:9px;">🌿</div>
+        <div style="font-family:var(--font-head);font-size:.92rem;font-weight:700;color:var(--navy);margin-bottom:3px;">Biology</div>
+        <div style="font-size:.74rem;color:var(--text-3);">NECO · 50 Questions</div>
+        <div class="badge badge-green" style="margin-top:9px;">Start Session</div>
+      </div>
+    </div>
+    <div class="card" style="cursor:pointer;" onclick="openCBTPage()">
+      <div class="card-body" style="text-align:center;padding:22px;">
+        <div style="font-size:2rem;margin-bottom:9px;">🎓</div>
+        <div style="font-family:var(--font-head);font-size:.92rem;font-weight:700;color:var(--navy);margin-bottom:3px;">Full JAMB Simulation</div>
+        <div style="font-size:.74rem;color:var(--text-3);">4 subjects · 180 questions · 2 hours</div>
+        <div class="badge badge-red" style="margin-top:9px;">Launch CBT</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Past Sessions table -->
+  <div class="card" style="max-width:800px;">
+    <div class="card-header"><div class="card-title">📊 Past Sessions</div><button class="btn-outline btn-sm" onclick="loadCBTHistory()"><i class="fas fa-sync"></i></button></div>
+    <div class="card-body" style="padding:0;"><div class="table-wrap"><table>
+      <thead><tr><th>Subject</th><th>Exam</th><th>Score</th><th>Date</th></tr></thead>
+      <tbody id="cbtHistory"><tr><td colspan="4"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
+    </table></div></div>
+  </div>
+</div>
