@@ -484,7 +484,7 @@ img{max-width:100%;height:auto;}
     <button class="retry-btn" onclick="retryLoad()"><i class="fas fa-redo"></i> Try Again</button>
     <button class="retry-btn sec" onclick="goToSetup()">Back to Setup</button>
   </div>
-  <div style="margin-top:auto;padding-bottom:20px;font-size:.7rem;color:rgba(255,255,255,.2);">This may take up to 30 seconds on first load</div>
+  <div style="margin-top:auto;padding-bottom:20px;font-size:.7rem;color:rgba(255,255,255,.2);">This may take up to 3 minutes on first load</div>
 </div>
 
 <!-- Subject Done Bridge (overlay) -->
@@ -855,7 +855,7 @@ function updateStartBtn() {
 /* ════════════════════════════════════════
    FETCH QUESTIONS
 ════════════════════════════════════════ */
-async function fetchSubjectQuestions(subjectKey, count, examType) {
+async function fetchSubjectQuestions(subjectKey, count, examType, onProgress) {
   // Headers exactly as per official ALOC API docs
   const headers = {
     'Accept': 'application/json',
@@ -891,7 +891,6 @@ async function fetchSubjectQuestions(subjectKey, count, examType) {
 
   const allQuestions = [];
   const seen = new Set();
-
   const addQ = (list) => {
     if (!Array.isArray(list)) return;
     list.forEach(q => {
@@ -901,17 +900,48 @@ async function fetchSubjectQuestions(subjectKey, count, examType) {
     });
   };
 
-  // Simple fetch — no AbortController (was causing AbortError on sequential requests)
-  async function tryFetch(url) {
+  // Fetch with real streaming progress:
+  // Phase 1 (0→50%): waiting for server to respond (connection + TTFB)
+  // Phase 2 (50→90%): downloading body bytes (tracked via Content-Length)
+  // Phase 3 (90→100%): JSON parsing
+  async function tryFetch(url, progressStart, progressEnd) {
+    const report = (pct) => onProgress && onProgress(progressStart + (progressEnd - progressStart) * pct);
     try {
+      report(0);
       const r = await fetch(url, { headers });
+      report(0.5); // headers received — halfway
       if (!r.ok) {
         console.warn(`[ALOC] HTTP ${r.status} for ${url}`);
         return [];
       }
-      const data = await r.json().catch(e => { console.warn('[ALOC] JSON parse error:', e); return {}; });
+
+      // Stream the body to get real download progress
+      const contentLength = parseInt(r.headers.get('Content-Length') || '0', 10);
+      let text = '';
+      if (contentLength > 0 && r.body) {
+        const reader = r.body.getReader();
+        const decoder = new TextDecoder();
+        let received = 0;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          received += value.byteLength;
+          text += decoder.decode(value, { stream: true });
+          // Map download progress to 50%→90% of the bar
+          report(0.5 + 0.4 * (received / contentLength));
+        }
+        text += decoder.decode(); // flush
+      } else {
+        // No Content-Length — just read all at once and hold at 70%
+        report(0.7);
+        text = await r.text();
+      }
+
+      report(0.9); // download done, parsing now
+      const data = JSON.parse(text);
       const parsed = parseResponse(data);
       console.log(`[ALOC] ${url} → ${parsed.length} questions`);
+      report(1.0);
       return parsed;
     } catch(e) {
       console.warn(`[ALOC] Fetch error for ${url}:`, e.name, e.message);
@@ -919,31 +949,42 @@ async function fetchSubjectQuestions(subjectKey, count, examType) {
     }
   }
 
-  const batchSize = 40;
+  // Fire primary (/q) and backup (/m) simultaneously.
+  // Each gets half the progress range so the bar reflects both.
+  async function fetchBest(primary, backup, pStart, pEnd) {
+    const mid = pStart + (pEnd - pStart) * 0.5;
+    const [r1, r2] = await Promise.all([
+      tryFetch(primary, pStart, mid),
+      tryFetch(backup,  mid,   pEnd),
+    ]);
+    return [...r1, ...r2];
+  }
 
-  // Official URL format: /api/v2/q?subject=chemistry&type=utme
-  // subject slugs from official docs: english, mathematics, physics, chemistry, biology, etc.
   if (isEnglish) {
-    const fallbacks = [
+    addQ(await fetchBest(
       `${ALOC_BASE}/q?subject=english&type=utme`,
-      `${ALOC_BASE}/q?subject=english`,
       `${ALOC_BASE}/m?subject=english&type=utme`,
-      `${ALOC_BASE}/m?subject=english`,
-    ];
-    for (const url of fallbacks) {
-      addQ(await tryFetch(url));
-      if (allQuestions.length >= count) break;
+      0, allQuestions.length < count ? 0.7 : 1.0
+    ));
+    if (allQuestions.length < count) {
+      addQ(await fetchBest(
+        `${ALOC_BASE}/q?subject=english`,
+        `${ALOC_BASE}/m?subject=english`,
+        0.7, 1.0
+      ));
     }
   } else {
-    const fallbacks = [
+    addQ(await fetchBest(
       `${ALOC_BASE}/q?subject=${encodeURIComponent(slug)}&type=${type}`,
-      `${ALOC_BASE}/q?subject=${encodeURIComponent(slug)}`,
       `${ALOC_BASE}/m?subject=${encodeURIComponent(slug)}&type=${type}`,
-      `${ALOC_BASE}/m?subject=${encodeURIComponent(slug)}`,
-    ];
-    for (const url of fallbacks) {
-      addQ(await tryFetch(url));
-      if (allQuestions.length >= count) break;
+      0, allQuestions.length < count ? 0.7 : 1.0
+    ));
+    if (allQuestions.length < count) {
+      addQ(await fetchBest(
+        `${ALOC_BASE}/q?subject=${encodeURIComponent(slug)}`,
+        `${ALOC_BASE}/m?subject=${encodeURIComponent(slug)}`,
+        0.7, 1.0
+      ));
     }
   }
 
@@ -989,10 +1030,10 @@ async function loadAllJambSubjects() {
   showScreen('loading-screen');
   document.getElementById('load-spinner').style.display    = 'block';
   document.getElementById('load-error-wrap').style.display = 'none';
-  document.getElementById('load-status-text').textContent  = `Loading subjects (0 of ${queue.length})…`;
-  document.getElementById('load-detail').textContent       = 'Starting…';
+  document.getElementById('load-status-text').textContent  = 'Loading all subjects at once…';
+  document.getElementById('load-detail').textContent       = 'All 4 subjects fetching in parallel';
 
-  // Build all 4 progress bars upfront
+  // Build all progress bars upfront
   const listEl = document.getElementById('load-subjects-list');
   listEl.innerHTML = queue.map((sl, i) => {
     const cfg = SUBJECTS_CONFIG[sl.key];
@@ -1001,7 +1042,7 @@ async function loadAllJambSubjects() {
       <div style="flex:1;">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <span class="load-subj-name">${cfg.name}</span>
-          <span class="load-subj-count" id="lc-${i}">0/${sl.count}</span>
+          <span class="load-subj-count" id="lc-${i}">—</span>
         </div>
         <div class="load-subj-bar">
           <div class="load-subj-fill" id="lf-${i}" style="background:${cfg.color};width:0%;transition:width .4s ease;"></div>
@@ -1010,38 +1051,26 @@ async function loadAllJambSubjects() {
     </div>`;
   }).join('');
 
-  // Load one subject at a time — sequential avoids rate limiting
+  // Bars start at 0 — real progress drives them from here
+  // No fake animation needed — fetchOneSubject reports actual byte progress
+
+  // *** PARALLEL FETCH — all 4 subjects at the same time ***
+  const results = await Promise.allSettled(
+    queue.map((sl, i) => fetchOneSubject(sl, i))
+  );
+
+  // Tally results
   let failCount = 0;
-  for (let i = 0; i < queue.length; i++) {
-    const sl  = queue[i];
-    const cfg = SUBJECTS_CONFIG[sl.key];
-    const fill = document.getElementById('lf-' + i);
-    const cnt  = document.getElementById('lc-' + i);
-
-    document.getElementById('load-status-text').textContent = `Loading ${cfg.emoji} ${cfg.name}… (${i + 1} of ${queue.length})`;
-    document.getElementById('load-detail').textContent = `Fetching ${sl.count} questions…`;
-
-    // Animate bar to show activity
-    if (fill) fill.style.width = '20%';
-
-    try {
-      const qs = await fetchSubjectQuestions(sl.key, sl.count, 'utme');
-
-      if (fill) fill.style.width = '100%';
-      if (cnt)  cnt.textContent  = `✓ ${qs.length}`;
-
-      state.subjects.push({
-        key: sl.key, name: cfg.name, emoji: cfg.emoji,
-        color: cfg.color, questions: qs, answered: {}
-      });
-
-    } catch(e) {
-      if (fill) { fill.style.background = 'var(--error)'; fill.style.width = '100%'; }
-      if (cnt)  cnt.textContent = 'Failed';
+  results.forEach((r, i) => {
+    if (r.status === 'rejected') {
       failCount++;
-      console.error(`[ALOC] Subject ${sl.key} failed:`, e);
+      const fill = document.getElementById('lf-' + i);
+      const cnt  = document.getElementById('lc-' + i);
+      if (fill) { fill.style.transition = 'none'; fill.style.background = 'var(--error)'; fill.style.width = '100%'; }
+      if (cnt)  cnt.textContent = '✗ Failed';
+      console.error(`[ALOC] ${queue[i].key} failed:`, r.reason);
     }
-  }
+  });
 
   if (state.subjects.length === 0) {
     document.getElementById('load-spinner').style.display    = 'none';
@@ -1056,7 +1085,7 @@ async function loadAllJambSubjects() {
     showToast(`⚠️ ${failCount} subject(s) failed — continuing with ${state.subjects.length} loaded`, 'error');
   }
 
-  document.getElementById('load-status-text').textContent = '✓ All done! Starting exam…';
+  document.getElementById('load-status-text').textContent = `✓ Ready! ${state.subjects.length} subjects loaded`;
 
   // Sort to match jambQueue order
   state.subjects.sort((a, b) => {
@@ -1073,6 +1102,39 @@ async function loadAllJambSubjects() {
   initExamScreen();
   showScreen('exam-screen');
   showToast(`${state.subjects.length} subjects loaded — good luck! 🎓`, 'success');
+}
+
+// Fetches one subject and updates its progress bar — called in parallel
+async function fetchOneSubject(sl, i) {
+  const cfg  = SUBJECTS_CONFIG[sl.key];
+  const fill = document.getElementById('lf-' + i);
+  const cnt  = document.getElementById('lc-' + i);
+
+  // Wire real fetch progress to this subject's bar
+  const onProgress = (pct) => {
+    if (fill) {
+      fill.style.transition = pct > 0 ? 'width .15s ease-out' : 'none';
+      fill.style.width = Math.round(pct * 100) + '%';
+    }
+    // Show phase label in the count slot while loading
+    if (cnt && pct < 1) {
+      if (pct < 0.5)       cnt.textContent = 'Connecting…';
+      else if (pct < 0.9)  cnt.textContent = 'Downloading…';
+      else                 cnt.textContent = 'Processing…';
+    }
+  };
+
+  const qs = await fetchSubjectQuestions(sl.key, sl.count, 'utme', onProgress);
+
+  // Snap to 100% and show final count
+  if (fill) { fill.style.transition = 'width .2s ease'; fill.style.width = '100%'; }
+  if (cnt)  cnt.textContent = `✓ ${qs.length} questions`;
+
+  state.subjects.push({ key: sl.key, name: cfg.name, emoji: cfg.emoji, color: cfg.color, questions: qs, answered: {} });
+  const done  = state.subjects.length;
+  const total = state.jambQueue.length;
+  document.getElementById('load-status-text').textContent =
+    done < total ? `${done} of ${total} ready…` : '✓ All subjects loaded!';
 }
 
 /* ════════════════════════════════════════
