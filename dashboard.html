@@ -222,6 +222,16 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
 @keyframes tOut{to{opacity:0;transform:translateX(16px);}}
 
 /* ═══════════════════════════════════════════
+   LEVEL-UP TOAST
+═══════════════════════════════════════════ */
+.toast-levelup{
+  background:linear-gradient(135deg,var(--navy),var(--navy-3));
+  color:white;border-left:4px solid var(--gold);
+  flex-direction:column;align-items:flex-start;gap:3px;
+}
+.toast-levelup-title{font-family:var(--font-head);font-size:.88rem;font-weight:800;color:var(--gold);}
+
+/* ═══════════════════════════════════════════
    VIDEO PLAYER
 ═══════════════════════════════════════════ */
 .video-player-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;flex-direction:column;padding:14px;}
@@ -300,7 +310,7 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
    CBT LAUNCH CARDS
 ═══════════════════════════════════════════ */
 .cbt-launch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;max-width:820px;margin-bottom:20px;}
-.cbt-launch-card{background:white;border-radius:var(--r-lg);border:1px solid var(--border);box-shadow:var(--shadow-sm);cursor:pointer;transition:all .2s;text-align:center;padding:24px 18px;}
+.cbt-launch-card{background:white;border-radius:var(--r-lg);border:1px solid var(--border);box-shadow:var(--shadow-sm);cursor:pointer;transition:all .2s;text-align:center;padding:24px 18px;position:relative;}
 .cbt-launch-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:rgba(11,29,58,.14);}
 .cbt-launch-icon{font-size:2.2rem;margin-bottom:10px;}
 .cbt-launch-name{font-family:var(--font-head);font-size:.92rem;font-weight:700;color:var(--navy);margin-bottom:4px;}
@@ -578,7 +588,6 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
   </div>
   <div class="dash-grid">
     <div style="display:flex;flex-direction:column;gap:18px;">
-      <!-- Recent Lessons -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">🎬 Continue Learning</div>
@@ -588,7 +597,6 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
           <div class="loading"><div class="spinner"></div></div>
         </div>
       </div>
-      <!-- Live Now -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">📡 Live Right Now</div>
@@ -598,7 +606,6 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
           <div class="loading"><div class="spinner"></div></div>
         </div>
       </div>
-      <!-- CBT quick launch from home -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">📝 Quick CBT Practice</div>
@@ -629,19 +636,16 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
           </div>
         </div>
       </div>
-      <!-- CBT Performance Chart -->
       <div class="card">
         <div class="card-header"><div class="card-title">📊 CBT Performance</div></div>
         <div class="card-body"><div style="height:180px;"><canvas id="cbtChart"></canvas></div></div>
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:18px;">
-      <!-- Achievements -->
       <div class="card">
         <div class="card-header"><div class="card-title">🏆 Achievements</div></div>
         <div class="card-body" style="padding:12px 14px;"><div id="achievementsWrap"><div class="loading"><div class="spinner"></div></div></div></div>
       </div>
-      <!-- Mini Leaderboard -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">🥇 Leaderboard</div>
@@ -651,7 +655,6 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
           <div class="loading"><div class="spinner"></div></div>
         </div>
       </div>
-      <!-- Upcoming Classes -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">📅 Upcoming Classes</div>
@@ -689,8 +692,6 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
 <!-- ───────────────────── CBT ───────────────────── -->
 <div class="view" id="view-cbt">
   <div class="page-hdr"><h2>📝 CBT Practice</h2><p>Simulate exam conditions with live questions — powered by ALOC</p></div>
-
-  <!-- Launch cards -->
   <div class="cbt-launch-grid">
     <div class="cbt-launch-card" onclick="openCBTPage()">
       <div style="position:absolute;top:12px;right:12px;"><span class="badge badge-red" style="font-size:.6rem;">HOT</span></div>
@@ -699,51 +700,49 @@ tbody td{padding:11px 13px;font-size:.83rem;color:var(--text-1);vertical-align:m
       <div class="cbt-launch-meta">4 subjects · 180 questions · 2 hours</div>
       <span class="badge badge-blue">Launch Now</span>
     </div>
-    <div class="cbt-launch-card" onclick="openCBTPage('Mathematics')" style="position:relative;">
+    <div class="cbt-launch-card" onclick="openCBTPage('Mathematics')">
       <div class="cbt-launch-icon">📐</div>
       <div class="cbt-launch-name">Mathematics</div>
       <div class="cbt-launch-meta">JAMB / UTME · 40 Questions</div>
       <span class="badge badge-blue">Start</span>
     </div>
-    <div class="cbt-launch-card" onclick="openCBTPage('English Language')" style="position:relative;">
+    <div class="cbt-launch-card" onclick="openCBTPage('English Language')">
       <div class="cbt-launch-icon">📖</div>
       <div class="cbt-launch-name">English Language</div>
       <div class="cbt-launch-meta">JAMB / UTME · 60 Questions</div>
       <span class="badge badge-blue">Start</span>
     </div>
-    <div class="cbt-launch-card" onclick="openCBTPage('Chemistry')" style="position:relative;">
+    <div class="cbt-launch-card" onclick="openCBTPage('Chemistry')">
       <div class="cbt-launch-icon">⚗️</div>
       <div class="cbt-launch-name">Chemistry</div>
       <div class="cbt-launch-meta">WAEC SSCE · 50 Questions</div>
       <span class="badge badge-gold">Start</span>
     </div>
-    <div class="cbt-launch-card" onclick="openCBTPage('Physics')" style="position:relative;">
+    <div class="cbt-launch-card" onclick="openCBTPage('Physics')">
       <div class="cbt-launch-icon">⚡</div>
       <div class="cbt-launch-name">Physics</div>
       <div class="cbt-launch-meta">WAEC SSCE · 50 Questions</div>
       <span class="badge badge-gold">Start</span>
     </div>
-    <div class="cbt-launch-card" onclick="openCBTPage('Biology')" style="position:relative;">
+    <div class="cbt-launch-card" onclick="openCBTPage('Biology')">
       <div class="cbt-launch-icon">🌿</div>
       <div class="cbt-launch-name">Biology</div>
       <div class="cbt-launch-meta">NECO · 50 Questions</div>
       <span class="badge badge-green">Start</span>
     </div>
-    <div class="cbt-launch-card" onclick="openCBTPage('Economics')" style="position:relative;">
+    <div class="cbt-launch-card" onclick="openCBTPage('Economics')">
       <div class="cbt-launch-icon">📈</div>
       <div class="cbt-launch-name">Economics</div>
       <div class="cbt-launch-meta">WAEC SSCE · 50 Questions</div>
       <span class="badge badge-green">Start</span>
     </div>
-    <div class="cbt-launch-card" onclick="openCBTPage('Government')" style="position:relative;">
+    <div class="cbt-launch-card" onclick="openCBTPage('Government')">
       <div class="cbt-launch-icon">🏛️</div>
       <div class="cbt-launch-name">Government</div>
       <div class="cbt-launch-meta">WAEC SSCE · 50 Questions</div>
       <span class="badge badge-green">Start</span>
     </div>
   </div>
-
-  <!-- Past sessions -->
   <div class="card" style="max-width:820px;">
     <div class="card-header">
       <div class="card-title">📊 Past Sessions</div>
@@ -911,7 +910,7 @@ const FIREBASE_CONFIG = {
 };
 const AGORA_APP_ID  = '5eae75b2cc3d48cc84446b94d3877f88';
 const BACKEND_URL   = 'https://nltc-backend.onrender.com';
-const CBT_PAGE      = 'cbt.html'; // path to your cbt.html file
+const CBT_PAGE      = 'cbt.html';
 
 const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
@@ -929,7 +928,8 @@ const AV_COLORS = ['#E67E22','#2E86AB','#6C3483','#117A65','#922B21','#1B4F72','
 const LEVEL_NAMES = ['Starter','Scholar','Explorer','Achiever','Champion','Elite','Legend'];
 
 function xpToLevel(xp) {
-  const t=[0,500,1500,3500,7000,12000,20000]; let l=0;
+  const t=[0,500,1500,3500,7000,12000,20000];
+  let l=0;
   for(let i=0;i<t.length;i++){if(xp>=t[i])l=i+1;}
   return Math.min(l,LEVEL_NAMES.length);
 }
@@ -967,6 +967,36 @@ async function backendFetch(method,path,body=null){
   return data;
 }
 
+/* ── GAMIFICATION HELPERS ── */
+
+// FIX: Central XP award handler — shows level-up toast when level changes
+function handleXPResult(result) {
+  if (!result) return;
+  if (result.xpEarned > 0) {
+    userData.xp = result.newXP;
+    userData.streak = result.newStreak;
+    renderUserUI();
+
+    if (result.leveledUp) {
+      showLevelUpToast(result.level);
+    } else {
+      showToast(`+${result.xpEarned} XP earned!`, 'success');
+    }
+    if (result.streakBonusAwarded) {
+      setTimeout(() => showToast(`🔥 ${result.newStreak}-day streak! +${10} bonus XP`, 'info'), 800);
+    }
+  }
+}
+
+function showLevelUpToast(level) {
+  const names = ['Starter','Scholar','Explorer','Achiever','Champion','Elite','Legend'];
+  const t = document.createElement('div');
+  t.className = 'toast toast-levelup';
+  t.innerHTML = `<div class="toast-levelup-title">🎉 Level Up! You're now Level ${level}</div><span>${names[level-1]||'Legend'} — keep going!</span>`;
+  document.getElementById('toast-ct').appendChild(t);
+  setTimeout(() => { t.classList.add('toast-out'); setTimeout(() => t.remove(), 300); }, 5000);
+}
+
 /* ── CBT PAGE INTEGRATION ── */
 window.openCBTPage = function(subject, mode) {
   const map = {
@@ -977,273 +1007,344 @@ window.openCBTPage = function(subject, mode) {
   };
   if (subject) {
     const key = map[subject] || subject.toLowerCase().replace(/\s+/g,'');
-    // Always use 'practice' (20 Qs, no timer) when launching a single subject from dashboard
     const resolvedMode = mode || 'practice';
     try { sessionStorage.setItem('nltc_cbt_preset', JSON.stringify({ key, mode: resolvedMode })); } catch(e) {}
   }
-  // Add cache-busting param so browser always loads latest cbt.html
   window.location.href = CBT_PAGE + '?v=' + Date.now();
 };
 
-// Receive score back from cbt.html when student returns
-window.addEventListener('message',(e)=>{
-  if(!e.data||e.data.type!=='nltc_cbt_score')return;
-  const{score,correct,total}=e.data;
-  if(userData&&score>0){
-    const xpGain=Math.round(score*0.5);
-    userData.xp=(userData.xp||0)+xpGain;
-    renderUserUI();
-    try{updateDoc(doc(db,'users',currentUser.uid),{xp:increment(xpGain)}).catch(()=>{});}catch(e){}
-  }
-  showToast(`CBT complete! Score: ${score}%`,'success');
-  loadCBTHistory();
+// FIX: Receive score from cbt.html via postMessage — now calls backend
+window.addEventListener('message', (e) => {
+  if (!e.data || e.data.type !== 'nltc_cbt_score') return;
+  handleCBTScore(e.data);
 });
 
-// Check localStorage for score from last CBT visit
-(function checkLastCBT(){
-  try{
-    const raw=localStorage.getItem('nltc_last_cbt');
-    if(!raw)return;
-    const d=JSON.parse(raw);
-    if(!d.timestamp)return;
-    if(Date.now()-d.timestamp<45000){
-      showToast(`Last CBT: ${d.score}% — ${d.correct}/${d.total} correct`,'success');
-      loadCBTHistory();
-    }
+// FIX: Check localStorage for score from last CBT visit — now calls backend
+(function checkLastCBT() {
+  try {
+    const raw = localStorage.getItem('nltc_last_cbt');
+    if (!raw) return;
+    const d = JSON.parse(raw);
     localStorage.removeItem('nltc_last_cbt');
-  }catch(e){}
+    if (!d.timestamp || Date.now() - d.timestamp > 45000) return;
+    // Defer until currentUser is ready
+    const wait = setInterval(() => {
+      if (!currentUser) return;
+      clearInterval(wait);
+      handleCBTScore(d);
+    }, 300);
+  } catch(e) {}
 })();
 
+// FIX: Unified CBT score handler — calls /gamification/cbt-session so XP
+//       is actually awarded and the session is saved to users/{uid}/results
+async function handleCBTScore(data) {
+  const { score = 0, correct = 0, total = 0, subject = 'General', exam = 'JAMB / UTME' } = data;
+  try {
+    const result = await backendFetch('POST', '/gamification/cbt-session', {
+      subject,
+      exam,
+      score: Number(score),
+      correct: Number(correct),
+      total: Number(total),
+    });
+    handleXPResult(result);
+    loadCBTHistory();
+    updateCBTChart();
+  } catch(err) {
+    // Backend unavailable — still show the score and refresh history
+    showToast(`CBT complete! Score: ${score}%`, 'success');
+    loadCBTHistory();
+  }
+}
+
 /* ── AUTH ── */
-onAuthStateChanged(auth,async(user)=>{
-  if(!user){window.location.href='auth.html';return;}
-  currentUser=user;
-  try{
-    const snap=await getDoc(doc(db,'users',user.uid));
-    userData=snap.exists()?snap.data():{};
-  }catch(e){userData={};}
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { window.location.href = 'auth.html'; return; }
+  currentUser = user;
+  try {
+    const snap = await getDoc(doc(db,'users',user.uid));
+    userData = snap.exists() ? snap.data() : {};
+  } catch(e) { userData = {}; }
   renderUserUI();
-  await Promise.all([loadVideos(),loadLiveSessions(),loadSchedule(),loadAnnouncements()]);
+  await Promise.all([loadVideos(), loadLiveSessions(), loadSchedule(), loadAnnouncements()]);
   loadCBTHistory();
   loadLeaderboard();
   renderAchievements();
   loadMiniLeaderboard();
   subscribeToActiveLive();
   renderCBTChart();
-  document.getElementById('settEmail').textContent=user.email||'—';
+  document.getElementById('settEmail').textContent = user.email || '—';
   prefillSettings();
 });
 
-function renderUserUI(){
-  const fn=userData.firstName||currentUser.displayName?.split(' ')[0]||'Student';
-  const ln=userData.lastName||currentUser.displayName?.split(' ').slice(1).join(' ')||'';
-  const init=`${fn[0]||''}${ln[0]||''}`.toUpperCase()||'?';
-  const xp=userData.xp||0;
-  const streak=userData.streak||0;
-  const plan=userData.plan||'free';
-  const lvl=xpToLevel(xp);
-  const pct=xpProgressInLevel(xp)*100;
+function renderUserUI() {
+  const fn = userData.firstName || currentUser.displayName?.split(' ')[0] || 'Student';
+  const ln = userData.lastName  || currentUser.displayName?.split(' ').slice(1).join(' ') || '';
+  const init = `${fn[0]||''}${ln[0]||''}`.toUpperCase() || '?';
+  const xp   = userData.xp     || 0;
+  const streak = userData.streak || 0;
+  const plan = userData.plan   || 'free';
+  const lvl  = xpToLevel(xp);
+  const pct  = xpProgressInLevel(xp) * 100;
 
-  document.getElementById('sbAvatar').textContent=init;
-  document.getElementById('sbName').textContent=`${fn} ${ln}`.trim();
-  document.getElementById('sbXpVal').textContent=`${xp.toLocaleString()} XP`;
-  document.getElementById('sbXpFill').style.width=pct+'%';
-  document.getElementById('sbLevel').textContent=`Level ${lvl} — ${LEVEL_NAMES[lvl-1]||'Legend'}`;
-  document.getElementById('streakCount').textContent=streak;
-  document.getElementById('tbStreak').style.display=streak>0?'':'none';
-  document.getElementById('st-xp').textContent=xp.toLocaleString();
-  document.getElementById('st-streak').textContent=streak;
+  document.getElementById('sbAvatar').textContent = init;
+  document.getElementById('sbName').textContent   = `${fn} ${ln}`.trim();
+  document.getElementById('sbXpVal').textContent  = `${xp.toLocaleString()} XP`;
+  document.getElementById('sbXpFill').style.width = pct + '%';
+  document.getElementById('sbLevel').textContent  = `Level ${lvl} — ${LEVEL_NAMES[lvl-1]||'Legend'}`;
+  document.getElementById('streakCount').textContent = streak;
+  document.getElementById('tbStreak').style.display  = streak > 0 ? '' : 'none';
+  document.getElementById('st-xp').textContent     = xp.toLocaleString();
+  document.getElementById('st-streak').textContent = streak;
 
-  const planEl=document.getElementById('sbPlan');
-  if(plan==='elite'){planEl.className='sb-user-plan plan-elite';planEl.innerHTML='<i class="fas fa-gem"></i> Elite';}
-  else if(plan==='pro'){planEl.className='sb-user-plan plan-pro';planEl.innerHTML='<i class="fas fa-crown"></i> Pro';}
-  else{planEl.className='sb-user-plan plan-free';planEl.innerHTML='<i class="fas fa-star"></i> Free';}
+  const planEl = document.getElementById('sbPlan');
+  if (plan === 'elite') { planEl.className = 'sb-user-plan plan-elite'; planEl.innerHTML = '<i class="fas fa-gem"></i> Elite'; }
+  else if (plan === 'pro') { planEl.className = 'sb-user-plan plan-pro'; planEl.innerHTML = '<i class="fas fa-crown"></i> Pro'; }
+  else { planEl.className = 'sb-user-plan plan-free'; planEl.innerHTML = '<i class="fas fa-star"></i> Free'; }
 
-  if(plan==='pro'||plan==='elite'){
-    document.getElementById('upgradeBanner').style.display='none';
-    document.getElementById('sbUpgrade').style.display='none';
-    const s=document.getElementById('settUpgradeBtn');if(s)s.style.display='none';
+  if (plan === 'pro' || plan === 'elite') {
+    document.getElementById('upgradeBanner').style.display = 'none';
+    document.getElementById('sbUpgrade').style.display     = 'none';
+    const s = document.getElementById('settUpgradeBtn'); if (s) s.style.display = 'none';
   }
 
-  const planLabels={free:'Free Starter',pro:'Pro Scholar',elite:'Elite Bundle'};
-  document.getElementById('settPlan').textContent=planLabels[plan]||'Free Starter';
-  document.getElementById('settPlanDesc').textContent=plan==='elite'?'You have full access to all features':plan==='pro'?'You have access to all lessons and live classes':'Upgrade for unlimited access';
+  const planLabels = { free:'Free Starter', pro:'Pro Scholar', elite:'Elite Bundle' };
+  document.getElementById('settPlan').textContent     = planLabels[plan] || 'Free Starter';
+  document.getElementById('settPlanDesc').textContent = plan === 'elite' ? 'You have full access to all features' : plan === 'pro' ? 'You have access to all lessons and live classes' : 'Upgrade for unlimited access';
 }
 
 /* ── VIDEO LESSONS ── */
-window.loadVideos=async function(){
-  try{
+window.loadVideos = async function() {
+  try {
     let snap;
-    try{snap=await getDocs(query(collection(db,'videos'),orderBy('createdAt','desc')));}
-    catch(e){snap=await getDocs(collection(db,'videos'));}
-    allVideos=snap.docs.map(d=>({id:d.id,...d.data()}));
-    allVideos.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-  }catch(e){allVideos=[];}
+    try { snap = await getDocs(query(collection(db,'videos'), orderBy('createdAt','desc'))); }
+    catch(e) { snap = await getDocs(collection(db,'videos')); }
+    allVideos = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    allVideos.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+  } catch(e) { allVideos = []; }
   renderVideos(allVideos);
   renderRecentLessons();
 };
 
-function canAccessVideo(v){
-  const plan=userData?.plan||'free';
-  if(!v.access||v.access==='free')return true;
-  if(v.access==='pro')return plan==='pro'||plan==='elite';
-  if(v.access==='elite')return plan==='elite';
+function canAccessVideo(v) {
+  const plan = userData?.plan || 'free';
+  if (!v.access || v.access === 'free') return true;
+  if (v.access === 'pro')   return plan === 'pro' || plan === 'elite';
+  if (v.access === 'elite') return plan === 'elite';
   return false;
 }
 
-function renderVideos(videos){
-  const grid=document.getElementById('lessonsGrid');
-  if(!videos.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">🎬</div><div class="empty-title">No lessons yet</div><div class="empty-sub">Check back soon for new content</div></div>';document.getElementById('lessonsCount').textContent='';return;}
-  const enc=s=>encodeURIComponent(s||'');
-  grid.innerHTML=videos.map(v=>{
-    const canAccess=canAccessVideo(v);
-    const examBadge=v.examType?`<span class="badge badge-red" style="font-size:.6rem;">${v.examType}</span>`:'';
-    const subjBadge=v.subject?`<span class="badge badge-blue" style="font-size:.6rem;">${v.subject}</span>`:'';
-    const thumb=v.thumbnailUrl?`<img src="${v.thumbnailUrl}" alt="${v.title||''}" loading="lazy">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;background:var(--navy);">🎬</div>`;
-    return`<div class="video-card" onclick="${canAccess?`openVideoPlayer('${enc(v.title)}','${v.videoUrl||''}','${enc(v.subject)}','${enc(v.teacher)}','${v.id}')` :'openUpgradeModal()'}">
-      <div class="video-thumb">${thumb}${canAccess?'<div class="video-thumb-ov"><i class="fas fa-play"></i></div>':'<div class="video-lock"><i class="fas fa-lock"></i><span>Pro Only</span></div>'}</div>
+function renderVideos(videos) {
+  const grid = document.getElementById('lessonsGrid');
+  if (!videos.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">🎬</div><div class="empty-title">No lessons yet</div><div class="empty-sub">Check back soon for new content</div></div>';
+    document.getElementById('lessonsCount').textContent = '';
+    return;
+  }
+  const enc = s => encodeURIComponent(s||'');
+  grid.innerHTML = videos.map(v => {
+    const canAccess = canAccessVideo(v);
+    const examBadge = v.examType ? `<span class="badge badge-red" style="font-size:.6rem;">${v.examType}</span>` : '';
+    const subjBadge = v.subject  ? `<span class="badge badge-blue" style="font-size:.6rem;">${v.subject}</span>` : '';
+    const thumb = v.thumbnailUrl
+      ? `<img src="${v.thumbnailUrl}" alt="${v.title||''}" loading="lazy">`
+      : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;background:var(--navy);">🎬</div>`;
+    return `<div class="video-card" onclick="${canAccess
+      ? `openVideoPlayer('${enc(v.title)}','${v.videoUrl||''}','${enc(v.subject)}','${enc(v.teacher)}','${v.id}')`
+      : `openUpgradeModal()`}">
+      <div class="video-thumb">${thumb}${canAccess
+        ? '<div class="video-thumb-ov"><i class="fas fa-play"></i></div>'
+        : '<div class="video-lock"><i class="fas fa-lock"></i><span>Pro Only</span></div>'}</div>
       <div class="video-info"><div class="video-title">${v.title||'Untitled'}</div><div class="video-meta">${v.teacher||'—'} · ${formatDate(v.createdAt)}</div><div class="video-tags">${subjBadge}${examBadge}</div></div>
     </div>`;
   }).join('');
-  document.getElementById('lessonsCount').textContent=`${videos.length} lesson${videos.length!==1?'s':''}`;
+  document.getElementById('lessonsCount').textContent = `${videos.length} lesson${videos.length!==1?'s':''}`;
 }
 
-function renderRecentLessons(){
-  const grid=document.getElementById('recentLessonsGrid');
-  const recent=allVideos.slice(0,4);
-  if(!recent.length){grid.innerHTML='<div class="empty-state" style="padding:16px;"><div class="empty-title">No lessons yet</div></div>';return;}
-  const enc=s=>encodeURIComponent(s||'');
-  grid.style.display='grid';grid.style.gridTemplateColumns='repeat(auto-fill,minmax(180px,1fr))';grid.style.gap='12px';
-  grid.innerHTML=recent.map(v=>{
-    const canAccess=canAccessVideo(v);
-    const thumb=v.thumbnailUrl?`<img src="${v.thumbnailUrl}" alt="" loading="lazy">`:`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:var(--navy);">🎬</div>`;
-    return`<div class="video-card" onclick="${canAccess?`openVideoPlayer('${enc(v.title)}','${v.videoUrl||''}','${enc(v.subject)}','${enc(v.teacher)}','${v.id}')` :'openUpgradeModal()'}">
-      <div class="video-thumb" style="height:100px;">${thumb}${canAccess?'<div class="video-thumb-ov"><i class="fas fa-play"></i></div>':'<div class="video-lock"><i class="fas fa-lock"></i><span>Pro</span></div>'}</div>
+function renderRecentLessons() {
+  const grid   = document.getElementById('recentLessonsGrid');
+  const recent = allVideos.slice(0, 4);
+  if (!recent.length) { grid.innerHTML = '<div class="empty-state" style="padding:16px;"><div class="empty-title">No lessons yet</div></div>'; return; }
+  const enc = s => encodeURIComponent(s||'');
+  grid.style.display = 'grid'; grid.style.gridTemplateColumns = 'repeat(auto-fill,minmax(180px,1fr))'; grid.style.gap = '12px';
+  grid.innerHTML = recent.map(v => {
+    const canAccess = canAccessVideo(v);
+    const thumb = v.thumbnailUrl
+      ? `<img src="${v.thumbnailUrl}" alt="" loading="lazy">`
+      : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:var(--navy);">🎬</div>`;
+    return `<div class="video-card" onclick="${canAccess
+      ? `openVideoPlayer('${enc(v.title)}','${v.videoUrl||''}','${enc(v.subject)}','${enc(v.teacher)}','${v.id}')`
+      : `openUpgradeModal()`}">
+      <div class="video-thumb" style="height:100px;">${thumb}${canAccess
+        ? '<div class="video-thumb-ov"><i class="fas fa-play"></i></div>'
+        : '<div class="video-lock"><i class="fas fa-lock"></i><span>Pro</span></div>'}</div>
       <div class="video-info"><div class="video-title">${v.title||'Untitled'}</div><div class="video-meta">${v.subject||'—'}</div></div>
     </div>`;
   }).join('');
 }
 
-window.filterLessons=function(){
-  const search=(document.getElementById('lessonSearch').value||'').toLowerCase();
-  const subject=document.getElementById('lessonSubject').value;
-  const exam=document.getElementById('lessonExam').value;
-  renderVideos(allVideos.filter(v=>
-    (!subject||v.subject===subject)&&(!exam||v.examType===exam)&&
-    (!search||(v.title||'').toLowerCase().includes(search)||(v.subject||'').toLowerCase().includes(search))
+window.filterLessons = function() {
+  const search  = (document.getElementById('lessonSearch').value  || '').toLowerCase();
+  const subject =  document.getElementById('lessonSubject').value;
+  const exam    =  document.getElementById('lessonExam').value;
+  renderVideos(allVideos.filter(v =>
+    (!subject || v.subject  === subject) &&
+    (!exam    || v.examType === exam)    &&
+    (!search  || (v.title||'').toLowerCase().includes(search) || (v.subject||'').toLowerCase().includes(search))
   ));
 };
 
-window.handleSearch=function(val){
-  if(!val.trim())return;
-  showView('lessons',document.querySelector('.sb-link[onclick*="lessons"]'));
-  document.getElementById('lessonSearch').value=val;
+window.handleSearch = function(val) {
+  if (!val.trim()) return;
+  showView('lessons', document.querySelector('.sb-link[onclick*="lessons"]'));
+  document.getElementById('lessonSearch').value = val;
   filterLessons();
 };
 
 /* ── VIDEO PLAYER ── */
-const vpSpeeds=[0.5,0.75,1,1.25,1.5,2];let vpSpeedIdx=2;
+const vpSpeeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
+let vpSpeedIdx = 2;
 
-window.openVideoPlayer=function(title,url,subject,teacher,videoId){
-  if(!url||url==='undefined'){showToast('Video not available','error');return;}
-  const dec=s=>decodeURIComponent((s||'').replace(/\+/g,' '));
-  const video=document.getElementById('vpVideo');
-  video.src=url;
-  document.getElementById('vpTitle').textContent=dec(title)||'Lesson';
-  document.getElementById('vpInfoTitle').textContent=dec(title)||'Lesson';
-  document.getElementById('vpInfoMeta').textContent=`${dec(subject)||'—'} · ${dec(teacher)||'—'}`;
+window.openVideoPlayer = function(title, url, subject, teacher, videoId) {
+  if (!url || url === 'undefined') { showToast('Video not available', 'error'); return; }
+  const dec = s => decodeURIComponent((s||'').replace(/\+/g,' '));
+  const video = document.getElementById('vpVideo');
+  video.src = url;
+  document.getElementById('vpTitle').textContent     = dec(title) || 'Lesson';
+  document.getElementById('vpInfoTitle').textContent = dec(title) || 'Lesson';
+  document.getElementById('vpInfoMeta').textContent  = `${dec(subject)||'—'} · ${dec(teacher)||'—'}`;
   document.getElementById('videoPlayerOverlay').classList.add('show');
-  document.body.style.overflow='hidden';
+  document.body.style.overflow = 'hidden';
   video.load();
-  const wrap=document.getElementById('vpWrap');
+
+  const wrap = document.getElementById('vpWrap');
   let touchTimer;
-  wrap.addEventListener('touchstart',()=>{wrap.classList.add('touch-active');clearTimeout(touchTimer);touchTimer=setTimeout(()=>wrap.classList.remove('touch-active'),3000);},{passive:true});
-  if(videoId)backendFetch('POST','/gamification/xp',{action:'watch_lesson',meta:{videoId}}).then(r=>{if(r.xpEarned){showToast(`+${r.xpEarned} XP for watching!`,'success');userData.xp=(userData.xp||0)+r.xpEarned;renderUserUI();}}).catch(()=>{});
+  wrap.addEventListener('touchstart', () => {
+    wrap.classList.add('touch-active');
+    clearTimeout(touchTimer);
+    touchTimer = setTimeout(() => wrap.classList.remove('touch-active'), 3000);
+  }, { passive: true });
+
+  // FIX: award XP for watching a lesson via the backend
+  if (videoId) {
+    backendFetch('POST', '/gamification/xp', { action: 'watch_lesson', meta: { videoId } })
+      .then(r => handleXPResult(r))
+      .catch(() => {}); // silently ignore if backend is down
+  }
 };
 
-window.closeVideoPlayer=function(){
-  const v=document.getElementById('vpVideo');v.pause();v.src='';
+window.closeVideoPlayer = function() {
+  const v = document.getElementById('vpVideo');
+  v.pause(); v.src = '';
   document.getElementById('videoPlayerOverlay').classList.remove('show');
-  document.body.style.overflow='';
-  vpSpeedIdx=2;document.getElementById('vpSpdBtn').textContent='1×';
-  document.getElementById('vpPlayBtn').innerHTML='<i class="fas fa-play"></i>';
+  document.body.style.overflow = '';
+  vpSpeedIdx = 2;
+  document.getElementById('vpSpdBtn').textContent = '1×';
+  document.getElementById('vpPlayBtn').innerHTML  = '<i class="fas fa-play"></i>';
 };
-window.vpToggle=()=>{const v=document.getElementById('vpVideo'),b=document.getElementById('vpPlayBtn');v.paused?(v.play(),b.innerHTML='<i class="fas fa-pause"></i>'):(v.pause(),b.innerHTML='<i class="fas fa-play"></i>');};
-window.vpSkip=s=>{const v=document.getElementById('vpVideo');v.currentTime=Math.max(0,Math.min(v.duration||0,v.currentTime+s));};
-window.vpMute=()=>{const v=document.getElementById('vpVideo');v.muted=!v.muted;document.getElementById('vpMuteBtn').innerHTML=v.muted?'<i class="fas fa-volume-mute"></i>':'<i class="fas fa-volume-up"></i>';};
-window.vpVolumeSet=val=>{document.getElementById('vpVideo').volume=parseFloat(val);};
-window.vpCycleSpeed=()=>{vpSpeedIdx=(vpSpeedIdx+1)%vpSpeeds.length;const v=document.getElementById('vpVideo');v.playbackRate=vpSpeeds[vpSpeedIdx];document.getElementById('vpSpdBtn').textContent=vpSpeeds[vpSpeedIdx]+'×';};
-window.vpFullscreen=()=>{const c=document.getElementById('vpWrap');document.fullscreenElement?document.exitFullscreen?.():c.requestFullscreen?.();};
+window.vpToggle   = () => { const v=document.getElementById('vpVideo'),b=document.getElementById('vpPlayBtn'); v.paused?(v.play(),b.innerHTML='<i class="fas fa-pause"></i>'):(v.pause(),b.innerHTML='<i class="fas fa-play"></i>'); };
+window.vpSkip     = s  => { const v=document.getElementById('vpVideo'); v.currentTime=Math.max(0,Math.min(v.duration||0,v.currentTime+s)); };
+window.vpMute     = () => { const v=document.getElementById('vpVideo'); v.muted=!v.muted; document.getElementById('vpMuteBtn').innerHTML=v.muted?'<i class="fas fa-volume-mute"></i>':'<i class="fas fa-volume-up"></i>'; };
+window.vpVolumeSet= val=> { document.getElementById('vpVideo').volume=parseFloat(val); };
+window.vpCycleSpeed=()=> { vpSpeedIdx=(vpSpeedIdx+1)%vpSpeeds.length; const v=document.getElementById('vpVideo'); v.playbackRate=vpSpeeds[vpSpeedIdx]; document.getElementById('vpSpdBtn').textContent=vpSpeeds[vpSpeedIdx]+'×'; };
+window.vpFullscreen=()=> { const c=document.getElementById('vpWrap'); document.fullscreenElement?document.exitFullscreen?.():c.requestFullscreen?.(); };
 
-(function(){
+(function() {
   const v=document.getElementById('vpVideo'),fill=document.getElementById('vpFill'),buf=document.getElementById('vpBuf'),time=document.getElementById('vpTime'),prog=document.getElementById('vpProgress');
   function fmt(s){return`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;}
-  v.addEventListener('timeupdate',()=>{if(!v.duration)return;const p=v.currentTime/v.duration*100;fill.style.width=p+'%';time.textContent=`${fmt(v.currentTime)} / ${fmt(v.duration)}`;});
-  v.addEventListener('progress',()=>{if(v.duration&&v.buffered.length)buf.style.width=(v.buffered.end(v.buffered.length-1)/v.duration*100)+'%';});
-  v.addEventListener('ended',()=>{document.getElementById('vpPlayBtn').innerHTML='<i class="fas fa-play"></i>';});
-  prog.addEventListener('click',e=>{if(!v.duration)return;const r=prog.getBoundingClientRect();v.currentTime=((e.clientX-r.left)/r.width)*v.duration;});
-  prog.addEventListener('touchstart',e=>{if(!v.duration)return;const r=prog.getBoundingClientRect();v.currentTime=((e.touches[0].clientX-r.left)/r.width)*v.duration;},{passive:true});
-  document.addEventListener('keydown',e=>{
+  v.addEventListener('timeupdate', () => { if(!v.duration)return; const p=v.currentTime/v.duration*100; fill.style.width=p+'%'; time.textContent=`${fmt(v.currentTime)} / ${fmt(v.duration)}`; });
+  v.addEventListener('progress',   () => { if(v.duration&&v.buffered.length)buf.style.width=(v.buffered.end(v.buffered.length-1)/v.duration*100)+'%'; });
+  v.addEventListener('ended',      () => { document.getElementById('vpPlayBtn').innerHTML='<i class="fas fa-play"></i>'; });
+  prog.addEventListener('click',      e => { if(!v.duration)return; const r=prog.getBoundingClientRect(); v.currentTime=((e.clientX-r.left)/r.width)*v.duration; });
+  prog.addEventListener('touchstart', e => { if(!v.duration)return; const r=prog.getBoundingClientRect(); v.currentTime=((e.touches[0].clientX-r.left)/r.width)*v.duration; }, {passive:true});
+  document.addEventListener('keydown', e => {
     if(!document.getElementById('videoPlayerOverlay').classList.contains('show'))return;
     if(['Space','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
-    if(e.code==='Space')window.vpToggle();
+    if(e.code==='Space')    window.vpToggle();
     if(e.code==='ArrowLeft')window.vpSkip(-10);
     if(e.code==='ArrowRight')window.vpSkip(10);
-    if(e.code==='KeyM')window.vpMute();
-    if(e.code==='Escape')window.closeVideoPlayer();
+    if(e.code==='KeyM')    window.vpMute();
+    if(e.code==='Escape')  window.closeVideoPlayer();
   });
 })();
 
-/* ── CBT HISTORY (from Firestore) ── */
-window.loadCBTHistory=async function(){
-  const tbody=document.getElementById('cbtHistory');
-  if(!tbody)return;
-  try{
+/* ── CBT HISTORY ── */
+window.loadCBTHistory = async function() {
+  const tbody = document.getElementById('cbtHistory');
+  if (!tbody) return;
+  try {
     let snap;
-    try{snap=await getDocs(query(collection(db,'users',currentUser.uid,'results'),orderBy('submittedAt','desc'),limit(10)));}
-    catch(e){snap=await getDocs(collection(db,'users',currentUser.uid,'results'));}
-    const results=snap.docs.map(d=>({id:d.id,...d.data()}));
-    results.sort((a,b)=>(b.submittedAt?.seconds||0)-(a.submittedAt?.seconds||0));
-    document.getElementById('st-cbt').textContent=results.length;
-    if(!results.length){tbody.innerHTML='<tr><td colspan="4"><div class="empty-state" style="padding:16px;"><div class="empty-title">No sessions yet</div><div class="empty-sub">Click any subject above to start</div></div></td></tr>';return;}
-    tbody.innerHTML=results.map(r=>{
-      const cls=(r.score||0)>=70?'badge-green':(r.score||0)>=50?'badge-gold':'badge-red';
-      return`<tr><td>${r.subject||'—'}</td><td style="color:var(--text-3);font-size:.78rem;">${r.exam||'—'}</td><td><span class="badge ${cls}">${r.score||0}%</span></td><td style="color:var(--text-3);">${timeAgo(r.submittedAt)}</td></tr>`;
+    try { snap = await getDocs(query(collection(db,'users',currentUser.uid,'results'), orderBy('submittedAt','desc'), limit(10))); }
+    catch(e) { snap = await getDocs(collection(db,'users',currentUser.uid,'results')); }
+    const results = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    results.sort((a,b) => (b.submittedAt?.seconds||0) - (a.submittedAt?.seconds||0));
+    document.getElementById('st-cbt').textContent = results.length;
+    if (!results.length) {
+      tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state" style="padding:16px;"><div class="empty-title">No sessions yet</div><div class="empty-sub">Click any subject above to start</div></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = results.map(r => {
+      const cls = (r.score||0) >= 70 ? 'badge-green' : (r.score||0) >= 50 ? 'badge-gold' : 'badge-red';
+      return `<tr>
+        <td>${r.subject||'—'}</td>
+        <td style="color:var(--text-3);font-size:.78rem;">${r.exam||'—'}</td>
+        <td><span class="badge ${cls}">${r.score||0}%</span></td>
+        <td style="color:var(--text-3);">${timeAgo(r.submittedAt)}</td>
+      </tr>`;
     }).join('');
-  }catch(e){tbody.innerHTML='<tr><td colspan="4" style="color:var(--text-3);text-align:center;padding:16px;">Could not load history</td></tr>';}
+    updateCBTChart(results);
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-3);text-align:center;padding:16px;">Could not load history</td></tr>';
+  }
 };
 
-function renderCBTChart(){
-  const ctx=document.getElementById('cbtChart');if(!ctx)return;
-  if(window._cbtChart)window._cbtChart.destroy();
-  window._cbtChart=new Chart(ctx,{
-    type:'line',
-    data:{labels:['Session 1','Session 2','Session 3','Session 4','Session 5'],datasets:[{data:[0,0,0,0,0],fill:true,backgroundColor:'rgba(11,29,58,.06)',borderColor:'#0B1D3A',borderWidth:2,tension:.4,pointBackgroundColor:'#F0A500',pointRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:11}}},y:{min:0,max:100,grid:{color:'rgba(0,0,0,.04)'},ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:11}}}}}
+/* ── CBT CHART ── */
+function renderCBTChart(results) {
+  const ctx = document.getElementById('cbtChart'); if (!ctx) return;
+  if (window._cbtChart) window._cbtChart.destroy();
+  const labels = results?.slice(0,5).reverse().map((_,i)=>`Session ${i+1}`) || ['S1','S2','S3','S4','S5'];
+  const data   = results?.slice(0,5).reverse().map(r=>r.score||0)           || [0,0,0,0,0];
+  window._cbtChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [{ data, fill:true, backgroundColor:'rgba(11,29,58,.06)', borderColor:'#0B1D3A', borderWidth:2, tension:.4, pointBackgroundColor:'#F0A500', pointRadius:4 }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:11}}}, y:{min:0,max:100,grid:{color:'rgba(0,0,0,.04)'},ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:11}}} } }
   });
 }
 
-/* ── LIVE CLASSES ── */
-async function loadLiveSessions(){
-  try{
-    let snap;
-    try{snap=await getDocs(query(collection(db,'liveSessions'),orderBy('createdAt','desc'),limit(20)));}
-    catch(e){snap=await getDocs(collection(db,'liveSessions'));}
-    const sessions=snap.docs.map(d=>({id:d.id,...d.data()}));
-    sessions.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-    renderLiveSessions(sessions);
-    renderLiveNow(sessions.filter(s=>s.status==='live'));
-  }catch(e){console.error('Live sessions:',e);}
+// FIX: update chart live when new results arrive
+function updateCBTChart(results) {
+  if (window._cbtChart && results) {
+    const d = results.slice(0,5).reverse();
+    window._cbtChart.data.labels   = d.map((_,i)=>`Session ${i+1}`);
+    window._cbtChart.data.datasets[0].data = d.map(r=>r.score||0);
+    window._cbtChart.update();
+  }
 }
 
-function renderLiveSessions(sessions){
-  const el=document.getElementById('liveSessionsList');
-  if(!sessions.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📡</div><div class="empty-title">No live sessions right now</div><div class="empty-sub">Check back soon or view the schedule</div></div>';return;}
-  el.innerHTML=sessions.map(s=>{
-    const isLive=s.status==='live';
-    const badge=isLive?'<span class="badge badge-live">● LIVE</span>':'<span class="badge badge-gray">Ended</span>';
-    const btn=isLive&&canAccessLive()?`<button class="btn-live btn-sm" onclick="joinLiveClass('${s.id}','${encodeURIComponent(s.title||'')}','${s.channel||''}')"><i class="fas fa-play-circle"></i> Join</button>`:isLive?`<button class="btn-gold btn-sm" onclick="openUpgradeModal()"><i class="fas fa-crown"></i> Upgrade</button>`:'';
-    return`<div class="card" style="margin-bottom:12px;">
+/* ── LIVE CLASSES ── */
+async function loadLiveSessions() {
+  try {
+    let snap;
+    try { snap = await getDocs(query(collection(db,'liveSessions'), orderBy('createdAt','desc'), limit(20))); }
+    catch(e) { snap = await getDocs(collection(db,'liveSessions')); }
+    const sessions = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    sessions.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+    renderLiveSessions(sessions);
+    renderLiveNow(sessions.filter(s => s.status === 'live'));
+  } catch(e) { console.error('Live sessions:', e); }
+}
+
+function renderLiveSessions(sessions) {
+  const el = document.getElementById('liveSessionsList');
+  if (!sessions.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">📡</div><div class="empty-title">No live sessions right now</div><div class="empty-sub">Check back soon or view the schedule</div></div>'; return; }
+  el.innerHTML = sessions.map(s => {
+    const isLive = s.status === 'live';
+    const badge  = isLive ? '<span class="badge badge-live">● LIVE</span>' : '<span class="badge badge-gray">Ended</span>';
+    const btn    = isLive && canAccessLive()
+      ? `<button class="btn-live btn-sm" onclick="joinLiveClass('${s.id}','${encodeURIComponent(s.title||'')}','${s.channel||''}')"><i class="fas fa-play-circle"></i> Join</button>`
+      : isLive ? `<button class="btn-gold btn-sm" onclick="openUpgradeModal()"><i class="fas fa-crown"></i> Upgrade</button>` : '';
+    return `<div class="card" style="margin-bottom:12px;">
       <div class="card-body" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
         <div style="width:44px;height:44px;background:${isLive?'var(--error)':'var(--surface-2)'};border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">${isLive?'📡':'📹'}</div>
         <div style="flex:1;min-width:0;">
@@ -1256,139 +1357,159 @@ function renderLiveSessions(sessions){
   }).join('');
 }
 
-function renderLiveNow(liveSessions){
-  const el=document.getElementById('liveNowList');
-  if(!liveSessions.length){el.innerHTML='<div class="empty-state" style="padding:16px;"><div class="empty-icon">📡</div><div class="empty-title">No live classes right now</div></div>';return;}
-  el.innerHTML=liveSessions.map(s=>`
+function renderLiveNow(liveSessions) {
+  const el = document.getElementById('liveNowList');
+  if (!liveSessions.length) { el.innerHTML = '<div class="empty-state" style="padding:16px;"><div class="empty-icon">📡</div><div class="empty-title">No live classes right now</div></div>'; return; }
+  el.innerHTML = liveSessions.map(s => `
     <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
       <div style="width:36px;height:36px;background:var(--error);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;">📡</div>
       <div style="flex:1;min-width:0;"><div style="font-size:.84rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.title}</div><div style="font-size:.7rem;color:var(--text-3);">${s.subject||'—'} · 👥 ${s.viewerCount||0}</div></div>
-      ${canAccessLive()?`<button class="btn-live btn-sm" onclick="joinLiveClass('${s.id}','${encodeURIComponent(s.title||'')}','${s.channel||''}')"><i class="fas fa-play"></i> Join</button>`:`<button class="btn-gold btn-sm" onclick="openUpgradeModal()"><i class="fas fa-crown"></i></button>`}
+      ${canAccessLive()
+        ? `<button class="btn-live btn-sm" onclick="joinLiveClass('${s.id}','${encodeURIComponent(s.title||'')}','${s.channel||''}')"><i class="fas fa-play"></i> Join</button>`
+        : `<button class="btn-gold btn-sm" onclick="openUpgradeModal()"><i class="fas fa-crown"></i></button>`}
     </div>`).join('');
 }
 
-function canAccessLive(){
-  const plan=userData?.plan||'free';
-  return plan==='pro'||plan==='elite';
+function canAccessLive() {
+  const plan = userData?.plan || 'free';
+  return plan === 'pro' || plan === 'elite';
 }
 
-function subscribeToActiveLive(){
-  const q=query(collection(db,'liveSessions'),where('status','==','live'));
-  onSnapshot(q,snap=>{
-    const hasLive=!snap.empty;
-    document.getElementById('liveDot').style.display=hasLive?'block':'none';
-    renderLiveNow(snap.docs.map(d=>({id:d.id,...d.data()})));
+function subscribeToActiveLive() {
+  const q = query(collection(db,'liveSessions'), where('status','==','live'));
+  onSnapshot(q, snap => {
+    const hasLive = !snap.empty;
+    document.getElementById('liveDot').style.display = hasLive ? 'block' : 'none';
+    renderLiveNow(snap.docs.map(d => ({ id:d.id, ...d.data() })));
   });
 }
 
-window.joinLiveClass=async function(sessionId,title,channel){
-  if(!canAccessLive()){openUpgradeModal();return;}
-  const dec=s=>decodeURIComponent(s||'');
-  document.getElementById('lvTitle').textContent=dec(title)||'Live Class';
-  document.getElementById('lvViewers').textContent='0';
-  document.getElementById('lvNoVideo').style.display='flex';
+window.joinLiveClass = async function(sessionId, title, channel) {
+  if (!canAccessLive()) { openUpgradeModal(); return; }
+  const dec = s => decodeURIComponent(s||'');
+  document.getElementById('lvTitle').textContent    = dec(title) || 'Live Class';
+  document.getElementById('lvViewers').textContent  = '0';
+  document.getElementById('lvNoVideo').style.display = 'flex';
   document.getElementById('liveViewerOverlay').classList.add('show');
-  document.body.style.overflow='hidden';
-  currentLiveSessionId=sessionId;
+  document.body.style.overflow = 'hidden';
+  currentLiveSessionId = sessionId;
 
-  const chatQ=query(collection(db,'liveSessions',sessionId,'messages'),orderBy('createdAt','asc'),limit(100));
-  lvChatUnsub=onSnapshot(chatQ,snap=>{
-    const msgs=document.getElementById('lvChatMsgs');
-    msgs.innerHTML=snap.docs.map(d=>{const m=d.data();return`<div class="lv-chat-msg"><strong>${m.senderName||'User'}</strong>: ${m.text||''}</div>`;}).join('');
-    msgs.scrollTop=msgs.scrollHeight;
+  // FIX: award XP for joining a live class — was missing entirely
+  backendFetch('POST', '/gamification/xp', { action: 'join_live', meta: { sessionId } })
+    .then(r => handleXPResult(r))
+    .catch(() => {});
+
+  const chatQ = query(collection(db,'liveSessions',sessionId,'messages'), orderBy('createdAt','asc'), limit(100));
+  lvChatUnsub = onSnapshot(chatQ, snap => {
+    const msgs = document.getElementById('lvChatMsgs');
+    msgs.innerHTML = snap.docs.map(d => { const m=d.data(); return `<div class="lv-chat-msg"><strong>${m.senderName||'User'}</strong>: ${m.text||''}</div>`; }).join('');
+    msgs.scrollTop = msgs.scrollHeight;
   });
 
-  lvViewerUnsub=onSnapshot(doc(db,'liveSessions',sessionId),snap=>{
-    if(snap.exists())document.getElementById('lvViewers').textContent=snap.data().viewerCount||0;
+  lvViewerUnsub = onSnapshot(doc(db,'liveSessions',sessionId), snap => {
+    if (snap.exists()) document.getElementById('lvViewers').textContent = snap.data().viewerCount || 0;
   });
 
-  try{
-    showToast('Connecting to live class…','info');
-    const tokenData=await backendFetch('POST','/agora/token',{channelName:channel,role:'audience'});
-    agoraClient=AgoraRTC.createClient({mode:'rtc',codec:'vp8'});
-    agoraClient.on('user-published',async(user,mediaType)=>{
-      await agoraClient.subscribe(user,mediaType);
-      if(mediaType==='video'){
-        document.getElementById('lvNoVideo').style.display='none';
-        const el=document.getElementById('lvRemoteVideo');el.innerHTML='';
-        const videoEl=document.createElement('div');videoEl.style.cssText='width:100%;height:100%;';
-        el.appendChild(videoEl);user.videoTrack.play(videoEl);
+  try {
+    showToast('Connecting to live class…', 'info');
+    const tokenData = await backendFetch('POST', '/agora/token', { channelName: channel, role: 'audience' });
+    agoraClient = AgoraRTC.createClient({ mode:'rtc', codec:'vp8' });
+    agoraClient.on('user-published', async (user, mediaType) => {
+      await agoraClient.subscribe(user, mediaType);
+      if (mediaType === 'video') {
+        document.getElementById('lvNoVideo').style.display = 'none';
+        const el = document.getElementById('lvRemoteVideo'); el.innerHTML = '';
+        const videoEl = document.createElement('div'); videoEl.style.cssText = 'width:100%;height:100%;';
+        el.appendChild(videoEl); user.videoTrack.play(videoEl);
       }
-      if(mediaType==='audio')user.audioTrack.play();
+      if (mediaType === 'audio') user.audioTrack.play();
     });
-    agoraClient.on('user-left',()=>{document.getElementById('lvNoVideo').style.display='flex';document.getElementById('lvRemoteVideo').innerHTML='';});
-    agoraClient.on('token-privilege-will-expire',async()=>{
-      const r=await backendFetch('POST','/agora/token',{channelName:channel,role:'audience'});
+    agoraClient.on('user-left', () => { document.getElementById('lvNoVideo').style.display='flex'; document.getElementById('lvRemoteVideo').innerHTML=''; });
+    agoraClient.on('token-privilege-will-expire', async () => {
+      const r = await backendFetch('POST', '/agora/token', { channelName: channel, role: 'audience' });
       await agoraClient.renewToken(r.token);
     });
-    await agoraClient.join(tokenData.appId||AGORA_APP_ID,channel,tokenData.token,tokenData.uid);
-    try{await updateDoc(doc(db,'liveSessions',sessionId),{viewerCount:increment(1)});}catch(e){}
-    showToast('Connected to live class!','success');
-  }catch(e){showToast(`Could not join stream: ${e.message}`,'error');console.error(e);}
+    await agoraClient.join(tokenData.appId || AGORA_APP_ID, channel, tokenData.token, tokenData.uid);
+    try { await updateDoc(doc(db,'liveSessions',sessionId), { viewerCount: increment(1) }); } catch(e) {}
+    showToast('Connected to live class!', 'success');
+  } catch(e) {
+    showToast(`Could not join stream: ${e.message}`, 'error');
+    console.error(e);
+  }
 };
 
-window.leaveLiveClass=async function(){
-  if(agoraClient){try{await agoraClient.leave();}catch(e){}agoraClient=null;}
-  if(lvChatUnsub){lvChatUnsub();lvChatUnsub=null;}
-  if(lvViewerUnsub){lvViewerUnsub();lvViewerUnsub=null;}
-  if(currentLiveSessionId){
-    try{await updateDoc(doc(db,'liveSessions',currentLiveSessionId),{viewerCount:increment(-1)});}catch(e){}
-    currentLiveSessionId=null;
+window.leaveLiveClass = async function() {
+  if (agoraClient) { try { await agoraClient.leave(); } catch(e) {} agoraClient = null; }
+  if (lvChatUnsub)   { lvChatUnsub();   lvChatUnsub   = null; }
+  if (lvViewerUnsub) { lvViewerUnsub(); lvViewerUnsub = null; }
+  if (currentLiveSessionId) {
+    try { await updateDoc(doc(db,'liveSessions',currentLiveSessionId), { viewerCount: increment(-1) }); } catch(e) {}
+    currentLiveSessionId = null;
   }
   document.getElementById('liveViewerOverlay').classList.remove('show');
-  document.getElementById('lvRemoteVideo').innerHTML='';
-  document.getElementById('lvNoVideo').style.display='flex';
-  document.body.style.overflow='';
+  document.getElementById('lvRemoteVideo').innerHTML = '';
+  document.getElementById('lvNoVideo').style.display = 'flex';
+  document.body.style.overflow = '';
 };
 
-window.lvSendMsg=async function(){
-  const input=document.getElementById('lvChatInput'),text=input.value.trim();
-  if(!text||!currentLiveSessionId)return;input.value='';
-  const name=`${userData.firstName||'Student'} ${userData.lastName||''}`.trim();
-  try{await addDoc(collection(db,'liveSessions',currentLiveSessionId,'messages'),{text,senderId:currentUser.uid,senderName:name,createdAt:serverTimestamp()});}
-  catch(e){showToast('Could not send message','error');}
+window.lvSendMsg = async function() {
+  const input = document.getElementById('lvChatInput'), text = input.value.trim();
+  if (!text || !currentLiveSessionId) return;
+  input.value = '';
+  const name = `${userData.firstName||'Student'} ${userData.lastName||''}`.trim();
+  try {
+    await addDoc(collection(db,'liveSessions',currentLiveSessionId,'messages'), {
+      text, senderId: currentUser.uid, senderName: name, createdAt: serverTimestamp()
+    });
+  } catch(e) { showToast('Could not send message', 'error'); }
 };
 
 /* ── LEADERBOARD ── */
-async function loadLeaderboard(){
-  try{
-    const data=await backendFetch('GET','/gamification/leaderboard?limit=50').catch(()=>null);
-    const rankData=await backendFetch('GET','/gamification/rank').catch(()=>null);
-    if(data?.leaderboard){
-      renderLeaderboard(data.leaderboard,'fullLeaderboard');
-      renderLeaderboard(data.leaderboard.slice(0,5),'miniLeaderboard');
-    }else{
+async function loadLeaderboard() {
+  try {
+    const data     = await backendFetch('GET', '/gamification/leaderboard?limit=50').catch(() => null);
+    const rankData = await backendFetch('GET', '/gamification/rank').catch(() => null);
+
+    if (data?.leaderboard) {
+      renderLeaderboard(data.leaderboard, 'fullLeaderboard');
+      renderLeaderboard(data.leaderboard.slice(0, 5), 'miniLeaderboard');
+    } else {
+      // FIX: fallback uses no where() clause — no composite index needed
       let snap;
-      try{snap=await getDocs(query(collection(db,'users'),where('role','==','student'),orderBy('xp','desc'),limit(50)));}
-      catch(e){snap=await getDocs(query(collection(db,'users'),orderBy('xp','desc'),limit(50)));}
-      const lb=snap.docs.map(d=>({id:d.id,...d.data()})).filter(u=>!u.role||u.role==='student');
-      renderLeaderboard(lb,'fullLeaderboard');
-      renderLeaderboard(lb.slice(0,5),'miniLeaderboard');
-      const myRank=lb.findIndex(u=>u.id===currentUser.uid)+1;
-      if(myRank>0)updateMyRank(myRank,lb.length);
+      try { snap = await getDocs(query(collection(db,'users'), orderBy('xp','desc'), limit(50))); }
+      catch(e) { snap = await getDocs(collection(db,'users')); }
+      const lb = snap.docs.map(d => ({ id:d.id, ...d.data() })).filter(u => u.role !== 'admin');
+      lb.sort((a,b) => (b.xp||0) - (a.xp||0));
+      renderLeaderboard(lb, 'fullLeaderboard');
+      renderLeaderboard(lb.slice(0, 5), 'miniLeaderboard');
+      const myRank = lb.findIndex(u => u.id === currentUser.uid) + 1;
+      if (myRank > 0) updateMyRank(myRank);
     }
-    if(rankData?.rank)updateMyRank(rankData.rank);
-  }catch(e){console.error('Leaderboard:',e);}
+    if (rankData?.rank) updateMyRank(rankData.rank);
+  } catch(e) { console.error('Leaderboard:', e); }
 }
 
-window.loadLeaderboard=loadLeaderboard;
+window.loadLeaderboard = loadLeaderboard;
 
-function updateMyRank(rank){
-  document.getElementById('st-rank').textContent=`#${rank}`;
-  document.getElementById('myRankBig').textContent=`#${rank}`;
-  const msg=rank<=3?'🏆 Amazing! You\'re in the Top 3!':rank<=10?'🔥 Top 10! Keep it up!':rank<=50?'📈 Top 50! Great progress!':'Keep studying to climb higher!';
-  document.getElementById('myRankMsg').textContent=msg;
+function updateMyRank(rank) {
+  document.getElementById('st-rank').textContent = `#${rank}`;
+  document.getElementById('myRankBig').textContent = `#${rank}`;
+  const msg = rank <= 3  ? '🏆 Amazing! You\'re in the Top 3!'
+            : rank <= 10 ? '🔥 Top 10! Keep it up!'
+            : rank <= 50 ? '📈 Top 50! Great progress!'
+            : 'Keep studying to climb higher!';
+  document.getElementById('myRankMsg').textContent = msg;
 }
 
-function renderLeaderboard(data,containerId){
-  const el=document.getElementById(containerId);if(!el)return;
-  if(!data.length){el.innerHTML='<div class="empty-state" style="padding:16px;"><div class="empty-title">No data yet</div></div>';return;}
-  const medals=['🥇','🥈','🥉'];
-  el.innerHTML=data.map((s,i)=>{
-    const name=`${s.firstName||''} ${s.lastName||''}`.trim()||s.displayName||'Student';
-    const init=`${(s.firstName||name)[0]||'?'}`.toUpperCase();
-    const isMe=(s.id||s.uid)===currentUser.uid;
-    return`<div class="lb-row${isMe?' lb-me':''}">
+function renderLeaderboard(data, containerId) {
+  const el = document.getElementById(containerId); if (!el) return;
+  if (!data.length) { el.innerHTML = '<div class="empty-state" style="padding:16px;"><div class="empty-title">No data yet</div></div>'; return; }
+  const medals = ['🥇','🥈','🥉'];
+  el.innerHTML = data.map((s, i) => {
+    const name  = `${s.firstName||''} ${s.lastName||''}`.trim() || s.displayName || 'Student';
+    const init  = `${(s.firstName||name)[0]||'?'}`.toUpperCase();
+    const isMe  = (s.id||s.uid) === currentUser.uid;
+    return `<div class="lb-row${isMe?' lb-me':''}">
       <div class="lb-rank${i<3?' r'+(i+1):''}">${i<3?medals[i]:i+1}</div>
       <div class="lb-av" style="background:${AV_COLORS[i%AV_COLORS.length]};">${init}</div>
       <div class="lb-name"><div class="lb-name-text">${name}${isMe?' (You)':''}</div><div class="lb-sub">${s.state||'Nigeria'} · ${s.targetExam||'—'}</div></div>
@@ -1397,190 +1518,192 @@ function renderLeaderboard(data,containerId){
   }).join('');
 }
 
-function loadMiniLeaderboard(){ loadLeaderboard(); }
+function loadMiniLeaderboard() { loadLeaderboard(); }
 
 /* ── ANNOUNCEMENTS ── */
-async function loadAnnouncements(){
-  try{
+async function loadAnnouncements() {
+  try {
     let snap;
-    try{snap=await getDocs(query(collection(db,'broadcasts'),orderBy('createdAt','desc'),limit(20)));}
-    catch(e){snap=await getDocs(collection(db,'broadcasts'));}
-    const items=snap.docs.map(d=>({id:d.id,...d.data()}));
-    items.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-    if(items.length){
-      document.getElementById('anncBadge').style.display='flex';
-      document.getElementById('anncBadge').textContent=items.length;
-      document.getElementById('notifDot').style.display='block';
+    try { snap = await getDocs(query(collection(db,'broadcasts'), orderBy('createdAt','desc'), limit(20))); }
+    catch(e) { snap = await getDocs(collection(db,'broadcasts')); }
+    const items = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    items.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+    if (items.length) {
+      document.getElementById('anncBadge').style.display  = 'flex';
+      document.getElementById('anncBadge').textContent    = items.length;
+      document.getElementById('notifDot').style.display   = 'block';
     }
-    const el=document.getElementById('announcementsList');
-    if(!items.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📢</div><div class="empty-title">No announcements yet</div></div>';return;}
-    const catBadge={'JAMB':'badge-red','WAEC':'badge-blue','NECO':'badge-gold','General':'badge-gray','Platform Update':'badge-teal'};
-    el.innerHTML=items.map(b=>`
+    const el = document.getElementById('announcementsList');
+    if (!items.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">📢</div><div class="empty-title">No announcements yet</div></div>'; return; }
+    const catBadge = { 'JAMB':'badge-red','WAEC':'badge-blue','NECO':'badge-gold','General':'badge-gray','Platform Update':'badge-teal' };
+    el.innerHTML = items.map(b => `
       <div class="annc-item">
         <div style="margin-bottom:5px;"><span class="badge ${catBadge[b.category]||'badge-gray'}">${b.category||'General'}</span></div>
         <div class="annc-title">${b.title||'—'}</div>
         <div class="annc-text">${b.message||''}</div>
         <div class="annc-time">${timeAgo(b.createdAt)} · To: ${b.sentTo||'All Students'}</div>
       </div>`).join('');
-  }catch(e){console.error('Announcements:',e);}
+  } catch(e) { console.error('Announcements:', e); }
 }
 
 /* ── SCHEDULE ── */
-async function loadSchedule(){
-  try{
+async function loadSchedule() {
+  try {
     let snap;
-    try{snap=await getDocs(query(collection(db,'schedule'),orderBy('scheduledAt','asc'),limit(20)));}
-    catch(e){snap=await getDocs(collection(db,'schedule'));}
-    const classes=snap.docs.map(d=>({id:d.id,...d.data()}));
-    classes.sort((a,b)=>(a.scheduledAt?.seconds||0)-(b.scheduledAt?.seconds||0));
-    renderSchedule(classes,'scheduleList');
-    renderSchedule(classes.filter(c=>{
-      if(!c.scheduledAt?.seconds)return false;
-      return new Date(c.scheduledAt.seconds*1000).getTime()>Date.now()-3600000;
-    }).slice(0,3),'upcomingClasses');
-  }catch(e){console.error('Schedule:',e);}
+    try { snap = await getDocs(query(collection(db,'schedule'), orderBy('scheduledAt','asc'), limit(20))); }
+    catch(e) { snap = await getDocs(collection(db,'schedule')); }
+    const classes = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    classes.sort((a,b) => (a.scheduledAt?.seconds||0) - (b.scheduledAt?.seconds||0));
+    renderSchedule(classes, 'scheduleList');
+    renderSchedule(classes.filter(c => {
+      if (!c.scheduledAt?.seconds) return false;
+      return new Date(c.scheduledAt.seconds * 1000).getTime() > Date.now() - 3600000;
+    }).slice(0, 3), 'upcomingClasses');
+  } catch(e) { console.error('Schedule:', e); }
 }
 
-function renderSchedule(classes,containerId){
-  const el=document.getElementById(containerId);if(!el)return;
-  if(!classes.length){el.innerHTML='<div class="empty-state" style="padding:16px;"><div class="empty-icon">📅</div><div class="empty-title">No upcoming classes</div></div>';return;}
-  el.innerHTML=classes.map(c=>{
-    const when=c.scheduledAt?.seconds?new Date(c.scheduledAt.seconds*1000):null;
-    const{day,mon,isToday}=when?schedDay(c.scheduledAt):{day:'?',mon:'—',isToday:false};
-    const timeStr=when?when.toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'}):'—';
-    return`<div class="sched-item${isToday?' sched-date-today':''}">
+function renderSchedule(classes, containerId) {
+  const el = document.getElementById(containerId); if (!el) return;
+  if (!classes.length) { el.innerHTML = '<div class="empty-state" style="padding:16px;"><div class="empty-icon">📅</div><div class="empty-title">No upcoming classes</div></div>'; return; }
+  el.innerHTML = classes.map(c => {
+    const when = c.scheduledAt?.seconds ? new Date(c.scheduledAt.seconds * 1000) : null;
+    const { day, mon, isToday } = when ? schedDay(c.scheduledAt) : { day:'?', mon:'—', isToday:false };
+    const timeStr = when ? when.toLocaleTimeString('en-NG', { hour:'2-digit', minute:'2-digit' }) : '—';
+    return `<div class="sched-item${isToday?' sched-date-today':''}">
       <div class="sched-date"><div class="sched-day">${day}</div><div class="sched-mon">${mon}</div></div>
       <div class="sched-info"><div class="sched-title">${c.title||'—'}</div><div class="sched-meta">${timeStr} · ${c.subject||'—'} · ${c.teacher||'NLTC'} · ${c.duration||90} min</div></div>
-      ${isToday?'<span class="badge badge-live">Today</span>':''}
+      ${isToday ? '<span class="badge badge-live">Today</span>' : ''}
     </div>`;
   }).join('');
 }
 
 /* ── ACHIEVEMENTS ── */
-function renderAchievements(){
-  const achieved=userData?.achievements||[];
-  const all=[
-    {id:'first_lesson',icon:'🎬',label:'First Lesson',desc:'Watch your first video'},
-    {id:'streak_3',icon:'🔥',label:'3-Day Streak',desc:'Study 3 days in a row'},
-    {id:'streak_7',icon:'⚡',label:'7-Day Streak',desc:'Study 7 days in a row'},
-    {id:'cbt_10',icon:'📝',label:'CBT Master',desc:'Complete 10 CBT sessions'},
-    {id:'top_10',icon:'🏆',label:'Top 10',desc:'Reach Top 10 nationwide'},
-    {id:'xp_1000',icon:'⭐',label:'1,000 XP',desc:'Earn 1,000 XP'},
+function renderAchievements() {
+  const achieved = userData?.achievements || [];
+  const all = [
+    { id:'first_lesson', icon:'🎬', label:'First Lesson',  desc:'Watch your first video' },
+    { id:'streak_3',     icon:'🔥', label:'3-Day Streak',  desc:'Study 3 days in a row' },
+    { id:'streak_7',     icon:'⚡', label:'7-Day Streak',  desc:'Study 7 days in a row' },
+    { id:'cbt_10',       icon:'📝', label:'CBT Master',    desc:'Complete 10 CBT sessions' },
+    { id:'top_10',       icon:'🏆', label:'Top 10',        desc:'Reach Top 10 nationwide' },
+    { id:'xp_1000',      icon:'⭐', label:'1,000 XP',      desc:'Earn 1,000 XP' },
   ];
-  const el=document.getElementById('achievementsWrap');
-  el.innerHTML=all.map(a=>{
-    const locked=!achieved.includes(a.id);
-    return`<div class="achievement-chip${locked?' locked':''}"><div class="ach-icon">${a.icon}</div><div><div class="ach-label">${a.label}</div><div style="font-size:.65rem;color:${locked?'var(--text-3)':'var(--text-2)'};">${a.desc}</div></div></div>`;
+  const el = document.getElementById('achievementsWrap');
+  el.innerHTML = all.map(a => {
+    const locked = !achieved.includes(a.id);
+    return `<div class="achievement-chip${locked?' locked':''}"><div class="ach-icon">${a.icon}</div><div><div class="ach-label">${a.label}</div><div style="font-size:.65rem;color:${locked?'var(--text-3)':'var(--text-2)'};">${a.desc}</div></div></div>`;
   }).join('');
 }
 
 /* ── SETTINGS ── */
-function prefillSettings(){
-  document.getElementById('sett-first').value=userData.firstName||'';
-  document.getElementById('sett-last').value=userData.lastName||'';
-  document.getElementById('sett-phone').value=userData.phone||'';
-  const stateEl=document.getElementById('sett-state'),examEl=document.getElementById('sett-exam');
-  for(let i=0;i<stateEl.options.length;i++)if(stateEl.options[i].text===userData.state)stateEl.selectedIndex=i;
-  for(let i=0;i<examEl.options.length;i++)if(examEl.options[i].text===userData.targetExam)examEl.selectedIndex=i;
+function prefillSettings() {
+  document.getElementById('sett-first').value = userData.firstName || '';
+  document.getElementById('sett-last').value  = userData.lastName  || '';
+  document.getElementById('sett-phone').value = userData.phone     || '';
+  const stateEl = document.getElementById('sett-state');
+  const examEl  = document.getElementById('sett-exam');
+  for (let i = 0; i < stateEl.options.length; i++) if (stateEl.options[i].text === userData.state)      stateEl.selectedIndex = i;
+  for (let i = 0; i < examEl.options.length;  i++) if (examEl.options[i].text  === userData.targetExam) examEl.selectedIndex  = i;
 }
 
-window.saveProfile=async function(){
-  const data={
-    firstName:document.getElementById('sett-first').value.trim(),
-    lastName:document.getElementById('sett-last').value.trim(),
-    phone:document.getElementById('sett-phone').value.trim(),
-    state:document.getElementById('sett-state').value,
-    targetExam:document.getElementById('sett-exam').value,
-    updatedAt:serverTimestamp()
+window.saveProfile = async function() {
+  const data = {
+    firstName:   document.getElementById('sett-first').value.trim(),
+    lastName:    document.getElementById('sett-last').value.trim(),
+    phone:       document.getElementById('sett-phone').value.trim(),
+    state:       document.getElementById('sett-state').value,
+    targetExam:  document.getElementById('sett-exam').value,
+    updatedAt:   serverTimestamp(),
   };
-  try{
-    await updateDoc(doc(db,'users',currentUser.uid),data);
-    Object.assign(userData,data);renderUserUI();
-    showToast('Profile saved!','success');
-  }catch(e){showToast(`Error: ${e.message}`,'error');}
+  try {
+    await updateDoc(doc(db,'users',currentUser.uid), data);
+    Object.assign(userData, data);
+    renderUserUI();
+    showToast('Profile saved!', 'success');
+  } catch(e) { showToast(`Error: ${e.message}`, 'error'); }
 };
 
 /* ── PAYSTACK UPGRADE ── */
-window.selectPlan=function(plan){
-  selectedPlan=plan;
-  document.getElementById('planProCard').style.borderColor=plan==='pro'?'var(--gold)':'var(--border)';
-  document.getElementById('planEliteCard').style.borderColor=plan==='elite'?'#7A5AF8':'var(--border)';
+window.selectPlan = function(plan) {
+  selectedPlan = plan;
+  document.getElementById('planProCard').style.borderColor   = plan === 'pro'   ? 'var(--gold)' : 'var(--border)';
+  document.getElementById('planEliteCard').style.borderColor = plan === 'elite' ? '#7A5AF8'     : 'var(--border)';
 };
-window.openUpgradeModal=function(){selectPlan('pro');document.getElementById('upgradeModal').style.display='flex';};
-window.closeUpgradeModal=function(){document.getElementById('upgradeModal').style.display='none';};
-window.initiatePayment=async function(){
-  const btn=document.getElementById('upgradePay'),errEl=document.getElementById('upgradeErr');
-  errEl.style.display='none';
-  btn.disabled=true;btn.innerHTML='<div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Processing…';
-  try{
-    const callbackUrl=`${window.location.origin}${window.location.pathname.replace(/[^/]*$/,'')}payment-success.html?plan=${selectedPlan}`;
-    const data=await backendFetch('POST','/paystack/initialize',{plan:selectedPlan,callbackUrl});
-    window.location.href=data.authorizationUrl;
-  }catch(e){
-    errEl.textContent=e.message||'Payment failed. Please try again.';
-    errEl.style.display='block';
-    btn.disabled=false;btn.innerHTML='<i class="fas fa-credit-card"></i> Pay with Paystack';
+window.openUpgradeModal  = function() { selectPlan('pro'); document.getElementById('upgradeModal').style.display = 'flex'; };
+window.closeUpgradeModal = function() { document.getElementById('upgradeModal').style.display = 'none'; };
+window.initiatePayment   = async function() {
+  const btn = document.getElementById('upgradePay'), errEl = document.getElementById('upgradeErr');
+  errEl.style.display = 'none';
+  btn.disabled = true; btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Processing…';
+  try {
+    const callbackUrl = `${window.location.origin}${window.location.pathname.replace(/[^/]*$/,'')}payment-success.html?plan=${selectedPlan}`;
+    const data = await backendFetch('POST', '/paystack/initialize', { plan: selectedPlan, callbackUrl });
+    window.location.href = data.authorizationUrl;
+  } catch(e) {
+    errEl.textContent = e.message || 'Payment failed. Please try again.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.innerHTML = '<i class="fas fa-credit-card"></i> Pay with Paystack';
   }
 };
 
-document.getElementById('upgradeModal').addEventListener('click',function(e){if(e.target===this)closeUpgradeModal();});
+document.getElementById('upgradeModal').addEventListener('click', function(e) { if (e.target === this) closeUpgradeModal(); });
 
 /* ── SIGN OUT ── */
-window.handleSignOut=async function(){
-  await leaveLiveClass().catch(()=>{});
-  try{await signOut(auth);window.location.href='auth.html';}
-  catch(e){showToast('Sign out failed','error');}
+window.handleSignOut = async function() {
+  await leaveLiveClass().catch(() => {});
+  try { await signOut(auth); window.location.href = 'auth.html'; }
+  catch(e) { showToast('Sign out failed', 'error'); }
 };
 </script>
 
 <!-- ═══════════ UI SCRIPTS ═══════════ -->
 <script>
-function showToast(msg,type='info'){
-  const icons={success:'fa-check-circle',error:'fa-times-circle',info:'fa-info-circle'};
-  const t=document.createElement('div');t.className=`toast ${type}`;
-  t.innerHTML=`<i class="fas ${icons[type]||'fa-info-circle'}" style="flex-shrink:0;margin-top:2px;"></i><span>${msg}</span>`;
+function showToast(msg, type='info') {
+  const icons = { success:'fa-check-circle', error:'fa-times-circle', info:'fa-info-circle' };
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<i class="fas ${icons[type]||'fa-info-circle'}" style="flex-shrink:0;margin-top:2px;"></i><span>${msg}</span>`;
   document.getElementById('toast-ct').appendChild(t);
-  setTimeout(()=>{t.classList.add('toast-out');setTimeout(()=>t.remove(),300);},4500);
+  setTimeout(() => { t.classList.add('toast-out'); setTimeout(() => t.remove(), 300); }, 4500);
 }
-window.showToast=showToast;
+window.showToast = showToast;
 
-function showView(name,btn){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const v=document.getElementById('view-'+name);if(v)v.classList.add('active');
-  document.querySelectorAll('.sb-link').forEach(b=>b.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  else{
-    // Auto-highlight sidebar link when navigating programmatically
-    document.querySelectorAll('.sb-link').forEach(b=>{
-      if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes(`'${name}'`))b.classList.add('active');
+function showView(name, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const v = document.getElementById('view-' + name); if (v) v.classList.add('active');
+  document.querySelectorAll('.sb-link').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else {
+    document.querySelectorAll('.sb-link').forEach(b => {
+      if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(`'${name}'`)) b.classList.add('active');
     });
   }
-  const titles={home:'Dashboard',lessons:'Video Lessons',cbt:'CBT Practice',live:'Live Classes',leaderboard:'Leaderboard',announcements:'Announcements',schedule:'Schedule',settings:'Settings'};
-  document.getElementById('topbarTitle').textContent=titles[name]||'Dashboard';
+  const titles = { home:'Dashboard', lessons:'Video Lessons', cbt:'CBT Practice', live:'Live Classes', leaderboard:'Leaderboard', announcements:'Announcements', schedule:'Schedule', settings:'Settings' };
+  document.getElementById('topbarTitle').textContent = titles[name] || 'Dashboard';
   closeSidebar();
-  window.scrollTo({top:0,behavior:'smooth'});
+  window.scrollTo({ top:0, behavior:'smooth' });
 }
-window.showView=showView;
+window.showView = showView;
 
-function toggleSidebar(){
-  const s=document.getElementById('sidebar'),o=document.getElementById('sbOverlay');
-  s.classList.contains('open')?(s.classList.remove('open'),o.classList.remove('show')):(s.classList.add('open'),o.classList.add('show'));
+function toggleSidebar() {
+  const s=document.getElementById('sidebar'), o=document.getElementById('sbOverlay');
+  s.classList.contains('open') ? (s.classList.remove('open'), o.classList.remove('show')) : (s.classList.add('open'), o.classList.add('show'));
 }
-function closeSidebar(){
+function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sbOverlay').classList.remove('show');
 }
-window.toggleSidebar=toggleSidebar;
-window.closeSidebar=closeSidebar;
+window.toggleSidebar = toggleSidebar;
+window.closeSidebar  = closeSidebar;
 
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
     closeSidebar();
     window.closeVideoPlayer?.();
-    document.querySelectorAll('.modal-overlay.show,.live-viewer-overlay.show').forEach(m=>m.classList.remove('show'));
+    document.querySelectorAll('.modal-overlay.show,.live-viewer-overlay.show').forEach(m => m.classList.remove('show'));
   }
 });
-window.addEventListener('resize',()=>{if(window.innerWidth>900)closeSidebar();});
+window.addEventListener('resize', () => { if (window.innerWidth > 900) closeSidebar(); });
 </script>
 </body>
 </html>

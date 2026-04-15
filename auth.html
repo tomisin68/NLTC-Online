@@ -9,228 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<!-- ═══════════════════════════════════════════════════════════════
-     FIREBASE — using signInWithRedirect (not signInWithPopup)
-     Reason: firebaseapp.com is unreachable on Nigerian ISPs (MTN,
-     Airtel, Glo etc.) when used as a popup intermediary.
-     signInWithRedirect goes straight to accounts.google.com which
-     is always reachable. getRedirectResult() picks up credentials
-     on page return.
-════════════════════════════════════════════════════════════════ -->
-<script type="module">
-  import {
-    initializeApp
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-
-  import {
-    getAuth,
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-    signInWithRedirect,
-    getRedirectResult,
-    GoogleAuthProvider,
-    sendPasswordResetEmail,
-    onAuthStateChanged,
-    updateProfile
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-  import {
-    getFirestore,
-    doc,
-    setDoc,
-    getDoc,
-    serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-  /* ── Firebase config ── */
-  const firebaseConfig = {
-    apiKey:            "AIzaSyA9vzT1TBpTdRJUfyYm51goS-5HfL3FcbU",
-    authDomain:        "nltc-online.firebaseapp.com",
-    projectId:         "nltc-online",
-    storageBucket:     "nltc-online.firebasestorage.app",
-    messagingSenderId: "267993935158",
-    appId:             "1:267993935158:web:723c13b2564b817fbc9797"
-  };
-
-  const app      = initializeApp(firebaseConfig);
-  const auth     = getAuth(app);
-  const db       = getFirestore(app);
-  const gProvider = new GoogleAuthProvider();
-  gProvider.setCustomParameters({ prompt: 'select_account' });
-
-  /* ── Expose to window so non-module scripts can call them ── */
-  window.__nltcAuth      = auth;
-  window.__nltcDb        = db;
-  window.__nltcGProvider = gProvider;
-
-  /* ── Save / merge user doc in Firestore ── */
-  async function saveUser(user, extras = {}) {
-    const ref  = doc(db, 'users', user.uid);
-    const snap = await getDoc(ref);
-    const payload = {
-      uid:         user.uid,
-      email:       user.email,
-      displayName: user.displayName || extras.displayName || '',
-      photoURL:    user.photoURL || '',
-      lastLogin:   serverTimestamp(),
-      updatedAt:   serverTimestamp(),
-      ...extras
-    };
-    if (!snap.exists()) {
-      payload.createdAt = serverTimestamp();
-      payload.xp        = 0;
-      payload.streak    = 0;
-      payload.badges    = [];
-    }
-    await setDoc(ref, payload, { merge: true });
-    const fresh = await getDoc(ref);
-    return fresh.data();
-  }
-  window.__nltcSaveUser = saveUser;
-
-  /* ── Email / password login ── */
-  window.__nltcLogin = async function(email, password) {
-    const cred = await signInWithEmailAndPassword(auth, email, password);
-    const data = await saveUser(cred.user);
-    return { user: cred.user, data };
-  };
-
-  /* ── Email / password signup ── */
-  window.__nltcSignup = async function(email, password, extras) {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(cred.user, { displayName: extras.displayName });
-    const data = await saveUser(cred.user, extras);
-    return { user: cred.user, data };
-  };
-
-  /* ── Initiate Google redirect (no popup) ── */
-  window.__nltcGoogleRedirect = async function() {
-    await signInWithRedirect(auth, gProvider);
-    // execution stops here — browser navigates away
-  };
-
-  /* ── Password reset ── */
-  window.__nltcReset = async function(email) {
-    await sendPasswordResetEmail(auth, email);
-  };
-
-  /* ══════════════════════════════════════════════════════════════
-     HANDLE REDIRECT RETURN
-     This runs on every page load. If we're returning from a Google
-     redirect, getRedirectResult() will have the credential.
-     If not (normal load), result is null and we do nothing.
-  ══════════════════════════════════════════════════════════════ */
-  async function handleRedirectResult() {
-    const loader = document.getElementById('redirectLoading');
-
-    /* Show a brief loading screen while we await the result.
-       We always await it; it resolves instantly when there's no
-       pending redirect so there's no visible flicker on normal loads. */
-    try {
-      const result = await getRedirectResult(auth);
-
-      if (!result) {
-        /* Normal page load — no redirect pending */
-        if (loader) loader.classList.remove('show');
-        return;
-      }
-
-      /* We have a Google user coming back from redirect */
-      if (loader) loader.classList.add('show');
-
-      const isNew   = result._tokenResponse?.isNewUser;
-      const extras  = isNew ? {
-        role:        'student',
-        plan:        'free',
-        firstName:   result.user.displayName?.split(' ')[0]  || '',
-        lastName:    result.user.displayName?.split(' ').slice(1).join(' ') || '',
-        targetExam:  '',
-        state:       '',
-      } : {};
-
-      const data        = await saveUser(result.user, extras);
-      const storedRole  = data?.role || 'student';
-
-      /* Restore the role the user had selected before redirect */
-      const intendedRole = sessionStorage.getItem('nltc_intended_role') || 'student';
-      sessionStorage.removeItem('nltc_intended_role');
-
-      if (intendedRole === 'admin' && storedRole !== 'admin') {
-        if (loader) loader.classList.remove('show');
-        window.__nltcPendingToast = {
-          msg:  'This account does not have admin privileges.',
-          type: 'error'
-        };
-        return;
-      }
-
-      const target = storedRole === 'admin' ? 'admin.html' : 'dashboard.html';
-      const fname  = result.user.displayName?.split(' ')[0] || 'User';
-
-      /* Show success overlay then redirect */
-      if (typeof window.__nltcShowSuccess === 'function') {
-        window.__nltcShowSuccess(
-          isNew ? 'Account Created! 🚀' : 'Welcome Back! 👋',
-          isNew
-            ? `Hi ${fname}! Your NLTC account is ready. Let's go!`
-            : `Good to see you again, ${fname}! Taking you to your dashboard.`,
-          storedRole === 'admin' ? 'Go to Admin Panel' : 'Go to Dashboard',
-          target
-        );
-      } else {
-        /* Fallback if DOM not ready yet */
-        window.location.href = target;
-      }
-
-    } catch(err) {
-      if (loader) loader.classList.remove('show');
-
-      /* Cancelled by user — silent */
-      if (err.code === 'auth/redirect-cancelled-by-user') return;
-
-      console.error('[NLTC Redirect Result Error]', err.code, err.message, err);
-
-      const msgMap = {
-        'auth/network-request-failed':          'Network error during sign-in. Check your connection.',
-        'auth/popup-blocked':                   'Sign-in was blocked. Please try again.',
-        'auth/account-exists-with-different-credential':
-          'An account with this email already exists using a different sign-in method.',
-        'auth/user-disabled':                   'This account has been disabled. Contact support.',
-        'auth/operation-not-allowed':           'Google Sign-In is not enabled. Contact the admin.',
-        'auth/unauthorized-domain':             'Domain not authorised. Contact the admin.',
-      };
-
-      window.__nltcPendingToast = {
-        msg:  msgMap[err.code] || `Google sign-in failed (${err.code || 'unknown'}). Please try again.`,
-        type: 'error'
-      };
-    }
-  }
-
-  /* Run it. DOM may not be ready yet so we queue on DOMContentLoaded. */
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', handleRedirectResult);
-  } else {
-    handleRedirectResult();
-  }
-
-  /* ── Auth state — auto redirect if already logged in ── */
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) return;
-    /* Don't auto-redirect if success overlay is already showing */
-    if (document.getElementById('successOv')?.classList.contains('show')) return;
-    /* Uncomment the lines below to enable auto-redirect on revisit:
-    try {
-      const snap = await getDoc(doc(db, 'users', user.uid));
-      if (snap.exists()) {
-        const role = snap.data()?.role || 'student';
-        window.location.href = role === 'admin' ? 'admin.html' : 'dashboard.html';
-      }
-    } catch(e) { console.warn('onAuthStateChanged error', e); }
-    */
-  });
-</script>
-
 <style>
 /* ═══════════════════════════════════════════════
    DESIGN TOKENS
@@ -1109,7 +887,7 @@ body {
         <div class="suc-icon"><i class="fas fa-check"></i></div>
         <div class="suc-title" id="sucTitle">Welcome!</div>
         <p class="suc-msg" id="sucMsg">You're in! Redirecting you now…</p>
-        <button class="suc-cta" onclick="redirect()">
+        <button class="suc-cta" onclick="doRedirect()">
           <i class="fas fa-arrow-right"></i>
           <span id="sucCtaLbl">Continue</span>
         </button>
@@ -1122,54 +900,41 @@ body {
 <!-- Lottie WC -->
 <script type="module" src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.10/dist/dotlottie-wc.js"></script>
 
+<!-- ═══════════════════════════════════════════════════════════════════
+  NON-MODULE UI SCRIPT
+  All DOM logic lives here so it is synchronous and available
+  immediately. The Firebase module script below references these
+  functions via window.* after DOMContentLoaded.
+════════════════════════════════════════════════════════════════════ -->
 <script>
-/* ═══════════════════════════════════════════════════════
-   APP STATE
-═══════════════════════════════════════════════════════ */
-let currentRole    = 'student'; // 'student' | 'admin'
-let currentTab     = 'in';      // 'in' | 'up'
-let redirectTarget = 'dashboard.html';
+/* ─── APP STATE ─────────────────────────────────────────── */
+var currentRole    = 'student';
+var currentTab     = 'in';
+var redirectTarget = 'dashboard.html';
+var _autoRedirectTimer = null;
 
-/* Admin invite code — keep this server-side in production */
-const ADMIN_INVITE_CODE = 'NLTC-ADMIN-2025';
+/* Admin invite code — move server-side in production */
+var ADMIN_INVITE_CODE = 'NLTC-ADMIN-2025';
 
-/* ═══════════════════════════════════════════════════════
-   Expose showSuccess to the Firebase module script so
-   handleRedirectResult() can call it after DOM is ready
-═══════════════════════════════════════════════════════ */
-window.__nltcShowSuccess = showSuccess;
-
-/* ═══════════════════════════════════════════════════════
-   ROLE MANAGEMENT
-═══════════════════════════════════════════════════════ */
+/* ─── ROLE ──────────────────────────────────────────────── */
 function setRole(role) {
   currentRole = role;
-  const isAdmin = role === 'admin';
-
+  var isAdmin = role === 'admin';
   document.getElementById('role-student').classList.toggle('active', !isAdmin);
-  document.getElementById('role-admin').classList.toggle('active',   isAdmin);
-
-  /* badges */
+  document.getElementById('role-admin').classList.toggle('active',    isAdmin);
   document.getElementById('badge-in-student').style.display = isAdmin ? 'none' : '';
   document.getElementById('badge-in-admin').style.display   = isAdmin ? ''     : 'none';
   document.getElementById('badge-up-student').style.display = isAdmin ? 'none' : '';
   document.getElementById('badge-up-admin').style.display   = isAdmin ? ''     : 'none';
-
-  /* admin notes */
   document.getElementById('adminNote-in').classList.toggle('show', isAdmin);
   document.getElementById('adminNote-up').classList.toggle('show', isAdmin);
-
-  /* field visibility */
-  document.getElementById('adminCodeField').style.display = isAdmin ? ''     : 'none';
+  document.getElementById('adminCodeField').style.display = isAdmin ? '' : 'none';
   document.getElementById('studentFields').style.display  = isAdmin ? 'none' : '';
-
-  const examEl = document.getElementById('su-exam');
+  var examEl = document.getElementById('su-exam');
   if (examEl) examEl.required = !isAdmin;
 }
 
-/* ═══════════════════════════════════════════════════════
-   TAB MANAGEMENT
-═══════════════════════════════════════════════════════ */
+/* ─── TABS ──────────────────────────────────────────────── */
 function switchTab(t) {
   currentTab = t;
   document.getElementById('tab-in').classList.toggle('active', t === 'in');
@@ -1179,244 +944,249 @@ function switchTab(t) {
   clearErrs();
 }
 
-/* ═══════════════════════════════════════════════════════
-   TOAST
-═══════════════════════════════════════════════════════ */
-function toast(msg, type = 'info') {
-  const icons = { success:'fa-check-circle', error:'fa-times-circle', info:'fa-info-circle' };
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span>${msg}</span>`;
+/* ─── TOAST ─────────────────────────────────────────────── */
+function toast(msg, type) {
+  type = type || 'info';
+  var icons = { success:'fa-check-circle', error:'fa-times-circle', info:'fa-info-circle' };
+  var t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.innerHTML = '<i class="fas ' + (icons[type] || icons.info) + '"></i><span>' + msg + '</span>';
   document.getElementById('toasts').appendChild(t);
-  setTimeout(() => {
+  setTimeout(function() {
     t.classList.add('t-out');
-    setTimeout(() => t.remove(), 350);
+    setTimeout(function() { t.remove(); }, 350);
   }, 5000);
 }
 
-/* ═══════════════════════════════════════════════════════
-   ERROR HELPERS
-═══════════════════════════════════════════════════════ */
+/* ─── ERROR HELPERS ─────────────────────────────────────── */
 function showErr(id, msg) {
-  const el = document.getElementById(id);
+  var el = document.getElementById(id);
   if (!el) return;
   el.querySelector('span').textContent = msg;
   el.classList.add('show');
 }
 function hideErr(id) {
-  const el = document.getElementById(id);
+  var el = document.getElementById(id);
   if (el) el.classList.remove('show');
 }
 function clearErrs() {
-  document.querySelectorAll('.fe').forEach(e => e.classList.remove('show'));
-  document.querySelectorAll('input.err, select.err').forEach(e => e.classList.remove('err'));
+  document.querySelectorAll('.fe').forEach(function(e) { e.classList.remove('show'); });
+  document.querySelectorAll('input.err, select.err').forEach(function(e) { e.classList.remove('err'); });
 }
 
-/* ═══════════════════════════════════════════════════════
-   EYE TOGGLE
-═══════════════════════════════════════════════════════ */
+/* ─── EYE TOGGLE ────────────────────────────────────────── */
 function toggleEye(id, btn) {
-  const inp = document.getElementById(id);
-  const ico = btn.querySelector('i');
+  var inp = document.getElementById(id);
+  var ico = btn.querySelector('i');
   inp.type = inp.type === 'password' ? 'text' : 'password';
   ico.classList.toggle('fa-eye');
   ico.classList.toggle('fa-eye-slash');
 }
 
-/* ═══════════════════════════════════════════════════════
-   PASSWORD STRENGTH
-═══════════════════════════════════════════════════════ */
+/* ─── PASSWORD STRENGTH ─────────────────────────────────── */
 function checkStr(v) {
-  const fill = document.getElementById('strFill');
-  const lbl  = document.getElementById('strLabel');
+  var fill = document.getElementById('strFill');
+  var lbl  = document.getElementById('strLabel');
   if (!v) {
     fill.style.width = '0';
     lbl.textContent  = 'Enter a password';
     lbl.style.color  = 'var(--text-3)';
     return;
   }
-  let s = 0;
+  var s = 0;
   if (v.length >= 8)          s++;
   if (/[A-Z]/.test(v))        s++;
   if (/[0-9]/.test(v))        s++;
   if (/[^A-Za-z0-9]/.test(v)) s++;
-  const levels = [
-    { w:'18%',  c:'#F04438', l:'Very weak'    },
-    { w:'38%',  c:'#F79009', l:'Weak'         },
-    { w:'62%',  c:'#FEC84B', l:'Fair'         },
-    { w:'84%',  c:'#12B76A', l:'Strong'       },
-    { w:'100%', c:'#039855', l:'Very strong'  }
+  var levels = [
+    { w:'18%',  c:'#F04438', l:'Very weak'   },
+    { w:'38%',  c:'#F79009', l:'Weak'        },
+    { w:'62%',  c:'#FEC84B', l:'Fair'        },
+    { w:'84%',  c:'#12B76A', l:'Strong'      },
+    { w:'100%', c:'#039855', l:'Very strong' }
   ];
-  const lvl = levels[s] || levels[0];
+  var lvl = levels[s] || levels[0];
   fill.style.width      = lvl.w;
   fill.style.background = lvl.c;
   lbl.style.color       = lvl.c;
   lbl.textContent       = lvl.l;
 }
 
-/* ═══════════════════════════════════════════════════════
-   BUTTON LOADING HELPERS
-═══════════════════════════════════════════════════════ */
+/* ─── BUTTON LOADING HELPERS ────────────────────────────── */
 function setBtnLoading(btnId, spinId, icoId, txtId, loading, txt) {
-  const btn = document.getElementById(btnId);
-  const sp  = document.getElementById(spinId);
-  const ic  = document.getElementById(icoId);
-  const tx  = document.getElementById(txtId);
+  var btn = document.getElementById(btnId);
+  var sp  = document.getElementById(spinId);
+  var ic  = document.getElementById(icoId);
+  var tx  = document.getElementById(txtId);
   if (!btn) return;
   btn.disabled = loading;
-  if (sp) sp.style.display  = loading ? 'block' : 'none';
-  if (ic) ic.style.display  = loading ? 'none'  : '';
+  if (sp) sp.style.display = loading ? 'block' : 'none';
+  if (ic) ic.style.display = loading ? 'none'  : '';
   if (tx && txt) tx.textContent = txt;
 }
 
 function setGBtnLoading(btnId, loading) {
-  const btn = document.getElementById(btnId);
+  var btn = document.getElementById(btnId);
   if (!btn) return;
   btn.disabled = loading;
   btn.classList.toggle('loading', loading);
 }
 
-/* ═══════════════════════════════════════════════════════
-   SUCCESS OVERLAY
-═══════════════════════════════════════════════════════ */
+/* ─── SUCCESS OVERLAY ───────────────────────────────────── */
 function showSuccess(title, msg, ctaLabel, target) {
+  /* Cancel any pending auto-redirect from a previous call */
+  if (_autoRedirectTimer) clearTimeout(_autoRedirectTimer);
+
   document.getElementById('sucTitle').textContent  = title;
   document.getElementById('sucMsg').textContent    = msg;
   document.getElementById('sucCtaLbl').textContent = ctaLabel;
   redirectTarget = target;
 
-  /* Hide redirect loader if it's still showing */
-  const loader = document.getElementById('redirectLoading');
+  /* Hide redirect loading overlay if visible */
+  var loader = document.getElementById('redirectLoading');
   if (loader) loader.classList.remove('show');
 
   document.getElementById('successOv').classList.add('show');
 
   /* Auto-redirect after 3 s */
-  setTimeout(redirect, 3000);
+  _autoRedirectTimer = setTimeout(doRedirect, 3000);
 }
 
-function redirect() {
+function doRedirect() {
   window.location.href = redirectTarget;
 }
 
-/* ═══════════════════════════════════════════════════════
-   ROLE-BASED REDIRECT TARGET
-═══════════════════════════════════════════════════════ */
-function getRedirectTarget(role) {
-  return role === 'admin' ? 'admin.html' : 'dashboard.html';
+/* ─── FORGOT PASSWORD MODAL ─────────────────────────────── */
+function openForgot(e) {
+  if (e) e.preventDefault();
+  document.getElementById('forgotBg').classList.add('open');
+}
+function closeForgot() {
+  document.getElementById('forgotBg').classList.remove('open');
 }
 
-/* ═══════════════════════════════════════════════════════
-   GOOGLE SIGN-IN  (signInWithRedirect — no popup)
-   We save the intended role to sessionStorage before
-   redirecting so we can check it on return.
-═══════════════════════════════════════════════════════ */
-async function doGoogle() {
-  /* Save current role selection across the redirect */
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('forgotBg').addEventListener('click', function(e) {
+    if (e.target === this) closeForgot();
+  });
+
+  /* ── Show any pending toast set by the Firebase module before DOM was ready ── */
+  if (window.__nltcPendingToast) {
+    setTimeout(function() {
+      toast(window.__nltcPendingToast.msg, window.__nltcPendingToast.type);
+      window.__nltcPendingToast = null;
+    }, 400);
+  }
+});
+
+/* ─── GOOGLE SIGN-IN (triggers signInWithRedirect) ──────── */
+function doGoogle() {
+  if (!window.__nltcFirebaseReady) {
+    toast('Authentication is still loading. Please wait a moment and try again.', 'error');
+    return;
+  }
+  /* Save role selection so handleRedirectResult() can read it on return */
   sessionStorage.setItem('nltc_intended_role', currentRole);
 
-  /* Show loading state on both Google buttons */
   setGBtnLoading('gLoginBtn',  true);
   setGBtnLoading('gSignupBtn', true);
 
-  try {
-    await window.__nltcGoogleRedirect();
-    /* Browser navigates away — nothing below runs */
-  } catch(err) {
-    /* Only reached if redirect itself throws (very rare) */
+  window.__nltcGoogleRedirect().catch(function(err) {
+    /* Only hit if the redirect call itself throws synchronously (very rare) */
     setGBtnLoading('gLoginBtn',  false);
     setGBtnLoading('gSignupBtn', false);
     sessionStorage.removeItem('nltc_intended_role');
 
-    const ignored = [
+    var ignored = [
       'auth/popup-closed-by-user',
       'auth/cancelled-popup-request',
       'auth/user-cancelled',
       'auth/redirect-cancelled-by-user'
     ];
-    if (ignored.includes(err.code)) return;
+    if (ignored.indexOf(err.code) !== -1) return;
 
-    console.error('[NLTC Google Redirect Error]', err.code, err.message, err);
-
-    const msgMap = {
-      'auth/network-request-failed': 'Network error. Please check your connection and try again.',
+    console.error('[NLTC Google Redirect Error]', err.code, err.message);
+    var msgMap = {
+      'auth/network-request-failed': 'Network error. Please check your connection.',
       'auth/operation-not-allowed':  'Google Sign-In is not enabled. Contact the administrator.',
       'auth/unauthorized-domain':    'This domain is not authorised. Contact the administrator.',
     };
-    toast(msgMap[err.code] || `Sign-in failed (${err.code || 'unknown'}). Please try again.`, 'error');
-  }
+    toast(msgMap[err.code] || ('Sign-in failed (' + (err.code || 'unknown') + '). Please try again.'), 'error');
+  });
 }
 
-/* ═══════════════════════════════════════════════════════
-   EMAIL / PASSWORD LOGIN
-═══════════════════════════════════════════════════════ */
-async function doLogin(e) {
+/* ─── EMAIL / PASSWORD LOGIN ────────────────────────────── */
+function doLogin(e) {
   e.preventDefault();
   clearErrs();
 
-  const email = document.getElementById('li-email').value.trim();
-  const pass  = document.getElementById('li-pass').value;
-  let ok = true;
+  var email = document.getElementById('li-email').value.trim();
+  var pass  = document.getElementById('li-pass').value;
+  var ok = true;
 
   if (!email) { showErr('li-emailErr', 'Email is required'); ok = false; }
   if (!pass)  { showErr('li-passErr',  'Password is required'); ok = false; }
   if (!ok) return;
 
+  if (!window.__nltcFirebaseReady) {
+    toast('Authentication is still loading. Please try again in a moment.', 'error');
+    return;
+  }
+
   setBtnLoading('liBtnId','liSpin','liIco','liTxt', true, 'Signing in…');
 
-  try {
-    const { user, data } = await window.__nltcLogin(email, pass);
-    const storedRole = data?.role || 'student';
+  window.__nltcLogin(email, pass).then(function(result) {
+    var user = result.user;
+    var data = result.data;
+    var storedRole = (data && data.role) ? data.role : 'student';
 
     if (currentRole === 'admin' && storedRole !== 'admin') {
       toast('This account does not have admin privileges.', 'error');
       return;
     }
 
-    const target = getRedirectTarget(storedRole);
-    const fname  = data?.firstName || user.displayName?.split(' ')[0] || 'User';
+    var target = storedRole === 'admin' ? 'admin.html' : 'dashboard.html';
+    var fname  = (data && data.firstName) || (user.displayName ? user.displayName.split(' ')[0] : 'User');
 
-    toast(`Welcome back, ${fname}! 🎉`, 'success');
+    toast('Welcome back, ' + fname + '! 🎉', 'success');
     showSuccess(
       'Welcome Back! 👋',
-      `Signed in as ${user.email}. Redirecting you now.`,
+      'Signed in as ' + user.email + '. Redirecting you now.',
       storedRole === 'admin' ? 'Go to Admin Panel' : 'Go to Dashboard',
       target
     );
-  } catch(err) {
-    const map = {
-      'auth/user-not-found':       ['li-emailErr', 'No account found with this email'],
-      'auth/wrong-password':       ['li-passErr',  'Incorrect password'],
-      'auth/invalid-credential':   ['li-passErr',  'Incorrect email or password'],
-      'auth/invalid-email':        ['li-emailErr', 'Invalid email address'],
-      'auth/user-disabled':        [null,          'This account has been disabled. Contact support.'],
-      'auth/too-many-requests':    [null,          'Too many failed attempts. Please wait and try again.'],
-      'auth/network-request-failed': [null,        'Network error. Check your connection and try again.'],
+  }).catch(function(err) {
+    var map = {
+      'auth/user-not-found':         ['li-emailErr', 'No account found with this email'],
+      'auth/wrong-password':         ['li-passErr',  'Incorrect password'],
+      'auth/invalid-credential':     ['li-passErr',  'Incorrect email or password'],
+      'auth/invalid-email':          ['li-emailErr', 'Invalid email address'],
+      'auth/user-disabled':          [null,          'This account has been disabled. Contact support.'],
+      'auth/too-many-requests':      [null,          'Too many failed attempts. Please wait and try again.'],
+      'auth/network-request-failed': [null,          'Network error. Check your connection and try again.'],
     };
-    const m = map[err.code];
+    var m = map[err.code];
     if (m && m[0]) showErr(m[0], m[1]);
-    else toast(m ? m[1] : `Sign in failed (${err.code || 'unknown'}). Please try again.`, 'error');
+    else toast(m ? m[1] : ('Sign in failed (' + (err.code || 'unknown') + '). Please try again.'), 'error');
     console.error('[NLTC Login Error]', err.code, err.message);
-  } finally {
+  }).finally(function() {
     setBtnLoading('liBtnId','liSpin','liIco','liTxt', false, 'Sign In');
-  }
+  });
 }
 
-/* ═══════════════════════════════════════════════════════
-   EMAIL / PASSWORD SIGNUP
-═══════════════════════════════════════════════════════ */
-async function doSignup(e) {
+/* ─── EMAIL / PASSWORD SIGNUP ───────────────────────────── */
+function doSignup(e) {
   e.preventDefault();
   clearErrs();
 
-  const first = document.getElementById('su-first').value.trim();
-  const last  = document.getElementById('su-last').value.trim();
-  const email = document.getElementById('su-email').value.trim();
-  const phone = document.getElementById('su-phone').value.trim();
-  const pass  = document.getElementById('su-pass').value;
-  const terms = document.getElementById('su-terms').checked;
+  var first = document.getElementById('su-first').value.trim();
+  var last  = document.getElementById('su-last').value.trim();
+  var email = document.getElementById('su-email').value.trim();
+  var phone = document.getElementById('su-phone').value.trim();
+  var pass  = document.getElementById('su-pass').value;
+  var terms = document.getElementById('su-terms').checked;
 
-  let ok = true;
+  var ok = true;
   if (!first)                                          { showErr('su-firstErr','First name required'); ok = false; }
   if (!last)                                           { showErr('su-lastErr', 'Last name required'); ok = false; }
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('su-emailErr','Valid email required'); ok = false; }
@@ -1424,152 +1194,138 @@ async function doSignup(e) {
   if (pass.length < 8)                                 { showErr('su-passErr', 'Minimum 8 characters'); ok = false; }
   if (!terms)                                          { toast('Please accept the Terms & Privacy Policy', 'error'); ok = false; }
 
-  let assignedRole = 'student';
+  var assignedRole = 'student';
 
   if (currentRole === 'admin') {
-    const code = document.getElementById('su-admincode').value.trim();
-    if (!code)                     { showErr('su-admincodeErr','Invite code is required for admin signup'); ok = false; }
-    else if (code !== ADMIN_INVITE_CODE) { showErr('su-admincodeErr','Invalid invite code'); ok = false; }
+    var code = document.getElementById('su-admincode').value.trim();
+    if (!code)                          { showErr('su-admincodeErr','Invite code is required for admin signup'); ok = false; }
+    else if (code !== ADMIN_INVITE_CODE){ showErr('su-admincodeErr','Invalid invite code'); ok = false; }
     else assignedRole = 'admin';
   } else {
-    const exam = document.getElementById('su-exam').value;
+    var exam = document.getElementById('su-exam').value;
     if (!exam) { showErr('su-examErr','Please select your target exam'); ok = false; }
   }
 
   if (!ok) return;
 
+  if (!window.__nltcFirebaseReady) {
+    toast('Authentication is still loading. Please try again in a moment.', 'error');
+    return;
+  }
+
   setBtnLoading('suBtnId','suSpin','suIco','suTxt', true, 'Creating account…');
 
-  try {
-    const extras = {
-      firstName:   first,
-      lastName:    last,
-      displayName: `${first} ${last}`,
-      phone:       phone || '',
-      role:        assignedRole,
-      plan:        assignedRole === 'admin' ? 'admin' : 'free',
-    };
+  var extras = {
+    firstName:   first,
+    lastName:    last,
+    displayName: first + ' ' + last,
+    phone:       phone || '',
+    role:        assignedRole,
+    plan:        assignedRole === 'admin' ? 'admin' : 'free',
+  };
 
-    if (assignedRole === 'student') {
-      extras.targetExam = document.getElementById('su-exam').value;
-      extras.state      = document.getElementById('su-state').value || '';
-    }
+  if (assignedRole === 'student') {
+    extras.targetExam = document.getElementById('su-exam').value;
+    extras.state      = document.getElementById('su-state').value || '';
+  }
 
-    await window.__nltcSignup(email, pass, extras);
-    const target = getRedirectTarget(assignedRole);
-
-    toast(`Account created! Welcome, ${first} 🎉`, 'success');
+  window.__nltcSignup(email, pass, extras).then(function(result) {
+    var target = assignedRole === 'admin' ? 'admin.html' : 'dashboard.html';
+    toast('Account created! Welcome, ' + first + ' 🎉', 'success');
     showSuccess(
       assignedRole === 'admin' ? 'Admin Account Created! 🛡️' : 'Welcome to NLTC! 🚀',
       assignedRole === 'admin'
-        ? `Hi ${first}! Your admin account is ready.`
-        : `Hi ${first}! Your free account is ready. Start your exam prep!`,
+        ? 'Hi ' + first + '! Your admin account is ready.'
+        : 'Hi ' + first + '! Your free account is ready. Start your exam prep!',
       assignedRole === 'admin' ? 'Go to Admin Panel' : 'Go to Dashboard',
       target
     );
-  } catch(err) {
-    const map = {
-      'auth/email-already-in-use': ['su-emailErr','An account already exists with this email'],
-      'auth/invalid-email':        ['su-emailErr','Invalid email address'],
-      'auth/weak-password':        ['su-passErr', 'Password too weak — use at least 8 characters'],
-      'auth/network-request-failed': [null,       'Network error. Check your connection and try again.'],
+  }).catch(function(err) {
+    var map = {
+      'auth/email-already-in-use':   ['su-emailErr','An account already exists with this email'],
+      'auth/invalid-email':          ['su-emailErr','Invalid email address'],
+      'auth/weak-password':          ['su-passErr', 'Password too weak — use at least 8 characters'],
+      'auth/network-request-failed': [null,         'Network error. Check your connection and try again.'],
     };
-    const m = map[err.code];
+    var m = map[err.code];
     if (m && m[0]) showErr(m[0], m[1]);
-    else toast(m ? m[1] : `Registration failed (${err.code || 'unknown'}). Please try again.`, 'error');
+    else toast(m ? m[1] : ('Registration failed (' + (err.code || 'unknown') + '). Please try again.'), 'error');
     console.error('[NLTC Signup Error]', err.code, err.message);
-  } finally {
+  }).finally(function() {
     setBtnLoading('suBtnId','suSpin','suIco','suTxt', false, 'Create Account');
-  }
+  });
 }
 
-/* ═══════════════════════════════════════════════════════
-   FORGOT PASSWORD MODAL
-═══════════════════════════════════════════════════════ */
-function openForgot(e) { e && e.preventDefault(); document.getElementById('forgotBg').classList.add('open'); }
-function closeForgot()  { document.getElementById('forgotBg').classList.remove('open'); }
-
-async function handleReset() {
+/* ─── FORGOT PASSWORD ───────────────────────────────────── */
+function handleReset() {
   hideErr('resetEmailErr');
-  const email = document.getElementById('resetEmail').value.trim();
+  var email = document.getElementById('resetEmail').value.trim();
   if (!email) { showErr('resetEmailErr','Please enter your email'); return; }
 
+  if (!window.__nltcFirebaseReady) {
+    toast('Authentication is still loading. Please try again in a moment.', 'error');
+    return;
+  }
+
   setBtnLoading('resetBtn','resetSpin','resetIco','resetTxt', true, 'Sending…');
-  try {
-    await window.__nltcReset(email);
+
+  window.__nltcReset(email).then(function() {
     toast('Reset link sent! Check your inbox 📧', 'success');
     closeForgot();
     document.getElementById('resetEmail').value = '';
-  } catch(err) {
-    const map = {
-      'auth/user-not-found': 'No account found with this email',
-      'auth/invalid-email':  'Enter a valid email address',
+  }).catch(function(err) {
+    var map = {
+      'auth/user-not-found':         'No account found with this email',
+      'auth/invalid-email':          'Enter a valid email address',
       'auth/network-request-failed': 'Network error. Please try again.',
     };
     showErr('resetEmailErr', map[err.code] || 'Could not send reset link. Please try again.');
     console.error('[NLTC Reset Error]', err.code, err.message);
-  } finally {
+  }).finally(function() {
     setBtnLoading('resetBtn','resetSpin','resetIco','resetTxt', false, 'Send Reset Link');
-  }
+  });
 }
 
-/* Close modal on overlay click */
-document.getElementById('forgotBg').addEventListener('click', function(e) {
-  if (e.target === this) closeForgot();
-});
-
-/* ═══════════════════════════════════════════════════════
-   PROCESS ANY PENDING TOAST (set by redirect handler
-   before DOM was fully ready)
-═══════════════════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', () => {
-  if (window.__nltcPendingToast) {
-    setTimeout(() => {
-      toast(window.__nltcPendingToast.msg, window.__nltcPendingToast.type);
-      window.__nltcPendingToast = null;
-    }, 400);
-  }
-});
-
-/* ═══════════════════════════════════════════════════════
-   BACKGROUND CANVAS PARTICLES
-═══════════════════════════════════════════════════════ */
+/* ─── BACKGROUND CANVAS PARTICLES ───────────────────────── */
 (function() {
-  const canvas = document.getElementById('bg-canvas');
-  const ctx    = canvas.getContext('2d');
-  let W, H, pts;
-  const N = 55, MAX_D = 110, SPD = 0.3;
+  var canvas = document.getElementById('bg-canvas');
+  var ctx    = canvas.getContext('2d');
+  var W, H, pts;
+  var N = 55, MAX_D = 110, SPD = 0.3;
 
   function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
   function ri(a, b) { return Math.random() * (b - a) + a; }
 
   function init() {
     resize();
-    pts = Array.from({ length: N }, () => ({
-      x: ri(0, W), y: ri(0, H),
-      vx: ri(-SPD, SPD), vy: ri(-SPD, SPD),
-      r: ri(0.7, 1.8),
-      gold: Math.random() < 0.18
-    }));
+    pts = [];
+    for (var k = 0; k < N; k++) {
+      pts.push({
+        x: ri(0, W), y: ri(0, H),
+        vx: ri(-SPD, SPD), vy: ri(-SPD, SPD),
+        r: ri(0.7, 1.8),
+        gold: Math.random() < 0.18
+      });
+    }
   }
 
   function tick() {
     ctx.clearRect(0, 0, W, H);
-    pts.forEach(p => {
+    pts.forEach(function(p) {
       p.x += p.vx; p.y += p.vy;
       if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
       if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
     });
-    for (let i = 0; i < pts.length; i++) {
-      for (let j = i + 1; j < pts.length; j++) {
-        const dx = pts[i].x - pts[j].x;
-        const dy = pts[i].y - pts[j].y;
-        const d  = Math.sqrt(dx * dx + dy * dy);
+    for (var i = 0; i < pts.length; i++) {
+      for (var j = i + 1; j < pts.length; j++) {
+        var dx = pts[i].x - pts[j].x;
+        var dy = pts[i].y - pts[j].y;
+        var d  = Math.sqrt(dx * dx + dy * dy);
         if (d < MAX_D) {
-          const a = 0.09 * (1 - d / MAX_D);
+          var a = 0.09 * (1 - d / MAX_D);
           ctx.strokeStyle = (pts[i].gold || pts[j].gold)
-            ? `rgba(240,165,0,${a * 0.55})`
-            : `rgba(255,255,255,${a})`;
+            ? 'rgba(240,165,0,' + (a * 0.55) + ')'
+            : 'rgba(255,255,255,' + a + ')';
           ctx.lineWidth = 0.5;
           ctx.beginPath();
           ctx.moveTo(pts[i].x, pts[i].y);
@@ -1578,7 +1334,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     }
-    pts.forEach(p => {
+    pts.forEach(function(p) {
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       ctx.fillStyle = p.gold ? 'rgba(240,165,0,0.5)' : 'rgba(255,255,255,0.22)';
@@ -1587,10 +1343,233 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(tick);
   }
 
-  window.addEventListener('resize', () => { resize(); init(); });
+  window.addEventListener('resize', function() { resize(); init(); });
   init();
   tick();
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+  FIREBASE MODULE SCRIPT
+  Kept as type="module" so we can use ES imports.
+
+  KEY FIXES vs original:
+  1.  signInWithRedirect + getRedirectResult — unchanged, correct for NG.
+  2.  handleRedirectResult() is now called inside DOMContentLoaded so
+      showSuccess() is guaranteed to exist on window before it runs.
+  3.  window.__nltcFirebaseReady flag lets the UI script gate button
+      clicks until Firebase is initialised.
+  4.  onAuthStateChanged no longer auto-redirects on every load —
+      it only acts if the success overlay is NOT already showing,
+      preventing double-navigation after a redirect return.
+  5.  All window.* functions are assigned before DOMContentLoaded fires
+      so email/password forms work even if the user is very fast.
+════════════════════════════════════════════════════════════════════ -->
+<script type="module">
+  import { initializeApp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signInWithRedirect,
+    getRedirectResult,
+    GoogleAuthProvider,
+    sendPasswordResetEmail,
+    onAuthStateChanged,
+    updateProfile
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import {
+    getFirestore,
+    doc, setDoc, getDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  /* ── Firebase config ── */
+  const firebaseConfig = {
+    apiKey:            "AIzaSyA9vzT1TBpTdRJUfyYm51goS-5HfL3FcbU",
+    authDomain:        "nltc-online.firebaseapp.com",
+    projectId:         "nltc-online",
+    storageBucket:     "nltc-online.firebasestorage.app",
+    messagingSenderId: "267993935158",
+    appId:             "1:267993935158:web:723c13b2564b817fbc9797"
+  };
+
+  const app       = initializeApp(firebaseConfig);
+  const auth      = getAuth(app);
+  const db        = getFirestore(app);
+  const gProvider = new GoogleAuthProvider();
+  gProvider.setCustomParameters({ prompt: 'select_account' });
+
+  /* ── Signal to UI that Firebase is ready ── */
+  window.__nltcFirebaseReady = true;
+
+  /* ── Save / merge user document ── */
+  async function saveUser(user, extras = {}) {
+    const ref  = doc(db, 'users', user.uid);
+    const snap = await getDoc(ref);
+    const payload = {
+      uid:         user.uid,
+      email:       user.email,
+      displayName: user.displayName || extras.displayName || '',
+      photoURL:    user.photoURL    || '',
+      lastLogin:   serverTimestamp(),
+      updatedAt:   serverTimestamp(),
+      ...extras
+    };
+    if (!snap.exists()) {
+      payload.createdAt = serverTimestamp();
+      payload.xp        = 0;
+      payload.streak    = 0;
+      payload.badges    = [];
+    }
+    await setDoc(ref, payload, { merge: true });
+    const fresh = await getDoc(ref);
+    return fresh.data();
+  }
+
+  /* ── Expose helpers to the UI script ── */
+
+  window.__nltcLogin = async function(email, password) {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const data = await saveUser(cred.user);
+    return { user: cred.user, data };
+  };
+
+  window.__nltcSignup = async function(email, password, extras) {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(cred.user, { displayName: extras.displayName });
+    const data = await saveUser(cred.user, extras);
+    return { user: cred.user, data };
+  };
+
+  window.__nltcGoogleRedirect = async function() {
+    /* This navigates the browser away — nothing after it runs */
+    await signInWithRedirect(auth, gProvider);
+  };
+
+  window.__nltcReset = async function(email) {
+    await sendPasswordResetEmail(auth, email);
+  };
+
+  /* ══════════════════════════════════════════════════════════════
+     HANDLE REDIRECT RETURN
+     Must run inside DOMContentLoaded so showSuccess() is defined.
+     getRedirectResult() resolves instantly (null) on normal loads —
+     there is no visible flicker.
+  ══════════════════════════════════════════════════════════════ */
+  async function handleRedirectResult() {
+    const loader = document.getElementById('redirectLoading');
+
+    try {
+      /* Show the loading overlay optimistically while we await.
+         On a normal (non-redirect) load it resolves to null almost
+         immediately, so the overlay flash is imperceptible. */
+      if (loader) loader.classList.add('show');
+
+      const result = await getRedirectResult(auth);
+
+      if (!result) {
+        /* Normal page load — no pending redirect */
+        if (loader) loader.classList.remove('show');
+        return;
+      }
+
+      /* ── We have a returning Google user ── */
+      const isNew = result._tokenResponse?.isNewUser ?? false;
+
+      const extras = isNew ? {
+        role:       'student',
+        plan:       'free',
+        firstName:  result.user.displayName?.split(' ')[0]              || '',
+        lastName:   result.user.displayName?.split(' ').slice(1).join(' ') || '',
+        targetExam: '',
+        state:      '',
+      } : {};
+
+      const data       = await saveUser(result.user, extras);
+      const storedRole = data?.role || 'student';
+
+      const intendedRole = sessionStorage.getItem('nltc_intended_role') || 'student';
+      sessionStorage.removeItem('nltc_intended_role');
+
+      if (intendedRole === 'admin' && storedRole !== 'admin') {
+        if (loader) loader.classList.remove('show');
+        /* Queue a toast — DOM is ready at this point */
+        toast('This account does not have admin privileges.', 'error');
+        return;
+      }
+
+      const target = storedRole === 'admin' ? 'admin.html' : 'dashboard.html';
+      const fname  = result.user.displayName?.split(' ')[0] || 'User';
+
+      showSuccess(
+        isNew ? 'Account Created! 🚀' : 'Welcome Back! 👋',
+        isNew
+          ? 'Hi ' + fname + '! Your NLTC account is ready. Let\'s go!'
+          : 'Good to see you again, ' + fname + '! Taking you to your dashboard.',
+        storedRole === 'admin' ? 'Go to Admin Panel' : 'Go to Dashboard',
+        target
+      );
+
+    } catch (err) {
+      if (loader) loader.classList.remove('show');
+
+      /* User cancelled — ignore silently */
+      if (err.code === 'auth/redirect-cancelled-by-user') return;
+
+      console.error('[NLTC Redirect Result Error]', err.code, err.message, err);
+
+      const msgMap = {
+        'auth/network-request-failed':
+          'Network error during sign-in. Check your connection and try again.',
+        'auth/account-exists-with-different-credential':
+          'An account with this email already exists using a different sign-in method.',
+        'auth/user-disabled':
+          'This account has been disabled. Contact support.',
+        'auth/operation-not-allowed':
+          'Google Sign-In is not enabled. Contact the admin.',
+        'auth/unauthorized-domain':
+          'Domain not authorised for sign-in. Contact the admin.',
+        'auth/internal-error':
+          'An internal error occurred. Please try again.',
+      };
+
+      /* DOM is ready here — call toast() directly */
+      toast(
+        msgMap[err.code] || ('Google sign-in failed (' + (err.code || 'unknown') + '). Please try again.'),
+        'error'
+      );
+    }
+  }
+
+  /* ── Auth state listener ──────────────────────────────────
+     Only auto-redirect if the user is already logged in AND
+     the success overlay is NOT showing (to avoid fighting with
+     a redirect that just completed).
+  ─────────────────────────────────────────────────────────── */
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+    const successOv = document.getElementById('successOv');
+    if (successOv && successOv.classList.contains('show')) return;
+
+    /* Optional: uncomment to auto-redirect already-logged-in users
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) {
+        const role = snap.data()?.role || 'student';
+        window.location.href = role === 'admin' ? 'admin.html' : 'dashboard.html';
+      }
+    } catch(e) { console.warn('[NLTC onAuthStateChanged]', e); }
+    */
+  });
+
+  /* ── Run redirect handler once DOM is ready ── */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', handleRedirectResult);
+  } else {
+    handleRedirectResult();
+  }
+</script>
+
 </body>
 </html>
