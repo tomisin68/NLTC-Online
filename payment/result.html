@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment Result — NLTC Online</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0F1117;
+      color: #E2E8F0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: #1A1D27;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px;
+      padding: 40px 32px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+    }
+    .icon-wrap {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 32px;
+    }
+    .icon-success { background: rgba(34,197,94,.15); color: #22c55e; }
+    .icon-failed  { background: rgba(239,68,68,.15);  color: #ef4444; }
+    .icon-loading { background: rgba(99,102,241,.15); color: #818cf8; }
+    .title { font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
+    .sub   { font-size: .9rem; color: #94a3b8; line-height: 1.5; }
+    .plan-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 16px; border-radius: 100px;
+      font-size: .82rem; font-weight: 600;
+      margin: 16px 0 24px;
+    }
+    .plan-pro   { background: rgba(251,191,36,.12); color: #fbbf24; border: 1px solid rgba(251,191,36,.3); }
+    .plan-elite { background: rgba(122,90,248,.12); color: #a78bfa; border: 1px solid rgba(122,90,248,.3); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 28px; border-radius: 8px; border: none;
+      font-size: .9rem; font-weight: 600; cursor: pointer;
+      text-decoration: none; transition: opacity .2s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-primary { background: #6366f1; color: #fff; }
+    .btn-outline { background: transparent; color: #94a3b8; border: 1px solid rgba(255,255,255,.12); }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(255,255,255,.15);
+      border-top-color: #6366f1;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .status-note { font-size: .78rem; color: #64748b; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+<div class="card" id="resultCard">
+  <!-- loading state -->
+  <div id="stateLoading">
+    <div class="icon-wrap icon-loading">
+      <div class="spinner" style="width:32px;height:32px;margin:0;border-color:rgba(255,255,255,.15);border-top-color:#818cf8;"></div>
+    </div>
+    <div class="title">Confirming payment…</div>
+    <div class="sub">Please wait while we verify your transaction.</div>
+  </div>
+
+  <!-- success state -->
+  <div id="stateSuccess" style="display:none;">
+    <div class="icon-wrap icon-success"><i class="fas fa-check"></i></div>
+    <div class="title">Payment Successful!</div>
+    <div class="sub">Your plan has been upgraded.</div>
+    <div id="planBadge" class="plan-badge" style="display:none;"></div>
+    <br>
+    <a href="../dashboard.html" class="btn btn-primary"><i class="fas fa-rocket"></i> Go to Dashboard</a>
+    <p class="status-note">Your new features are now active.</p>
+  </div>
+
+  <!-- failed state -->
+  <div id="stateFailed" style="display:none;">
+    <div class="icon-wrap icon-failed"><i class="fas fa-times"></i></div>
+    <div class="title" id="failedTitle">Payment Not Completed</div>
+    <div class="sub" id="failedSub">Your payment was not processed. No charge was made.</div>
+    <br>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="../dashboard.html" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+      <button class="btn btn-primary" onclick="retryPayment()"><i class="fas fa-redo"></i> Try Again</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp }  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyA9vzT1TBpTdRJUfyYm51goS-5HfL3FcbU',
+  authDomain: 'nltc-online.firebaseapp.com',
+  projectId: 'nltc-online',
+  storageBucket: 'nltc-online.firebasestorage.app',
+  messagingSenderId: '267993935158',
+  appId: '1:267993935158:web:723c13b2564b817fbc9797',
+};
+const BACKEND_URL = 'https://nltc-backend.onrender.com';
+
+const app  = initializeApp(FIREBASE_CONFIG);
+const auth = getAuth(app);
+
+// Read Paystack redirect params
+const params    = new URLSearchParams(window.location.search);
+const status    = params.get('status');    // "success" | "failed" | "error"
+const plan      = params.get('plan');      // "pro" | "elite"
+const reference = params.get('reference');
+const message   = params.get('message');
+
+function showSuccess() {
+  document.getElementById('stateLoading').style.display = 'none';
+  document.getElementById('stateSuccess').style.display = '';
+  if (plan === 'pro' || plan === 'elite') {
+    const badge = document.getElementById('planBadge');
+    badge.style.display = '';
+    if (plan === 'elite') {
+      badge.className = 'plan-badge plan-elite';
+      badge.innerHTML = '<i class="fas fa-gem"></i> Elite Plan Active';
+    } else {
+      badge.className = 'plan-badge plan-pro';
+      badge.innerHTML = '<i class="fas fa-crown"></i> Pro Plan Active';
+    }
+  }
+}
+
+function showFailed(title, sub) {
+  document.getElementById('stateLoading').style.display = 'none';
+  document.getElementById('stateFailed').style.display = '';
+  if (title) document.getElementById('failedTitle').textContent = title;
+  if (sub)   document.getElementById('failedSub').textContent   = sub;
+}
+
+// Fallback verify — calls the backend verify endpoint in case the webhook
+// didn't fire (e.g. user closed browser before webhook arrived).
+async function verifyWithBackend(user) {
+  if (!reference) return false;
+  try {
+    const token = await user.getIdToken();
+    const res = await fetch(`${BACKEND_URL}/api/paystack/verify?reference=${encodeURIComponent(reference)}`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (res.ok) return true;
+    const err = await res.json().catch(() => ({}));
+    console.warn('Verify fallback error:', err.error);
+    return false;
+  } catch (e) {
+    console.warn('Verify fallback network error:', e);
+    return false;
+  }
+}
+
+window.retryPayment = function() {
+  window.location.href = '../dashboard.html';
+};
+
+onAuthStateChanged(auth, async (user) => {
+  if (status === 'success') {
+    // Run verify fallback (silent — backend may already know via webhook)
+    if (user && reference) await verifyWithBackend(user);
+    showSuccess();
+  } else if (status === 'failed') {
+    showFailed('Payment Not Completed', 'Your payment was not processed. No charge was made.');
+  } else {
+    // status === 'error' or unknown
+    showFailed('Something Went Wrong', message || 'An unexpected error occurred. Please try again or contact support.');
+  }
+});
+</script>
+
+</body>
+</html>

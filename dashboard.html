@@ -988,6 +988,19 @@ function handleXPResult(result) {
   }
 }
 
+// Awards daily_streak XP once per calendar day per user.
+// Uses localStorage keyed on uid+date so it doesn't fire again on page reload.
+async function tryAwardDailyStreak() {
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const key   = `nltc_streak_${currentUser.uid}`;
+  if (localStorage.getItem(key) === today) return;
+  try {
+    const r = await backendFetch('POST', '/gamification/xp', { action: 'daily_streak' });
+    localStorage.setItem(key, today);
+    handleXPResult(r);
+  } catch(e) {} // silently skip if backend is unavailable
+}
+
 function showLevelUpToast(level) {
   const names = ['Starter','Scholar','Explorer','Achiever','Champion','Elite','Legend'];
   const t = document.createElement('div');
@@ -1067,6 +1080,7 @@ onAuthStateChanged(auth, async (user) => {
     userData = snap.exists() ? snap.data() : {};
   } catch(e) { userData = {}; }
   renderUserUI();
+  tryAwardDailyStreak(); // fire-and-forget — only runs once per calendar day
   await Promise.all([loadVideos(), loadLiveSessions(), loadSchedule(), loadAnnouncements()]);
   loadCBTHistory();
   loadLeaderboard();
@@ -1485,6 +1499,12 @@ async function loadLeaderboard() {
       const myRank = lb.findIndex(u => u.id === currentUser.uid) + 1;
       if (myRank > 0) updateMyRank(myRank);
     }
+    // Sync authoritative XP/streak/level from backend into the sidebar bar
+    if (rankData?.xp != null) {
+      userData.xp     = rankData.xp;
+      userData.streak = rankData.streak ?? userData.streak;
+      renderUserUI();
+    }
     if (rankData?.rank) updateMyRank(rankData.rank);
   } catch(e) { console.error('Leaderboard:', e); }
 }
@@ -1506,11 +1526,13 @@ function renderLeaderboard(data, containerId) {
   if (!data.length) { el.innerHTML = '<div class="empty-state" style="padding:16px;"><div class="empty-title">No data yet</div></div>'; return; }
   const medals = ['🥇','🥈','🥉'];
   el.innerHTML = data.map((s, i) => {
+    const rank  = s.rank || (i + 1); // prefer server-supplied rank field
     const name  = `${s.firstName||''} ${s.lastName||''}`.trim() || s.displayName || 'Student';
     const init  = `${(s.firstName||name)[0]||'?'}`.toUpperCase();
     const isMe  = (s.id||s.uid) === currentUser.uid;
+    const r0    = rank - 1; // 0-indexed for medals array
     return `<div class="lb-row${isMe?' lb-me':''}">
-      <div class="lb-rank${i<3?' r'+(i+1):''}">${i<3?medals[i]:i+1}</div>
+      <div class="lb-rank${r0<3?' r'+(r0+1):''}">${r0<3?medals[r0]:rank}</div>
       <div class="lb-av" style="background:${AV_COLORS[i%AV_COLORS.length]};">${init}</div>
       <div class="lb-name"><div class="lb-name-text">${name}${isMe?' (You)':''}</div><div class="lb-sub">${s.state||'Nigeria'} · ${s.targetExam||'—'}</div></div>
       <div class="lb-xp">${(s.xp||0).toLocaleString()} XP</div>
@@ -1636,8 +1658,10 @@ window.initiatePayment   = async function() {
   errEl.style.display = 'none';
   btn.disabled = true; btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;"></div> Processing…';
   try {
-    const callbackUrl = `${window.location.origin}${window.location.pathname.replace(/[^/]*$/,'')}payment-success.html?plan=${selectedPlan}`;
-    const data = await backendFetch('POST', '/paystack/initialize', { plan: selectedPlan, callbackUrl });
+    const data = await backendFetch('POST', '/paystack/initialize', {
+      plan: selectedPlan,
+      callbackUrl: 'https://nltc-backend.onrender.com/payment/callback',
+    });
     window.location.href = data.authorizationUrl;
   } catch(e) {
     errEl.textContent = e.message || 'Payment failed. Please try again.';
