@@ -641,7 +641,7 @@ const ALOC_BASE  = 'https://questions.aloc.com.ng/api/v2';
 const DASHBOARD_URL = 'index.html';
 
 const ALOC_SLUG = {
-  english:     'use-of-english',
+  english:     'english',
   mathematics: 'mathematics',
   physics:     'physics',
   chemistry:   'chemistry',
@@ -650,7 +650,7 @@ const ALOC_SLUG = {
   government:  'government',
   geography:   'geography',
   accounting:  'accounting',
-  literature:  'literature-in-english',
+  literature:  'englishlit',
   history:     'history',
   commerce:    'commerce',
   yoruba:      'yoruba',
@@ -856,7 +856,12 @@ function updateStartBtn() {
    FETCH QUESTIONS
 ════════════════════════════════════════ */
 async function fetchSubjectQuestions(subjectKey, count, examType) {
-  const headers   = { 'AccessToken': ALOC_TOKEN, 'Accept': 'application/json' };
+  // Headers exactly as per official ALOC API docs
+  const headers = {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+    'AccessToken': ALOC_TOKEN
+  };
   const slug      = ALOC_SLUG[subjectKey] || subjectKey;
   const type      = examType || 'utme';
   const isEnglish = subjectKey === 'english';
@@ -896,42 +901,49 @@ async function fetchSubjectQuestions(subjectKey, count, examType) {
     });
   };
 
+  // Simple fetch — no AbortController (was causing AbortError on sequential requests)
   async function tryFetch(url) {
     try {
       const r = await fetch(url, { headers });
-      if (!r.ok) return [];
-      return parseResponse(await r.json().catch(() => ({})));
-    } catch(e) { return []; }
+      if (!r.ok) {
+        console.warn(`[ALOC] HTTP ${r.status} for ${url}`);
+        return [];
+      }
+      const data = await r.json().catch(e => { console.warn('[ALOC] JSON parse error:', e); return {}; });
+      const parsed = parseResponse(data);
+      console.log(`[ALOC] ${url} → ${parsed.length} questions`);
+      return parsed;
+    } catch(e) {
+      console.warn(`[ALOC] Fetch error for ${url}:`, e.name, e.message);
+      return [];
+    }
   }
 
   const batchSize = 40;
 
+  // Official URL format: /api/v2/q?subject=chemistry&type=utme
+  // subject slugs from official docs: english, mathematics, physics, chemistry, biology, etc.
   if (isEnglish) {
-    const englishUrls = [
-      `${ALOC_BASE}/q/${batchSize}?subject=english&type=utme`,
-      `${ALOC_BASE}/q/${batchSize}?subject=english`,
-      `${ALOC_BASE}/m?subject=use-of-english&type=utme`,
-      `${ALOC_BASE}/m?subject=use-of-english`,
-      `${ALOC_BASE}/q/${batchSize}?subject=use-of-english&type=utme`,
-      `${ALOC_BASE}/q/${batchSize}?subject=use-of-english`,
+    const fallbacks = [
+      `${ALOC_BASE}/q?subject=english&type=utme`,
+      `${ALOC_BASE}/q?subject=english`,
       `${ALOC_BASE}/m?subject=english&type=utme`,
       `${ALOC_BASE}/m?subject=english`,
     ];
-    for (const url of englishUrls) {
-      if (allQuestions.length >= count) break;
+    for (const url of fallbacks) {
       addQ(await tryFetch(url));
-      if (allQuestions.length < count) await new Promise(r => setTimeout(r, 300));
+      if (allQuestions.length >= count) break;
     }
   } else {
-    const batches = Math.ceil(count / batchSize);
-    for (let b = 0; b < Math.min(batches + 1, 4) && allQuestions.length < count; b++) {
-      addQ(await tryFetch(`${ALOC_BASE}/q/${batchSize}?subject=${encodeURIComponent(slug)}&type=${type}`));
-      if (allQuestions.length < count)
-        addQ(await tryFetch(`${ALOC_BASE}/m?subject=${encodeURIComponent(slug)}&type=${type}`));
-      if (allQuestions.length < count)
-        addQ(await tryFetch(`${ALOC_BASE}/q/${batchSize}?subject=${encodeURIComponent(slug)}`));
-      if (b < batches && allQuestions.length < count)
-        await new Promise(r => setTimeout(r, 350));
+    const fallbacks = [
+      `${ALOC_BASE}/q?subject=${encodeURIComponent(slug)}&type=${type}`,
+      `${ALOC_BASE}/q?subject=${encodeURIComponent(slug)}`,
+      `${ALOC_BASE}/m?subject=${encodeURIComponent(slug)}&type=${type}`,
+      `${ALOC_BASE}/m?subject=${encodeURIComponent(slug)}`,
+    ];
+    for (const url of fallbacks) {
+      addQ(await tryFetch(url));
+      if (allQuestions.length >= count) break;
     }
   }
 
@@ -974,13 +986,13 @@ async function startJambExam() {
 async function loadAllJambSubjects() {
   const queue = state.jambQueue;
 
-  // Build the loading screen with a bar for EVERY subject
   showScreen('loading-screen');
   document.getElementById('load-spinner').style.display    = 'block';
   document.getElementById('load-error-wrap').style.display = 'none';
-  document.getElementById('load-status-text').textContent  = 'Loading all subjects simultaneously…';
-  document.getElementById('load-detail').textContent       = 'This usually takes 10–30 seconds';
+  document.getElementById('load-status-text').textContent  = `Loading subjects (0 of ${queue.length})…`;
+  document.getElementById('load-detail').textContent       = 'Starting…';
 
+  // Build all 4 progress bars upfront
   const listEl = document.getElementById('load-subjects-list');
   listEl.innerHTML = queue.map((sl, i) => {
     const cfg = SUBJECTS_CONFIG[sl.key];
@@ -992,55 +1004,61 @@ async function loadAllJambSubjects() {
           <span class="load-subj-count" id="lc-${i}">0/${sl.count}</span>
         </div>
         <div class="load-subj-bar">
-          <div class="load-subj-fill" id="lf-${i}" style="background:${cfg.color};width:0%;transition:width .5s ease;"></div>
+          <div class="load-subj-fill" id="lf-${i}" style="background:${cfg.color};width:0%;transition:width .4s ease;"></div>
         </div>
       </div>
     </div>`;
   }).join('');
 
-  // Animate bars to show "starting"
-  queue.forEach((sl, i) => {
-    setTimeout(() => {
-      const fill = document.getElementById('lf-' + i);
-      if (fill) fill.style.width = '8%';
-    }, i * 100);
-  });
+  // Load one subject at a time — sequential avoids rate limiting
+  let failCount = 0;
+  for (let i = 0; i < queue.length; i++) {
+    const sl  = queue[i];
+    const cfg = SUBJECTS_CONFIG[sl.key];
+    const fill = document.getElementById('lf-' + i);
+    const cnt  = document.getElementById('lc-' + i);
 
-  // Fetch all subjects in parallel
-  const results = await Promise.allSettled(
-    queue.map((sl, i) => fetchOneJambSubject(sl, i))
-  );
+    document.getElementById('load-status-text').textContent = `Loading ${cfg.emoji} ${cfg.name}… (${i + 1} of ${queue.length})`;
+    document.getElementById('load-detail').textContent = `Fetching ${sl.count} questions…`;
 
-  // Check results
-  const errors = [];
-  results.forEach((result, i) => {
-    if (result.status === 'rejected') {
-      errors.push({ idx: i, key: queue[i].key, error: result.reason?.message || 'Unknown error' });
-      const fill = document.getElementById('lf-' + i);
-      const cnt  = document.getElementById('lc-' + i);
+    // Animate bar to show activity
+    if (fill) fill.style.width = '20%';
+
+    try {
+      const qs = await fetchSubjectQuestions(sl.key, sl.count, 'utme');
+
+      if (fill) fill.style.width = '100%';
+      if (cnt)  cnt.textContent  = `✓ ${qs.length}`;
+
+      state.subjects.push({
+        key: sl.key, name: cfg.name, emoji: cfg.emoji,
+        color: cfg.color, questions: qs, answered: {}
+      });
+
+    } catch(e) {
       if (fill) { fill.style.background = 'var(--error)'; fill.style.width = '100%'; }
       if (cnt)  cnt.textContent = 'Failed';
+      failCount++;
+      console.error(`[ALOC] Subject ${sl.key} failed:`, e);
     }
-  });
+  }
 
-  if (errors.length === queue.length) {
-    // All failed
+  if (state.subjects.length === 0) {
     document.getElementById('load-spinner').style.display    = 'none';
     document.getElementById('load-error-wrap').style.display = 'block';
-    document.getElementById('load-error-msg').textContent    =
-      'Failed to load questions. Please check your internet connection and try again.';
+    document.getElementById('load-error-msg').innerHTML =
+      `Failed to load any questions.<br><br>` +
+      `<span style="font-size:.72rem;opacity:.7;">Check your internet connection. If the problem persists, the ALOC API may be temporarily down.</span>`;
     return;
   }
 
-  if (errors.length > 0) {
-    // Some failed — warn but continue with what we have
-    const failedNames = errors.map(e => SUBJECTS_CONFIG[e.key]?.name || e.key).join(', ');
-    showToast(`⚠️ ${failedNames} failed to load — continuing with available subjects`, 'error');
+  if (failCount > 0) {
+    showToast(`⚠️ ${failCount} subject(s) failed — continuing with ${state.subjects.length} loaded`, 'error');
   }
 
-  document.getElementById('load-detail').textContent = '✓ All questions loaded! Starting exam…';
+  document.getElementById('load-status-text').textContent = '✓ All done! Starting exam…';
 
-  // Sort subjects to match jambQueue order
+  // Sort to match jambQueue order
   state.subjects.sort((a, b) => {
     const ai = queue.findIndex(q => q.key === a.key);
     const bi = queue.findIndex(q => q.key === b.key);
@@ -1049,47 +1067,12 @@ async function loadAllJambSubjects() {
 
   state.currentSubIdx = 0;
   state.currentQIdx   = 0;
+  state.startTime     = Date.now();
 
-  await new Promise(r => setTimeout(r, 500));
-
-  // Start the exam
   startTimer();
   initExamScreen();
   showScreen('exam-screen');
-  showToast(`All ${state.subjects.length} subjects loaded — good luck! 🎓`, 'success');
-}
-
-async function fetchOneJambSubject(sl, index) {
-  const cfg  = SUBJECTS_CONFIG[sl.key];
-  const fill = document.getElementById('lf-' + index);
-  const cnt  = document.getElementById('lc-' + index);
-
-  // Animate to "loading" state
-  if (fill) fill.style.width = '15%';
-
-  const qs = await fetchSubjectQuestions(sl.key, sl.count, 'utme');
-
-  // Update progress bar to 100%
-  if (fill) fill.style.width = '100%';
-  if (cnt)  cnt.textContent  = `${qs.length}/${sl.count}`;
-
-  // Add to subjects array
-  state.subjects.push({
-    key:       sl.key,
-    name:      cfg.name,
-    emoji:     cfg.emoji,
-    color:     cfg.color,
-    questions: qs,
-    answered:  {}
-  });
-
-  // Update status text
-  const loaded = state.subjects.length;
-  const total  = state.jambQueue.length;
-  document.getElementById('load-status-text').textContent =
-    loaded < total
-      ? `${loaded} of ${total} subjects ready…`
-      : 'All subjects loaded!';
+  showToast(`${state.subjects.length} subjects loaded — good luck! 🎓`, 'success');
 }
 
 /* ════════════════════════════════════════
@@ -1194,7 +1177,6 @@ async function startSingleSubjectExam() {
     state.submitted     = false;
     state.startTime     = Date.now();
 
-    await new Promise(r => setTimeout(r, 300));
     initExamScreen();
     showScreen('exam-screen');
     startTimer();

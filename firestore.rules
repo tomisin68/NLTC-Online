@@ -62,9 +62,13 @@ service cloud.firestore {
     }
 
     // ── Protected fields that only the Admin SDK backend may write ──
+    // xp, streak      — awarded by backend gamification endpoints
+    // plan, role      — set by Paystack webhook / admin SDK only
+    // paystackRef etc — payment metadata
     function touchesProtectedFields() {
       let protected = [
-        'xp', 'streak', 'paystackRef', 'planActivatedAt',
+        'xp', 'streak', 'plan', 'role',
+        'paystackRef', 'planActivatedAt',
         'planExpiresAt', 'lastActivityAt', 'subscriptionId'
       ];
       return request.resource.data.diff(resource.data)
