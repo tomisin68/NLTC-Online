@@ -1,0 +1,360 @@
+// firestore.rules
+// Deploy with: firebase deploy --only firestore:rules
+//
+// ═══════════════════════════════════════════════════════════════════════
+//  ARCHITECTURE NOTES
+// ═══════════════════════════════════════════════════════════════════════
+//
+//  This app stores user roles in BOTH places:
+//    1. Firestore /users/{uid}.role  — set at signup via auth.html saveUser()
+//    2. Firebase Auth custom claims  — optional, set via Admin SDK
+//
+//  Rules support BOTH patterns so the app works before custom claims are set.
+//  The isAdmin() and isTeacher() helpers check custom claims first (fast),
+//  then fall back to a Firestore get() on the user's own document.
+//
+//  Fields sent by admin.html to liveSessions:
+//    { title, subject, examType, description, channel, hostId,
+//      hostName, status, viewerCount, startedAt, createdAt }
+//
+//  Fields sent by auth.html saveUser() on first create:
+//    { uid, email, displayName, photoURL, lastLogin, updatedAt,
+//      createdAt, xp, streak, badges, role, plan,
+//      firstName, lastName, targetExam, state, phone }
+//
+// ═══════════════════════════════════════════════════════════════════════
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ───────────────────────────────────────────────────────────────
+    //  CORE HELPERS
+    // ───────────────────────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ── Admin check: custom claim first, then Firestore role field ──
+    // The get() only fires if the custom claim is absent/false.
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.get('admin', false) == true
+        ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role','') == 'admin'
+      );
+    }
+
+    // Teacher check: custom claim OR Firestore role = 'teacher' OR 'admin'
+    function isTeacher() {
+      return isSignedIn() && (
+        request.auth.token.get('teacher', false) == true
+        || request.auth.token.get('admin',   false) == true
+        ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role','')
+          in ['teacher', 'admin']
+      );
+    }
+
+    // ── Protected fields that only the Admin SDK backend may write ──
+    function touchesProtectedFields() {
+      let protected = [
+        'xp', 'streak', 'paystackRef', 'planActivatedAt',
+        'planExpiresAt', 'lastActivityAt', 'subscriptionId'
+      ];
+      return request.resource.data.diff(resource.data)
+               .affectedKeys()
+               .hasAny(protected);
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    //  USERS  /users/{uid}
+    // ───────────────────────────────────────────────────────────────
+
+    match /users/{uid} {
+
+      // ── READ ──
+      // Any signed-in user can read any user document.
+      // This is required for the leaderboard — the dashboard queries
+      // all users ordered by XP when the backend leaderboard endpoint
+      // is unavailable. Sensitive write fields are protected separately.
+      allow read: if isSignedIn();
+
+      // ── CREATE ──
+      // auth.html saveUser() calls setDoc(..., { merge:true }) on signup.
+      // When no document exists yet this is a CREATE. Allow it ONLY for
+      // the user creating their own document.
+      allow create: if isOwner(uid) && validNewUser();
+
+      // ── UPDATE ──
+      // Students: only safe profile fields, no protected fields.
+      // Admins:   anything (plan upgrades, manual corrections, etc.)
+      //           — sensitive changes should still go through backend.
+      allow update: if (isOwner(uid) && !touchesProtectedFields() && validProfileUpdate())
+                    || isAdmin();
+
+      // ── DELETE ──
+      allow delete: if isAdmin();
+    }
+
+    // Per-user progress subcollection
+    match /users/{uid}/progress/{progressId} {
+      allow read:           if isOwner(uid) || isAdmin();
+      allow create, update: if isOwner(uid) && validProgressWrite();
+      allow delete:         if isAdmin();
+    }
+
+    // CBT results — immutable once written; admin can correct/delete
+    match /users/{uid}/results/{resultId} {
+      allow read:           if isOwner(uid) || isAdmin();
+      allow create:         if isOwner(uid) && validResultData();
+      allow update, delete: if isAdmin();
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    //  XP LOG  — Admin SDK only
+    // ───────────────────────────────────────────────────────────────
+
+    match /xpLog/{docId} {
+      allow read:  if isSignedIn() &&
+                      (resource.data.get('uid','') == request.auth.uid || isAdmin());
+      allow write: if false;
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    //  CBT SESSIONS  — Admin SDK only
+    // ───────────────────────────────────────────────────────────────
+
+    match /cbtSessions/{sessionId} {
+      allow read:  if isSignedIn() &&
+                      (resource.data.get('userId','') == request.auth.uid || isAdmin());
+      allow write: if false;
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    //  QUESTIONS  /questions/{questionId}
+    // ───────────────────────────────────────────────────────────────
+
+    match /questions/{questionId} {
+      allow read:           if isSignedIn();
+      allow create, update: if isTeacher() && validQuestionWrite();
+      allow delete:         if isAdmin();
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    //  VIDEOS  /videos/{videoId}
+    // ───────────────────────────────────────────────────────────────
+
+    match /videos/{videoId} {
+      allow read:           if isSignedIn();
+      allow create, update: if isTeacher() && validVideoWrite();
+      allow delete:         if isAdmin();
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    //  COURSES + LESSONS
+    // ───────────────────────────────────────────────────────────────
+
+    match /courses/{courseId} {
+      allow read:           if isSignedIn();
+      allow create, update: if isTeacher();
+      allow delete:         if isAdmin();
+    }
+
+    match /courses/{courseId}/lessons/{lessonId} {
+      allow read:           if isSignedIn();
+      allow create, update: if isTeacher();
+      allow delete:         if isAdmin();
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    //  LIVE SESSIONS  /liveSessions/{sessionId}
+    //
+    //  admin.html sends fields: title, subject, examType, description,
+    //    channel, hostId, hostName, status, viewerCount, startedAt, createdAt
+    // ───────────────────────────────────────────────────────────────
+
+    match /liveSessions/{sessionId} {
+      allow read:   if isSignedIn();
+
+      // Teachers / admins may create sessions
+      allow create: if isTeacher() && validLiveSessionCreate();
+
+      // Session owner OR admin may update metadata.
+      // Signed-in students may ONLY bump viewerCount ±1.
+      allow update: if (isTeacher() && resource.data.get('hostId','') == request.auth.uid)
+                    || isAdmin()
+                    || (isSignedIn() && onlyViewerCountChange());
+
+      allow delete: if isAdmin();
+    }
+
+    // Live chat subcollection
+    match /liveSessions/{sessionId}/messages/{messageId} {
+      allow read:           if isSignedIn();
+      allow create:         if isSignedIn() && validChatMessage();
+      allow update, delete: if isAdmin();
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    //  TEACHERS  /teachers/{teacherId}
+    // ───────────────────────────────────────────────────────────────
+
+    match /teachers/{teacherId} {
+      allow read:  if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    //  BROADCASTS  /broadcasts/{docId}
+    // ───────────────────────────────────────────────────────────────
+
+    match /broadcasts/{docId} {
+      allow read:  if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Legacy alias
+    match /announcements/{docId} {
+      allow read:  if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    //  SCHEDULE  /schedule/{docId}
+    // ───────────────────────────────────────────────────────────────
+
+    match /schedule/{docId} {
+      allow read:  if isSignedIn();
+      allow write: if isTeacher();
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    //  LEADERBOARD  — Cloud Function writes only
+    // ───────────────────────────────────────────────────────────────
+
+    match /leaderboard/{entryId} {
+      allow read:  if isSignedIn();
+      allow write: if false;
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    //  SUBSCRIPTIONS  — Paystack webhook via Cloud Function
+    // ───────────────────────────────────────────────────────────────
+
+    match /subscriptions/{subId} {
+      allow read:  if isOwner(subId) || isAdmin();
+      allow write: if false;
+    }
+
+    // ───────────────────────────────────────────────────────────────
+    //  DENY ALL CATCH-ALL  (must be last)
+    // ───────────────────────────────────────────────────────────────
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+
+    // ═══════════════════════════════════════════════════════════════
+    //  VALIDATION FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════
+
+    // ── New user document (CREATE path from auth.html saveUser()) ──
+    function validNewUser() {
+      let d = request.resource.data;
+      return d.get('uid', '') == request.auth.uid
+          && d.get('email', '') == request.auth.token.email;
+    }
+
+    // ── Profile update by the owner (non-protected fields only) ──
+    function validProfileUpdate() {
+      let allowed = [
+        'displayName', 'photoURL', 'phone', 'state',
+        'targetExam', 'bio', 'lastLogin', 'updatedAt',
+        'fcmToken', 'firstName', 'lastName', 'notifPrefs',
+        'email', 'uid'
+      ];
+      return request.resource.data.diff(resource.data)
+               .affectedKeys()
+               .hasOnly(allowed);
+    }
+
+    // ── Student progress node ──
+    function validProgressWrite() {
+      let d = request.resource.data;
+      return d.keys().hasAll(['lessonId', 'completedAt', 'watchedSeconds'])
+          && d.lessonId       is string
+          && d.lessonId.size() > 0
+          && d.watchedSeconds is int
+          && d.watchedSeconds >= 0
+          && d.completedAt    is timestamp;
+    }
+
+    // ── CBT result written by student ──
+    function validResultData() {
+      let d = request.resource.data;
+      return d.keys().hasAll(['exam', 'score', 'total', 'submittedAt'])
+          && d.exam        is string
+          && d.exam.size() > 0
+          && d.score       is int
+          && d.total       is int
+          && d.score       >= 0
+          && d.score       <= d.total
+          && d.submittedAt is timestamp;
+    }
+
+    // ── Question document structure ──
+    function validQuestionWrite() {
+      let d = request.resource.data;
+      return d.get('question', d.get('text', '')) is string
+          && d.get('question', d.get('text', '')).size() > 0
+          && d.get('subject', '') is string
+          && d.get('subject', '').size() > 0;
+    }
+
+    // ── Video document structure ──
+    function validVideoWrite() {
+      let d = request.resource.data;
+      return d.get('title', '') is string
+          && d.get('title', '').size() > 0
+          && d.get('subject', '') is string
+          && (d.get('videoUrl', d.get('cloudinaryUrl', '')) is string);
+    }
+
+    // ── Live session CREATE ──
+    function validLiveSessionCreate() {
+      let d = request.resource.data;
+      return d.get('title', '') is string
+          && d.get('title', '').size() > 0
+          && d.get('channel', '') is string
+          && d.get('channel', '').size() > 0
+          && d.get('hostId', '') == request.auth.uid;
+    }
+
+    // ── Students may only bump viewerCount ±1 ──
+    function onlyViewerCountChange() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      let cur  = resource.data.get('viewerCount', 0);
+      let next = request.resource.data.get('viewerCount', 0);
+      let delta = next - cur;
+      return changed.hasOnly(['viewerCount'])
+          && (delta == 1 || delta == -1);
+    }
+
+    // ── Chat message validation ──
+    function validChatMessage() {
+      let d = request.resource.data;
+      return d.get('senderId', '') == request.auth.uid
+          && d.get('text', '') is string
+          && d.get('text', '').size() > 0
+          && d.get('text', '').size() <= 500
+          && d.get('senderName', '') is string;
+    }
+  }
+}

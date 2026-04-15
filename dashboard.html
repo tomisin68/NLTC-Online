@@ -959,7 +959,9 @@ function schedDay(ts){
 async function backendFetch(method,path,body=null){
   if(!currentUser)throw new Error('Not signed in');
   const token=await currentUser.getIdToken();
-  const opts={method,headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'}};
+  const headers={'Authorization':`Bearer ${token}`};
+  if(body)headers['Content-Type']='application/json';
+  const opts={method,headers};
   if(body)opts.body=JSON.stringify(body);
   const res=await fetch(`${BACKEND_URL}/api${path}`,opts);
   const data=await res.json().catch(()=>({}));

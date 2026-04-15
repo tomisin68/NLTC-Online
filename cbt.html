@@ -329,30 +329,7 @@ img{max-width:100%;height:auto;}
 @keyframes tIn{from{opacity:0;transform:translateX(10px);}to{opacity:1;transform:none;}}
 @keyframes tOut{to{opacity:0;transform:translateX(10px);}}
 
-/* ═══ JAMB SUBJECT PICKER SCREEN ═══ */
-#jamb-picker-screen{background:var(--navy);align-items:center;justify-content:flex-start;padding:20px;padding-top:env(safe-area-inset-top,20px);}
-.picker-card{background:white;border-radius:24px;width:100%;max-width:560px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.4);margin:0 auto;}
-.picker-top{background:linear-gradient(135deg,var(--navy-2),var(--navy-3));padding:24px 28px;text-align:center;}
-.picker-title{font-family:var(--font-head);font-size:1.2rem;font-weight:800;color:white;margin-bottom:5px;}
-.picker-sub{font-size:.8rem;color:rgba(255,255,255,.45);line-height:1.6;}
-.picker-timer{display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:rgba(255,255,255,.1);border-radius:100px;padding:5px 13px;font-family:var(--font-mono);font-size:.82rem;color:white;}
-.picker-body{padding:22px 24px;}
-.picker-progress{display:flex;gap:6px;margin-bottom:18px;}
-.picker-progress-dot{flex:1;height:5px;border-radius:100px;background:var(--surface-2);}
-.picker-progress-dot.done{background:var(--success);}
-.picker-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
-.picker-subj-card{border:2px solid var(--border);border-radius:var(--r-md);padding:18px 14px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:white;}
-.picker-subj-card:hover{border-color:var(--navy-2);transform:translateY(-2px);box-shadow:0 6px 20px rgba(11,29,58,.1);}
-.picker-subj-card.done-card{background:var(--success-bg);border-color:var(--success);cursor:default;transform:none;}
-.picker-subj-card.done-card:hover{transform:none;box-shadow:none;}
-.pscard-emoji{font-size:1.8rem;margin-bottom:8px;}
-.pscard-name{font-family:var(--font-head);font-size:.88rem;font-weight:700;color:var(--navy);margin-bottom:3px;}
-.pscard-meta{font-size:.7rem;color:var(--text-3);}
-.pscard-score{font-family:var(--font-head);font-size:.95rem;font-weight:800;margin-top:6px;}
-.pscard-done-badge{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;color:white;font-size:.65rem;}
-.picker-hint{font-size:.75rem;color:var(--text-3);text-align:center;line-height:1.6;}
-
-/* Subject Bridge / Done Banner */
+/* Subject Done Bridge (overlay) */
 .subj-done-banner{position:fixed;inset:0;background:rgba(11,29,58,.85);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
 .subj-done-banner.hidden{display:none;}
 .bridge-card{background:white;border-radius:22px;padding:28px;max-width:400px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.4);}
@@ -508,22 +485,6 @@ img{max-width:100%;height:auto;}
     <button class="retry-btn sec" onclick="goToSetup()">Back to Setup</button>
   </div>
   <div style="margin-top:auto;padding-bottom:20px;font-size:.7rem;color:rgba(255,255,255,.2);">This may take up to 30 seconds on first load</div>
-</div>
-
-<!-- ═══════════════════ JAMB SUBJECT PICKER ═══════════════════ -->
-<div class="screen" id="jamb-picker-screen">
-  <div class="picker-card">
-    <div class="picker-top">
-      <div class="picker-title" id="picker-title">Choose Your First Subject</div>
-      <div class="picker-sub">Select a subject to begin. You can do them in any order.</div>
-      <div class="picker-timer"><i class="fas fa-clock"></i> <span id="picker-timer-display">2:00:00</span></div>
-    </div>
-    <div class="picker-body">
-      <div class="picker-progress" id="picker-progress"></div>
-      <div class="picker-grid" id="picker-grid"></div>
-      <div class="picker-hint" id="picker-hint">Tap a subject card to load it and begin answering</div>
-    </div>
-  </div>
 </div>
 
 <!-- Subject Done Bridge (overlay) -->
@@ -992,7 +953,7 @@ async function startExam() {
 }
 
 /* ════════════════════════════════════════
-   JAMB PICKER FLOW
+   *** FIXED: JAMB EXAM — LOAD ALL SUBJECTS UPFRONT ***
 ════════════════════════════════════════ */
 async function startJambExam() {
   state.jambQueue = [
@@ -1005,123 +966,135 @@ async function startJambExam() {
   state.submitted     = false;
   state.startTime     = Date.now();
   state.timeLeft      = 7200;
-  startTimer();
-  showJambPicker();
+
+  // Load ALL subjects in parallel — show loading screen with 4 progress bars
+  await loadAllJambSubjects();
 }
 
-function showJambPicker() {
-  updatePickerTimer();
-  const queue    = state.jambQueue;
-  const doneKeys = state.subjects.map(s => s.key);
-  const allDone  = doneKeys.length === queue.length;
+async function loadAllJambSubjects() {
+  const queue = state.jambQueue;
 
-  document.getElementById('picker-title').textContent =
-    allDone ? 'All Subjects Complete — Ready to Submit!'
-    : doneKeys.length === 0 ? 'Choose Your First Subject'
-    : `${doneKeys.length} of ${queue.length} Done — Choose Next Subject`;
-
-  document.getElementById('picker-progress').innerHTML =
-    queue.map((s, i) =>
-      `<div class="picker-progress-dot ${i < doneKeys.length ? 'done' : ''}"></div>`
-    ).join('');
-
-  document.getElementById('picker-grid').innerHTML = queue.map(sl => {
-    const cfg  = SUBJECTS_CONFIG[sl.key];
-    const done = state.subjects.find(s => s.key === sl.key);
-    if (done) {
-      const correct    = done.questions.filter((q, qi) => done.answered[qi] === q._answer).length;
-      const total      = done.questions.length;
-      const pct        = Math.round(correct / total * 100);
-      const scoreColor = pct >= 50 ? 'var(--success)' : pct >= 30 ? 'var(--gold)' : 'var(--error)';
-      return `<div class="picker-subj-card done-card">
-        <div class="pscard-done-badge"><i class="fas fa-check"></i></div>
-        <div class="pscard-emoji">${cfg.emoji}</div>
-        <div class="pscard-name">${cfg.name}</div>
-        <div class="pscard-meta">${correct}/${total} correct</div>
-        <div class="pscard-score" style="color:${scoreColor};">${pct}%</div>
-      </div>`;
-    }
-    return `<div class="picker-subj-card" onclick="loadAndStartJambSubject('${sl.key}',${sl.count})">
-      <div class="pscard-emoji">${cfg.emoji}</div>
-      <div class="pscard-name">${cfg.name}</div>
-      <div class="pscard-meta">${sl.count} questions</div>
-      <div class="pscard-meta" style="margin-top:4px;font-weight:700;color:var(--navy);">Tap to start</div>
-    </div>`;
-  }).join('');
-
-  const hintEl = document.getElementById('picker-hint');
-  if (allDone) {
-    hintEl.innerHTML = `<button onclick="confirmSubmit()" style="width:100%;padding:12px;background:var(--error);color:white;border:none;border-radius:var(--r-sm);font-family:var(--font-head);font-size:.95rem;font-weight:800;cursor:pointer;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:8px;"><i class="fas fa-paper-plane"></i> Submit All & See Results</button>`;
-  } else {
-    hintEl.textContent = 'Tap a subject to load it and start answering. The 2-hour timer keeps running.';
-  }
-
-  showScreen('jamb-picker-screen');
-}
-
-function updatePickerTimer() {
-  const h   = Math.floor(state.timeLeft / 3600);
-  const m   = Math.floor((state.timeLeft % 3600) / 60);
-  const s   = state.timeLeft % 60;
-  const txt = h > 0
-    ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
-    : `${m}:${String(s).padStart(2,'0')}`;
-  const el = document.getElementById('picker-timer-display');
-  if (el) el.textContent = txt;
-}
-
-async function loadAndStartJambSubject(key, count) {
-  const cfg = SUBJECTS_CONFIG[key];
+  // Build the loading screen with a bar for EVERY subject
   showScreen('loading-screen');
-  document.getElementById('load-spinner').style.display  = 'block';
+  document.getElementById('load-spinner').style.display    = 'block';
   document.getElementById('load-error-wrap').style.display = 'none';
-  document.getElementById('load-status-text').textContent = `Loading ${cfg.name}…`;
-  document.getElementById('load-subjects-list').innerHTML = `
-    <div class="load-subj-row">
+  document.getElementById('load-status-text').textContent  = 'Loading all subjects simultaneously…';
+  document.getElementById('load-detail').textContent       = 'This usually takes 10–30 seconds';
+
+  const listEl = document.getElementById('load-subjects-list');
+  listEl.innerHTML = queue.map((sl, i) => {
+    const cfg = SUBJECTS_CONFIG[sl.key];
+    return `<div class="load-subj-row">
       <span class="load-subj-icon">${cfg.emoji}</span>
       <div style="flex:1;">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <span class="load-subj-name">${cfg.name}</span>
-          <span class="load-subj-count" id="lc-0">0/${count}</span>
+          <span class="load-subj-count" id="lc-${i}">0/${sl.count}</span>
         </div>
-        <div class="load-subj-bar"><div class="load-subj-fill" id="lf-0" style="background:${cfg.color};width:0%;"></div></div>
+        <div class="load-subj-bar">
+          <div class="load-subj-fill" id="lf-${i}" style="background:${cfg.color};width:0%;transition:width .5s ease;"></div>
+        </div>
       </div>
     </div>`;
-  document.getElementById('load-detail').textContent = `Loading ${cfg.name}…`;
+  }).join('');
 
-  try {
-    const qs   = await fetchSubjectQuestions(key, count, 'utme');
-    const fill = document.getElementById('lf-0'), cnt = document.getElementById('lc-0');
-    if (fill) fill.style.width = '100%';
-    if (cnt)  cnt.textContent  = `${qs.length}/${count}`;
-    document.getElementById('load-detail').textContent = `✓ ${qs.length} questions loaded. Starting…`;
+  // Animate bars to show "starting"
+  queue.forEach((sl, i) => {
+    setTimeout(() => {
+      const fill = document.getElementById('lf-' + i);
+      if (fill) fill.style.width = '8%';
+    }, i * 100);
+  });
 
-    const existing = state.subjects.findIndex(s => s.key === key);
-    const subObj   = { key, name:cfg.name, emoji:cfg.emoji, color:cfg.color, questions:qs, answered:{} };
-    if (existing >= 0) state.subjects[existing] = subObj;
-    else state.subjects.push(subObj);
+  // Fetch all subjects in parallel
+  const results = await Promise.allSettled(
+    queue.map((sl, i) => fetchOneJambSubject(sl, i))
+  );
 
-    state.currentSubIdx = state.subjects.length - 1;
-    state.currentQIdx   = 0;
-
-    await new Promise(r => setTimeout(r, 300));
-    initExamScreen();
-    showScreen('exam-screen');
-    buildTabBar();
-  } catch(e) {
-    showLoadError(e.message);
-    const errWrap = document.getElementById('load-error-wrap');
-    if (!errWrap.querySelector('.back-to-picker')) {
-      const b = document.createElement('button');
-      b.className = 'retry-btn sec back-to-picker';
-      b.style.marginTop = '6px';
-      b.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Subject Picker';
-      b.onclick = showJambPicker;
-      errWrap.appendChild(b);
+  // Check results
+  const errors = [];
+  results.forEach((result, i) => {
+    if (result.status === 'rejected') {
+      errors.push({ idx: i, key: queue[i].key, error: result.reason?.message || 'Unknown error' });
+      const fill = document.getElementById('lf-' + i);
+      const cnt  = document.getElementById('lc-' + i);
+      if (fill) { fill.style.background = 'var(--error)'; fill.style.width = '100%'; }
+      if (cnt)  cnt.textContent = 'Failed';
     }
+  });
+
+  if (errors.length === queue.length) {
+    // All failed
+    document.getElementById('load-spinner').style.display    = 'none';
+    document.getElementById('load-error-wrap').style.display = 'block';
+    document.getElementById('load-error-msg').textContent    =
+      'Failed to load questions. Please check your internet connection and try again.';
+    return;
   }
+
+  if (errors.length > 0) {
+    // Some failed — warn but continue with what we have
+    const failedNames = errors.map(e => SUBJECTS_CONFIG[e.key]?.name || e.key).join(', ');
+    showToast(`⚠️ ${failedNames} failed to load — continuing with available subjects`, 'error');
+  }
+
+  document.getElementById('load-detail').textContent = '✓ All questions loaded! Starting exam…';
+
+  // Sort subjects to match jambQueue order
+  state.subjects.sort((a, b) => {
+    const ai = queue.findIndex(q => q.key === a.key);
+    const bi = queue.findIndex(q => q.key === b.key);
+    return ai - bi;
+  });
+
+  state.currentSubIdx = 0;
+  state.currentQIdx   = 0;
+
+  await new Promise(r => setTimeout(r, 500));
+
+  // Start the exam
+  startTimer();
+  initExamScreen();
+  showScreen('exam-screen');
+  showToast(`All ${state.subjects.length} subjects loaded — good luck! 🎓`, 'success');
 }
 
+async function fetchOneJambSubject(sl, index) {
+  const cfg  = SUBJECTS_CONFIG[sl.key];
+  const fill = document.getElementById('lf-' + index);
+  const cnt  = document.getElementById('lc-' + index);
+
+  // Animate to "loading" state
+  if (fill) fill.style.width = '15%';
+
+  const qs = await fetchSubjectQuestions(sl.key, sl.count, 'utme');
+
+  // Update progress bar to 100%
+  if (fill) fill.style.width = '100%';
+  if (cnt)  cnt.textContent  = `${qs.length}/${sl.count}`;
+
+  // Add to subjects array
+  state.subjects.push({
+    key:       sl.key,
+    name:      cfg.name,
+    emoji:     cfg.emoji,
+    color:     cfg.color,
+    questions: qs,
+    answered:  {}
+  });
+
+  // Update status text
+  const loaded = state.subjects.length;
+  const total  = state.jambQueue.length;
+  document.getElementById('load-status-text').textContent =
+    loaded < total
+      ? `${loaded} of ${total} subjects ready…`
+      : 'All subjects loaded!';
+}
+
+/* ════════════════════════════════════════
+   SUBJECT DONE BRIDGE (for JAMB mid-exam)
+════════════════════════════════════════ */
 function showSubjectBridge() {
   const sub = state.subjects[state.currentSubIdx];
   const cfg = SUBJECTS_CONFIG[sub.key];
@@ -1136,28 +1109,45 @@ function showSubjectBridge() {
   const pct   = Math.round(correct / total * 100);
   const scoreColor = pct >= 50 ? 'var(--success)' : pct >= 30 ? 'var(--gold)' : 'var(--error)';
 
-  const doneKeys  = state.subjects.map(s => s.key);
-  const remaining = state.jambQueue.filter(s => !doneKeys.includes(s.key));
-  const allDone   = remaining.length === 0;
+  // Find next unstarted or partially answered subject
+  const nextIdx = findNextSubjectIdx();
+  const allDone = nextIdx === null;
 
-  document.getElementById('bridge-emoji').textContent      = pct >= 70 ? '🎉' : pct >= 50 ? '👍' : '📚';
-  document.getElementById('bridge-title').textContent      = `${cfg.name} Complete!`;
-  document.getElementById('bridge-score').innerHTML        = `<span style="color:${scoreColor};">${pct}%</span>`;
-  document.getElementById('bridge-meta').textContent       =
+  document.getElementById('bridge-emoji').textContent  = pct >= 70 ? '🎉' : pct >= 50 ? '👍' : '📚';
+  document.getElementById('bridge-title').textContent  = `${cfg.name} Complete!`;
+  document.getElementById('bridge-score').innerHTML    = `<span style="color:${scoreColor};">${pct}%</span>`;
+  document.getElementById('bridge-meta').textContent   =
     `${correct} correct · ${wrong} wrong · ${unanswered} skipped out of ${total} questions`;
 
   const actionsEl = document.getElementById('bridge-actions');
   if (allDone) {
     actionsEl.innerHTML = `
-      <button class="bridge-btn primary" onclick="closeSubjectBridge();showJambPicker()"><i class="fas fa-chart-bar"></i> Review All</button>
+      <button class="bridge-btn primary" onclick="closeSubjectBridge()"><i class="fas fa-eye"></i> Review Answers</button>
       <button class="bridge-btn danger"  onclick="closeSubjectBridge();confirmSubmit()"><i class="fas fa-paper-plane"></i> Submit All</button>`;
   } else {
+    const nextSub = state.subjects[nextIdx];
     actionsEl.innerHTML = `
-      <button class="bridge-btn primary" onclick="closeSubjectBridge();showJambPicker()"><i class="fas fa-th"></i> Next Subject</button>
-      <button class="bridge-btn gold"    onclick="closeSubjectBridge()"><i class="fas fa-eye"></i> Review Answers</button>`;
+      <button class="bridge-btn primary" onclick="closeSubjectBridge();switchSubject(${nextIdx})">
+        <i class="fas fa-arrow-right"></i> Go to ${nextSub.emoji} ${nextSub.name.split(' ')[0]}
+      </button>
+      <button class="bridge-btn gold" onclick="closeSubjectBridge()"><i class="fas fa-eye"></i> Review Answers</button>`;
   }
 
   document.getElementById('subj-done-banner').classList.remove('hidden');
+}
+
+function findNextSubjectIdx() {
+  // Find the next subject that isn't fully answered yet, or the next one in order
+  for (let i = state.currentSubIdx + 1; i < state.subjects.length; i++) {
+    return i; // return the next subject in order
+  }
+  // Wrap around — check earlier subjects that have unanswered questions
+  for (let i = 0; i < state.currentSubIdx; i++) {
+    const s = state.subjects[i];
+    const answered = Object.keys(s.answered).length;
+    if (answered < s.questions.length) return i;
+  }
+  return null; // all done
 }
 
 function closeSubjectBridge() {
@@ -1222,8 +1212,7 @@ function showLoadError(msg) {
 
 function retryLoad() {
   if (state.mode === 'jamb') {
-    if (state.jambQueue && state.jambQueue.length > 0) showJambPicker();
-    else if (state.selectedJambSubs.length === 3) startExam();
+    if (state.selectedJambSubs.length === 3) startExam();
     else goToSetup();
   } else if (state.singleSubject) {
     startExam();
@@ -1244,50 +1233,36 @@ function initExamScreen() {
 
 function buildTabBar() {
   const tabs = document.getElementById('exam-tabs');
-  if (state.mode === 'jamb' && state.jambQueue && state.jambQueue.length > 0) {
-    tabs.innerHTML = state.jambQueue.map((sl, i) => {
-      const cfg      = SUBJECTS_CONFIG[sl.key];
-      const loaded   = state.subjects.find(s => s.key === sl.key);
-      const isCurrent = loaded && state.subjects.indexOf(loaded) === state.currentSubIdx;
-      const isDone   = !!loaded;
-      const ansCount = loaded ? Object.keys(loaded.answered).length : 0;
-      const qCount   = loaded ? loaded.questions.length : sl.count;
-      const doneCheck = isDone ? ' ✓' : '';
-      return `<div class="etab ${isCurrent ? 'active' : ''}" id="etab-jq-${i}"
-        onclick="${isDone ? `switchToJambSubject('${sl.key}')` : `showToast('Tap this subject on the picker to start it','info')`}"
-        title="${cfg.name}${isDone ? ' — Done' : ' — Not started yet'}">
-        <span class="etab-dot" style="background:${cfg.color};opacity:${isDone ? 1 : .4};"></span>${cfg.name.split(' ')[0]}${doneCheck}
-        <span class="etab-count">(${ansCount}/${qCount})</span>
-      </div>`;
-    }).join('');
-  } else {
-    tabs.innerHTML = state.subjects.map((s, i) =>
-      `<div class="etab ${i === state.currentSubIdx ? 'active' : ''}" id="etab-${i}" onclick="switchSubject(${i})" title="${s.name}">
-        <span class="etab-dot" style="background:${s.color};"></span>${s.name.split(' ')[0]}
-        <span class="etab-count" id="etab-count-${i}">(${Object.keys(s.answered).length}/${s.questions.length})</span>
-      </div>`
-    ).join('');
-  }
+  // *** FIX: All tabs are always clickable — no more toast dead-end ***
+  tabs.innerHTML = state.subjects.map((s, i) => {
+    const isCurrent = i === state.currentSubIdx;
+    const ansCount  = Object.keys(s.answered).length;
+    const qCount    = s.questions.length;
+    return `<div class="etab ${isCurrent ? 'active' : ''}" id="etab-${i}"
+      onclick="switchSubject(${i})"
+      title="${s.name} — ${ansCount}/${qCount} answered">
+      <span class="etab-dot" style="background:${s.color};"></span>${s.name.split(' ')[0]}
+      <span class="etab-count" id="etab-count-${i}">(${ansCount}/${qCount})</span>
+    </div>`;
+  }).join('');
 }
 
-function switchToJambSubject(key) {
-  const idx = state.subjects.findIndex(s => s.key === key);
-  if (idx < 0) { showToast('Subject not loaded yet', 'info'); return; }
+function switchSubject(idx) {
+  if (idx < 0 || idx >= state.subjects.length) return;
   state.currentSubIdx = idx;
   state.currentQIdx   = 0;
   buildTabBar();
   renderQMap();
   renderMobileQMap();
   renderQuestion();
+  const qa = document.getElementById('exam-q-area');
+  if (qa) qa.scrollTop = 0;
 }
 
-function switchSubject(idx) {
-  state.currentSubIdx = idx;
-  state.currentQIdx   = 0;
-  document.querySelectorAll('.etab').forEach((t, i) => t.classList.toggle('active', i === idx));
-  renderQMap();
-  renderMobileQMap();
-  renderQuestion();
+/* switchToJambSubject kept for any legacy references */
+function switchToJambSubject(key) {
+  const idx = state.subjects.findIndex(s => s.key === key);
+  if (idx >= 0) switchSubject(idx);
 }
 
 function resolveImage(q) {
@@ -1344,19 +1319,18 @@ function renderQuestion() {
   document.getElementById('prev-btn').disabled = isFirst;
 
   const nb = document.getElementById('next-btn');
-  if (state.mode === 'jamb' && isLastQ) {
-    const allSubjDone = state.subjects.length >= state.jambQueue.length;
-    nb.innerHTML  = allSubjDone
-      ? 'Submit All <i class="fas fa-paper-plane"></i>'
-      : 'Finish Subject <i class="fas fa-flag-checkered"></i>';
-    nb.onclick    = allSubjDone ? confirmSubmit : showSubjectBridge;
-    nb.className  = 'nav-btn primary';
-  } else if (state.mode !== 'jamb' && isLastQ && isLastS) {
+  if (isLastQ && isLastS) {
     nb.innerHTML = 'Submit <i class="fas fa-paper-plane"></i>';
     nb.onclick   = confirmSubmit;
+    nb.className = 'nav-btn primary';
+  } else if (isLastQ && state.mode === 'jamb') {
+    nb.innerHTML = 'Finish Subject <i class="fas fa-flag-checkered"></i>';
+    nb.onclick   = showSubjectBridge;
+    nb.className = 'nav-btn primary';
   } else {
     nb.innerHTML = 'Next <i class="fas fa-chevron-right"></i>';
     nb.onclick   = () => navigate(1);
+    nb.className = 'nav-btn primary';
   }
 
   document.getElementById('nav-center-text').textContent = `${state.currentQIdx + 1} / ${total}`;
@@ -1394,13 +1368,13 @@ function navigate(dir) {
     if (state.currentSubIdx > 0) {
       state.currentSubIdx--;
       state.currentQIdx = state.subjects[state.currentSubIdx].questions.length - 1;
-      document.querySelectorAll('.etab').forEach((t,i) => t.classList.toggle('active', i === state.currentSubIdx));
+      buildTabBar();
     }
   } else if (newQ >= sub.questions.length) {
     if (state.currentSubIdx < state.subjects.length - 1) {
       state.currentSubIdx++;
       state.currentQIdx = 0;
-      document.querySelectorAll('.etab').forEach((t,i) => t.classList.toggle('active', i === state.currentSubIdx));
+      buildTabBar();
     }
   } else {
     state.currentQIdx = newQ;
@@ -1479,7 +1453,7 @@ function closeMobileQMap() {
 function jumpTo(si, qi) {
   state.currentSubIdx = si;
   state.currentQIdx   = qi;
-  document.querySelectorAll('.etab').forEach((t,i) => t.classList.toggle('active', i === si));
+  buildTabBar();
   closeMobileQMap();
   renderQuestion();
   const qa = document.getElementById('exam-q-area');
@@ -1583,7 +1557,7 @@ function opSymbol(op) {
 function startTimer() {
   const timerEl = document.getElementById('exam-timer');
   if (state.mode === 'practice') { if (timerEl) timerEl.textContent = 'Practice'; return; }
-  if (state.mode === 'jamb' && state.timerInterval) return; /* already running */
+  if (state.timerInterval) return; /* already running */
   clearInterval(state.timerInterval);
   state.timerInterval = setInterval(() => {
     state.timeLeft--;
@@ -1597,7 +1571,6 @@ function startTimer() {
       timerEl.textContent = txt;
       timerEl.className   = 'exam-timer' + (state.timeLeft <= 300 ? (state.timeLeft <= 60 ? ' danger' : ' warning') : '');
     }
-    updatePickerTimer();
     if (state.timeLeft <= 0) { clearInterval(state.timerInterval); autoSubmit(); }
   }, 1000);
 }
@@ -1613,19 +1586,13 @@ function autoSubmit() {
 function confirmSubmit() {
   const totalQ   = state.subjects.reduce((a,s) => a + s.questions.length, 0);
   const totalAns = state.subjects.reduce((a,s) => a + Object.keys(s.answered).length, 0);
-  const notStarted = (state.mode === 'jamb' && state.jambQueue)
-    ? state.jambQueue.length - state.subjects.length : 0;
 
   document.getElementById('modal-stats').innerHTML = `
     <div class="modal-stat"><div class="modal-stat-num" style="color:var(--success);">${totalAns}</div><div class="modal-stat-label">Answered</div></div>
     <div class="modal-stat"><div class="modal-stat-num" style="color:var(--error);">${totalQ - totalAns}</div><div class="modal-stat-label">Skipped</div></div>
-    <div class="modal-stat"><div class="modal-stat-num">${totalQ}</div><div class="modal-stat-label">Total</div></div>
-    ${notStarted > 0 ? `<div class="modal-stat" style="flex-basis:100%;"><div class="modal-stat-num" style="color:var(--error);">${notStarted}</div><div class="modal-stat-label">Subjects Not Started</div></div>` : ''}`;
+    <div class="modal-stat"><div class="modal-stat-num">${totalQ}</div><div class="modal-stat-label">Total</div></div>`;
 
-  document.getElementById('modal-text').textContent = notStarted > 0
-    ? `⚠️ You have ${notStarted} subject${notStarted > 1 ? 's' : ''} you haven't attempted. Scores will show as 0%.`
-    : 'This action cannot be undone.';
-
+  document.getElementById('modal-text').textContent = 'This action cannot be undone.';
   document.getElementById('submit-modal').classList.add('show');
 }
 
@@ -1640,21 +1607,7 @@ function submitExam() {
 }
 
 function buildResults(elapsed) {
-  let subjectsForResults = [...state.subjects];
-  if (state.mode === 'jamb' && state.jambQueue) {
-    const doneKeys = state.subjects.map(s => s.key);
-    state.jambQueue.forEach(sl => {
-      if (!doneKeys.includes(sl.key)) {
-        const cfg = SUBJECTS_CONFIG[sl.key];
-        subjectsForResults.push({
-          key:sl.key, name:cfg.name, emoji:cfg.emoji, color:cfg.color,
-          questions: new Array(sl.count).fill({ _answer:'' }), answered:{}
-        });
-      }
-    });
-  }
-
-  const subResults = subjectsForResults.map(s => {
+  const subResults = state.subjects.map(s => {
     const cfg = SUBJECTS_CONFIG[s.key];
     let correct = 0, wrong = 0, unanswered = 0;
     s.questions.forEach((q, qi) => {
@@ -1874,7 +1827,7 @@ document.addEventListener('keydown', e => {
   else if (k === 'S')   { confirmSubmit(); }
   else if (k === 'C')   { toggleCalculator(); }
   else if (k === 'M')   { toggleMobileQMap(); }
-  else if (['1','2','3','4'].includes(k)) { const i = parseInt(k) - 1; if (i < state.subjects.length) switchSubject(i); }
+  else if (['1','2','3','4'].includes(k)) { const i = parseInt(k) - 1; switchSubject(i); }
 });
 
 document.addEventListener('keydown', e => {
