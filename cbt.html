@@ -782,7 +782,7 @@ function renderPastSessions() {
 function goToDashboard() {
   clearInterval(state.timerInterval);
   try { window.parent.postMessage({type:'nltc_cbt_done'},'*'); } catch(e){}
-  window.location.href = DASHBOARD_URL;
+  window.location.href = 'dashboard.html';
 }
 
 /* ════════════════════════════════════════
