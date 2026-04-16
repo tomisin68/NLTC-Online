@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>NLTC — Admin Dashboard</title>
+<link rel="icon" type="image/png" href="NLTC.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fraunces:opsz,wght@9..144,700;9..144,800;9..144,900&display=swap" rel="stylesheet">
@@ -61,9 +62,7 @@ input,select,textarea{font-family:var(--font-body);}
 .sidebar::-webkit-scrollbar{display:none;}
 
 .sb-logo{display:flex;align-items:center;gap:10px;padding:16px 20px 14px;border-bottom:1px solid rgba(255,255,255,.06);}
-.sb-logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--gold-2));display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:.78rem;font-weight:900;color:var(--navy);flex-shrink:0;letter-spacing:-.5px;}
-.sb-logo-name{font-family:var(--font-head);font-size:.95rem;font-weight:900;color:white;letter-spacing:-.02em;}
-.sb-logo-name em{color:var(--gold);font-style:normal;}
+.sb-logo-img{height:28px;width:auto;object-fit:contain;display:block;}
 
 .sb-admin-badge{margin:10px 20px 4px;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.2);border-radius:8px;padding:7px 12px;display:flex;align-items:center;gap:8px;}
 .sb-admin-badge i{color:var(--gold);font-size:.78rem;}
@@ -366,8 +365,7 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
 <!-- ═══════════════════════════════════ SIDEBAR ═══════════════════════════════════ -->
 <aside class="sidebar" id="sidebar">
   <div class="sb-logo">
-    <div class="sb-logo-icon">NL</div>
-    <span class="sb-logo-name">NL<em>TC</em></span>
+    <img src="nltc-dark.png" alt="NLTC" class="sb-logo-img">
   </div>
   <div class="sb-admin-badge"><i class="fas fa-shield-alt"></i><span>Admin Panel</span></div>
   <div class="sb-user">

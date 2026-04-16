@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>NLTC — Live Class</title>
+<link rel="icon" type="image/png" href="NLTC.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
@@ -90,21 +91,7 @@ button, a { touch-action: manipulation; }
   flex-shrink: 0;
   text-decoration: none;
 }
-.ls-logo-icon {
-  width: 30px; height: 30px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--gold), var(--gold-2));
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-head);
-  font-size: .7rem; font-weight: 800;
-  color: #0A1628;
-}
-.ls-logo-name {
-  font-family: var(--font-head);
-  font-size: .88rem; font-weight: 800;
-  color: var(--text-1);
-}
-.ls-logo-name em { color: var(--gold); font-style: normal; }
+.ls-logo-img { height: 26px; width: auto; object-fit: contain; display: block; }
 
 .ls-divider { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
 
@@ -674,14 +661,8 @@ button, a { touch-action: manipulation; }
   transition: opacity .4s ease;
 }
 .ls-loading.fade-out { opacity: 0; pointer-events: none; }
-.ls-loading-logo {
-  font-family: var(--font-head);
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: var(--text-1);
-  letter-spacing: -.02em;
-}
-.ls-loading-logo em { color: var(--gold); font-style: normal; }
+.ls-loading-logo { display: flex; align-items: center; justify-content: center; }
+.ls-loading-logo img { height: 36px; width: auto; object-fit: contain; }
 .ls-loading-spinner {
   width: 30px; height: 30px;
   border: 2.5px solid var(--bg-4);
@@ -840,7 +821,7 @@ button, a { touch-action: manipulation; }
 
 <!-- Loading screen -->
 <div class="ls-loading" id="loadingScreen">
-  <div class="ls-loading-logo">NL<em>TC</em></div>
+  <div class="ls-loading-logo"><img src="nltc-dark.png" alt="NLTC"></div>
   <div class="ls-loading-spinner"></div>
   <div class="ls-loading-status" id="loadingStatus">Connecting to session…</div>
 </div>
@@ -869,8 +850,7 @@ button, a { touch-action: manipulation; }
   <!-- HEADER -->
   <header class="ls-header">
     <a href="#" class="ls-logo" id="backLink" onclick="handleBack(event)">
-      <div class="ls-logo-icon">NL</div>
-      <span class="ls-logo-name">NL<em>TC</em></span>
+      <img src="nltc-dark.png" alt="NLTC" class="ls-logo-img">
     </a>
     <div class="ls-divider"></div>
     <div class="live-pill" id="livePill" style="display:none;">
