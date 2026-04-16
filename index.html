@@ -86,7 +86,6 @@ button { font-family: var(--font); }
   flex-shrink: 0;
   text-decoration: none;
 }
-/* Logo image — sized to fit the 68px nav height with comfortable padding */
 .nav-logo img {
   height: 44px;
   width: auto;
@@ -123,9 +122,10 @@ button { font-family: var(--font); }
   display: none; flex-direction: column; gap: 5px;
   width: 40px; height: 40px; justify-content: center; align-items: center;
   border: none; background: none; cursor: pointer; border-radius: var(--r-sm);
-  transition: background 0.2s; flex-shrink: 0;
-  /* Push hamburger to the far right on mobile */
+  transition: background 0.2s;
+  /* ── FIX: always sits at the far right via margin-left:auto ── */
   margin-left: auto;
+  flex-shrink: 0;
 }
 .hamburger:hover { background: var(--surface); }
 .hamburger span {
@@ -602,6 +602,7 @@ h2.section-title .accent { color: var(--gold); }
 .plan-btn.outline:hover { background: var(--navy); color: white; }
 .plan-btn.solid { background: var(--gold); color: var(--navy); }
 .plan-btn.solid:hover { background: var(--gold-2); box-shadow: 0 4px 20px rgba(240,165,0,0.4); }
+.plan-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 .pricing-note {
   text-align: center; font-size: 0.8rem; color: var(--text-3); margin-top: 28px;
 }
@@ -793,6 +794,19 @@ footer { background: #04101F; padding: 64px 24px 36px; }
 .anim.visible { opacity: 1; transform: none; }
 
 /* ============================================================
+   PAYSTACK SPINNER
+   ============================================================ */
+@keyframes spin { to { transform: rotate(360deg); } }
+.pay-spinner {
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid rgba(11,29,58,0.3);
+  border-top-color: var(--navy);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle; margin-right: 6px;
+}
+
+/* ============================================================
    RESPONSIVE — TABLET
    ============================================================ */
 @media (max-width: 1024px) {
@@ -804,26 +818,16 @@ footer { background: #04101F; padding: 64px 24px 36px; }
   .nav-links, .nav-actions { display: none; }
   .hamburger { display: flex; }
 
-  /* ── Mobile nav: logo left, hamburger right with generous gap ── */
+  /* ── Mobile nav: logo left, hamburger right ── */
   .nav-inner {
-    /* Remove the large gap that only suits desktop; let flex handle spacing */
     gap: 0;
     padding: 0 20px;
   }
   .nav-logo {
-    /* Logo takes its natural width, then flex pushes hamburger to the right */
     flex: 0 0 auto;
   }
-  /* Spacer that fills all available room between logo and hamburger */
-  .nav-inner::after {
-    content: '';
-    flex: 1;
-  }
-  .hamburger {
-    /* Ensure hamburger sits at the very end with no extra auto margin fighting */
-    margin-left: 0;
-    flex: 0 0 auto;
-  }
+  /* hamburger already has margin-left:auto from base rule,
+     which pushes it to the far right on mobile */
 
   .hero-body { grid-template-columns: 1fr; gap: 40px; padding: 48px 24px 40px; }
   .hero-visual { display: none; }
@@ -880,7 +884,6 @@ footer { background: #04101F; padding: 64px 24px 36px; }
      ============================================================ -->
 <header class="nav" id="nav">
   <div class="nav-inner">
-    <!-- Logo: image on desktop & mobile, falls back gracefully if PNG missing -->
     <a href="#" class="nav-logo">
       <img src="nltc-dark.png" alt="Next Level Tutorial College" />
     </a>
@@ -893,8 +896,9 @@ footer { background: #04101F; padding: 64px 24px 36px; }
     </ul>
     <div class="nav-actions">
       <a href="auth.html" class="btn-ghost">Sign In</a>
-      <a href="#pricing" class="btn-primary">Get Started Free</a>
+      <a href="auth.html" class="btn-primary">Get Started Free</a>
     </div>
+    <!-- hamburger: margin-left:auto keeps it pinned to the far right on mobile -->
     <button class="hamburger" id="hamburger" aria-label="Open menu">
       <span></span><span></span><span></span>
     </button>
@@ -912,7 +916,7 @@ footer { background: #04101F; padding: 64px 24px 36px; }
   </nav>
   <div class="mobile-menu-footer">
     <a href="auth.html" class="btn-ghost mm-close">Sign In</a>
-    <a href="#pricing" class="btn-primary mm-close">Get Started Free</a>
+    <a href="auth.html" class="btn-primary mm-close">Get Started Free</a>
   </div>
 </div>
 
@@ -941,7 +945,7 @@ footer { background: #04101F; padding: 64px 24px 36px; }
         gamified learning, and real-time exam news — all from your phone or laptop.
       </p>
       <div class="hero-btns">
-        <a href="#pricing" class="hero-btn-main">
+        <a href="auth.html" class="hero-btn-main">
           <i class="fas fa-rocket"></i> Start Learning Free
         </a>
         <a href="#features" class="hero-btn-secondary">
@@ -1066,7 +1070,7 @@ footer { background: #04101F; padding: 64px 24px 36px; }
         <div class="section-tag on-dark"><i class="fas fa-users"></i> Our Learning Environment</div>
         <h2 class="section-title on-dark">Where Nigeria's <span class="accent">Best Students</span> Come to Learn</h2>
         <p class="section-sub on-dark" style="margin-bottom: 28px;">From Kano to Lagos, thousands of students are transforming their academic journeys on NLTC. World-class tutors and resources, directly at your fingertips.</p>
-        <a href="#pricing" class="hero-btn-main" style="display: inline-flex;">
+        <a href="auth.html" class="hero-btn-main" style="display: inline-flex;">
           <i class="fas fa-arrow-right"></i> Start Your Journey
         </a>
       </div>
@@ -1283,6 +1287,8 @@ footer { background: #04101F; padding: 64px 24px 36px; }
       <p class="section-sub">Start free today. No credit card required. Upgrade anytime to unlock the full NLTC platform.</p>
     </div>
     <div class="pricing-grid">
+
+      <!-- FREE -->
       <div class="plan anim">
         <div class="plan-name">Free Starter</div>
         <div class="plan-price">₦0</div>
@@ -1295,9 +1301,11 @@ footer { background: #04101F; padding: 64px 24px 36px; }
           <li><i class="fas fa-check-circle"></i>Basic progress tracking</li>
           <li><i class="fas fa-check-circle"></i>Community access</li>
         </ul>
-        <button class="plan-btn outline">Get Started Free</button>
+        <!-- Free plan → go to signup page -->
+        <a href="auth.html" class="plan-btn outline" style="display:block;text-align:center;">Get Started Free</a>
       </div>
 
+      <!-- PRO -->
       <div class="plan popular anim">
         <div class="popular-tag">Most Popular</div>
         <div class="plan-name">Pro Scholar</div>
@@ -1313,9 +1321,12 @@ footer { background: #04101F; padding: 64px 24px 36px; }
           <li><i class="fas fa-check-circle"></i>AI-driven study recommendations</li>
           <li><i class="fas fa-check-circle"></i>Mobile app (iOS & Android)</li>
         </ul>
-        <button class="plan-btn solid">Subscribe with Paystack</button>
+        <button class="plan-btn solid" id="btnProPay" onclick="initiateLandingPayment('pro', this)">
+          <i class="fas fa-credit-card"></i> Subscribe with Paystack
+        </button>
       </div>
 
+      <!-- ELITE -->
       <div class="plan anim">
         <div class="plan-name">Elite Bundle</div>
         <div class="plan-price">₦12,000</div>
@@ -1329,13 +1340,18 @@ footer { background: #04101F; padding: 64px 24px 36px; }
           <li><i class="fas fa-check-circle"></i>Offline content download</li>
           <li><i class="fas fa-check-circle"></i>Certificate of completion</li>
         </ul>
-        <button class="plan-btn outline">Choose Elite Bundle</button>
+        <button class="plan-btn outline" id="btnElitePay" onclick="initiateLandingPayment('elite', this)">
+          <i class="fas fa-crown"></i> Choose Elite Bundle
+        </button>
       </div>
+
     </div>
     <p class="pricing-note">
       <i class="fas fa-shield-alt" style="color: var(--success); margin-right: 5px;"></i>
       All payments secured via <strong style="color: var(--navy);">Paystack</strong>. 7-day money-back guarantee on paid plans.
     </p>
+    <!-- Error message area -->
+    <p id="pricingErr" style="display:none;text-align:center;color:#c0392b;font-size:0.82rem;margin-top:12px;"></p>
   </div>
 </section>
 
@@ -1540,7 +1556,7 @@ footer { background: #04101F; padding: 64px 24px 36px; }
     <h2>Ready to Take Your Exams<br>to the <span>Next Level?</span></h2>
     <p>Join 15,000+ Nigerian students already on their path to exam excellence. It starts with a single step — sign up free today.</p>
     <div class="cta-btns">
-      <a href="#" class="cta-btn-main"><i class="fas fa-rocket"></i> Start Free Today</a>
+      <a href="auth.html" class="cta-btn-main"><i class="fas fa-rocket"></i> Start Free Today</a>
       <a href="#pricing" class="cta-btn-ghost">View All Plans</a>
     </div>
     <div class="cta-checks">
@@ -1739,6 +1755,59 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     }
   });
 });
+
+/* ============================================================
+   PAYSTACK PAYMENT — Landing page
+   Mirrors the same backend endpoint used in the dashboard.
+   ============================================================ */
+const BACKEND_URL = 'https://nltc-backend.onrender.com';
+
+async function initiateLandingPayment(plan, btn) {
+  const errEl = document.getElementById('pricingErr');
+  errEl.style.display = 'none';
+
+  // Disable both buttons to prevent double-clicks
+  const btnPro   = document.getElementById('btnProPay');
+  const btnElite = document.getElementById('btnElitePay');
+  const originalHTML = btn.innerHTML;
+
+  btnPro.disabled   = true;
+  btnElite.disabled = true;
+  btn.innerHTML = '<span class="pay-spinner"></span> Please wait…';
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/paystack/initialize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        plan: plan,
+        callbackUrl: window.location.origin + '/auth.html?payment=success&plan=' + plan
+      })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data.error || 'Payment initialisation failed. Please try again.');
+    }
+
+    if (data.authorizationUrl) {
+      // Redirect to Paystack checkout
+      window.location.href = data.authorizationUrl;
+    } else {
+      throw new Error('No payment URL returned. Please try again.');
+    }
+  } catch (err) {
+    // Re-enable buttons and show error
+    btnPro.disabled   = false;
+    btnElite.disabled = false;
+    btn.innerHTML = originalHTML;
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+    // Scroll error into view
+    errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
 </script>
 </body>
 </html>
