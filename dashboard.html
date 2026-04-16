@@ -768,10 +768,19 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
   </div>
   <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
     <div class="tb-streak" id="tbStreak" style="display:none;"><i class="fas fa-fire"></i> <span id="streakCount">0</span></div>
-    <button class="tb-btn" onclick="showView('announcements',null)" title="Announcements">
-      <i class="fas fa-bell"></i>
-      <div class="tb-notif-dot" id="notifDot" style="display:none;"></div>
-    </button>
+    <div class="notif-bell-wrap" id="notifBellWrap">
+      <button class="tb-btn" id="notif-btn" onclick="toggleNotifDropdown()" title="Notifications" aria-label="Notifications">
+        <i class="fas fa-bell"></i>
+        <span class="notif-badge" id="notif-badge" style="display:none;"></span>
+      </button>
+      <div class="notif-dropdown" id="notif-dropdown">
+        <div class="notif-dropdown-header">
+          <span class="notif-dropdown-title">Notifications</span>
+          <button class="notif-mark-all" onclick="markAllRead()">Mark all read</button>
+        </div>
+        <div id="notif-list"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -1107,6 +1116,57 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
 .quick-cbt-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm);}
 .qcc-name{font-family:var(--font-head);font-size:.75rem;font-weight:800;color:var(--navy);letter-spacing:-.01em;}
 .qcc-sub{font-size:.63rem;color:var(--text-3);margin-top:2px;}
+
+/* ═══════════════════════════════════════════
+   NOTIFICATION BELL & DROPDOWN
+═══════════════════════════════════════════ */
+.notif-bell-wrap{position:relative;}
+.notif-badge{
+  position:absolute;top:-5px;right:-5px;
+  min-width:16px;height:16px;padding:0 4px;
+  background:var(--error);color:white;
+  font-size:.57rem;font-weight:800;
+  border-radius:100px;border:2px solid white;
+  display:flex;align-items:center;justify-content:center;
+  line-height:1;pointer-events:none;
+}
+.notif-dropdown{
+  display:none;position:absolute;top:calc(100% + 8px);right:0;
+  width:320px;max-height:440px;
+  background:white;border-radius:var(--r-lg);
+  border:1px solid var(--border);box-shadow:var(--shadow-lg);
+  z-index:9000;overflow:hidden;flex-direction:column;
+}
+.notif-dropdown.open{display:flex;}
+.notif-dropdown-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px 10px;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.notif-dropdown-title{font-family:var(--font-head);font-size:.88rem;font-weight:800;color:var(--navy);}
+.notif-mark-all{font-size:.72rem;font-weight:700;color:var(--gold);background:none;border:none;cursor:pointer;padding:0;}
+.notif-mark-all:hover{color:var(--navy);}
+#notif-list{overflow-y:auto;flex:1;max-height:360px;}
+#notif-list::-webkit-scrollbar{width:4px;}
+#notif-list::-webkit-scrollbar-track{background:transparent;}
+#notif-list::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:4px;}
+.notif-item{
+  display:flex;align-items:flex-start;gap:10px;padding:10px 14px;
+  border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;
+}
+.notif-item:last-child{border-bottom:none;}
+.notif-item:hover{background:var(--surface);}
+.notif-item.unread{background:var(--gold-pale);}
+.notif-item.unread:hover{background:#FFF0CC;}
+.notif-item-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px;}
+.notif-item-body{flex:1;min-width:0;}
+.notif-item-title{font-size:.8rem;font-weight:700;color:var(--navy);line-height:1.3;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.notif-item-text{font-size:.74rem;color:var(--text-2);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;}
+.notif-item-time{font-size:.66rem;color:var(--text-3);margin-top:3px;}
+.notif-unread-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:5px;}
+.notif-empty-state{text-align:center;padding:28px 16px;color:var(--text-3);}
+.notif-empty-state .notif-empty-icon{font-size:1.8rem;margin-bottom:8px;}
+.notif-empty-state p{font-size:.8rem;}
+@media(max-width:600px){.notif-dropdown{width:calc(100vw - 28px);right:-8px;}}
 </style>
 
 <!-- ═══════════ FIREBASE ═══════════ -->
@@ -1117,6 +1177,7 @@ import {
   getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc,
   query, orderBy, limit, where, serverTimestamp, onSnapshot, increment
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getMessaging, getToken, onMessage, deleteToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
 
 const FIREBASE_CONFIG = {
   apiKey:"AIzaSyA9vzT1TBpTdRJUfyYm51goS-5HfL3FcbU",
@@ -1134,10 +1195,15 @@ const app  = initializeApp(FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
+// Replace with your key from Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
+const VAPID_KEY = 'BLw6s59QLZJVfXGChqf9YGgxcweSfxUjTq4iCcRXDB6BRxPDeYJhcD7dSrqVqLpFN6obHRz1Gf8ANjBH2PN8dKQ';
+
 let currentUser = null, userData = null;
 let allVideos   = [];
 let agoraClient = null, localAudioTrack = null, localVideoTrack = null;
 let lvChatUnsub = null, lvViewerUnsub = null;
+let notifUnsubscribe = null;
+let _notifCache = [];
 let currentLiveSessionId = null;
 let selectedPlan = 'pro';
 let lvMicOn = true, lvCamOn = false;
@@ -1294,6 +1360,10 @@ onAuthStateChanged(auth,async(user)=>{
   renderCBTChart();
   document.getElementById('settEmail').textContent=user.email||'—';
   prefillSettings();
+  tryAwardFirstLogin();
+  initPushNotifications();
+  loadNotifications();
+  notifUnsubscribe=listenToUnreadCount(db,user.uid,document.getElementById('notif-badge'));
 });
 
 function renderUserUI(){
@@ -2065,7 +2135,6 @@ async function loadAnnouncements(){
     if(items.length){
       document.getElementById('anncBadge').style.display='flex';
       document.getElementById('anncBadge').textContent=items.length;
-      document.getElementById('notifDot').style.display='block';
     }
     const el=document.getElementById('announcementsList');
     if(!items.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📢</div><div class="empty-title">No announcements yet</div></div>';return;}
@@ -2197,9 +2266,148 @@ window.initiatePayment=async function(){
 /* ── SIGN OUT ── */
 window.handleSignOut=async function(){
   await leaveLiveClass().catch(()=>{});
+  if(notifUnsubscribe){notifUnsubscribe();notifUnsubscribe=null;}
+  try{await deleteToken(getMessaging(app));}catch(e){}
   try{await signOut(auth);window.location.href='auth.html';}
   catch(e){showToast('Sign out failed','error');}
 };
+
+/* ══════════════════════════════════════════════════════════════
+   PUSH & IN-APP NOTIFICATIONS
+══════════════════════════════════════════════════════════════ */
+
+function escHtml(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+const NOTIF_ICONS = {
+  welcome:'🎓', live_class_start:'📡', session_ended:'📡',
+  announcement:'📢', new_lesson:'🎬', class_reminder:'📅',
+  new_signup:'👤', payment:'💳', achievement:'🏆'
+};
+
+/* Register FCM token with backend and wire foreground handler */
+async function initPushNotifications(){
+  try{
+    if(!('Notification' in window)||!('serviceWorker' in navigator))return;
+    const permission=await Notification.requestPermission();
+    if(permission!=='granted')return;
+    const messaging=getMessaging(app);
+    const fcmToken=await getToken(messaging,{vapidKey:VAPID_KEY});
+    if(!fcmToken)return;
+    await backendFetch('POST','/notifications/register-token',{fcmToken,platform:'web'});
+    onMessage(messaging,(payload)=>{
+      const{title='',body=''}=payload.notification||{};
+      const type=payload.data?.type||'';
+      if(title)showToast(`${NOTIF_ICONS[type]||'🔔'} ${title}${body?': '+body:''}`, 'info');
+      loadNotifications();
+    });
+  }catch(e){console.warn('[NLTC Push]',e.message);}
+}
+
+/* Fetch in-app notification list from backend */
+async function loadNotifications(){
+  try{
+    const{notifications=[],unreadCount=0}=await backendFetch('GET','/notifications/me');
+    const badge=document.getElementById('notif-badge');
+    if(badge){badge.textContent=unreadCount||'';badge.style.display=unreadCount?'flex':'none';}
+    renderNotificationDropdown(notifications);
+  }catch(e){console.warn('[NLTC Notif]',e.message);}
+}
+
+/* Firestore real-time unread count — returns unsubscribe fn */
+function listenToUnreadCount(firestoreDb,uid,badgeEl){
+  if(!badgeEl)return()=>{};
+  const q=query(collection(firestoreDb,'users',uid,'notifications'),where('read','==',false));
+  return onSnapshot(q,(snap)=>{
+    const count=snap.size;
+    badgeEl.textContent=count||'';
+    badgeEl.style.display=count?'flex':'none';
+    if(document.getElementById('notif-dropdown')?.classList.contains('open'))loadNotifications();
+  });
+}
+
+/* Render notification list inside the dropdown */
+function renderNotificationDropdown(notifications){
+  _notifCache=notifications;
+  const el=document.getElementById('notif-list');
+  if(!el)return;
+  if(!notifications.length){
+    el.innerHTML=`<div class="notif-empty-state"><div class="notif-empty-icon">🔔</div><p>No notifications yet</p></div>`;
+    return;
+  }
+  el.innerHTML=notifications.map((n,i)=>{
+    const icon=NOTIF_ICONS[n.type]||n.iconEmoji||'🔔';
+    const unread=!n.read;
+    return`<div class="notif-item${unread?' unread':''}" onclick="handleNotifClick(${i})">
+      <div class="notif-item-icon">${icon}</div>
+      <div class="notif-item-body">
+        <div class="notif-item-title">${escHtml(n.title)}</div>
+        <div class="notif-item-text">${escHtml(n.body)}</div>
+        <div class="notif-item-time">${timeAgo(n.createdAt)}</div>
+      </div>
+      ${unread?'<div class="notif-unread-dot"></div>':''}
+    </div>`;
+  }).join('');
+}
+
+window.toggleNotifDropdown=function(){
+  const dd=document.getElementById('notif-dropdown');
+  if(!dd)return;
+  if(dd.classList.contains('open')){
+    dd.classList.remove('open');
+  }else{
+    dd.classList.add('open');
+    loadNotifications();
+    backendFetch('POST','/notifications/mark-read',{all:true}).catch(()=>{});
+  }
+};
+
+window.markAllRead=async function(){
+  try{
+    await backendFetch('POST','/notifications/mark-read',{all:true});
+    const badge=document.getElementById('notif-badge');
+    if(badge){badge.textContent='';badge.style.display='none';}
+    await loadNotifications();
+  }catch(e){showToast('Could not mark notifications read','error');}
+};
+
+window.handleNotifClick=function(idx){
+  const notif=_notifCache[idx];
+  if(!notif)return;
+  document.getElementById('notif-dropdown')?.classList.remove('open');
+  const actions={
+    announcement:   ()=>showView('announcements',null),
+    new_lesson:     ()=>showView('lessons',null),
+    class_reminder: ()=>showView('schedule',null),
+    live_class_start:()=>notif.data?.url?window.location.href=notif.data.url:showView('live',null),
+    session_ended:  ()=>showView('live',null),
+    payment:        ()=>showView('settings',null),
+    achievement:    ()=>showView('leaderboard',null),
+  };
+  if(actions[notif.type])actions[notif.type]();
+  if(!notif.read)backendFetch('POST','/notifications/mark-read',{notifIds:[notif.id]}).catch(()=>{});
+};
+
+/* Close dropdown when clicking outside */
+document.addEventListener('click',(e)=>{
+  const wrap=document.getElementById('notifBellWrap');
+  const dd=document.getElementById('notif-dropdown');
+  if(dd&&dd.classList.contains('open')&&wrap&&!wrap.contains(e.target)){
+    dd.classList.remove('open');
+  }
+});
+
+/* Award first_login XP once per device */
+async function tryAwardFirstLogin(){
+  const key=`nltc_first_login_${currentUser.uid}`;
+  if(localStorage.getItem(key))return;
+  try{
+    const r=await backendFetch('POST','/gamification/xp',{action:'first_login'});
+    localStorage.setItem(key,'1');
+    handleXPResult(r);
+  }catch(e){}
+}
 </script>
 
 <!-- ═══════════ UI SCRIPTS ═══════════ -->

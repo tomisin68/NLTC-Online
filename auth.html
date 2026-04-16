@@ -1455,7 +1455,27 @@ async function doSignup(e) {
       extras.state      = document.getElementById('su-state').value || '';
     }
 
-    await window.__nltcSignup(email, pass, extras);
+    const { user: signedUpUser } = await window.__nltcSignup(email, pass, extras);
+
+    /* Notify backend so the welcome push / in-app notification fires */
+    if (assignedRole === 'student') {
+      try {
+        const idToken = await signedUpUser.getIdToken();
+        await fetch('https://nltc-backend.onrender.com/api/users/on-signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+          body: JSON.stringify({
+            firstName:  extras.firstName,
+            lastName:   extras.lastName,
+            phone:      extras.phone  || '',
+            state:      extras.state  || '',
+            targetExam: extras.targetExam || '',
+            plan:       'free',
+          }),
+        });
+      } catch(e) { /* silent — account was created successfully */ }
+    }
+
     const target = getRedirectTarget(assignedRole);
 
     toast(`Account created! Welcome, ${first} 🎉`, 'success');
