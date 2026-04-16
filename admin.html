@@ -945,7 +945,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let currentUser = null, userData = null;
-let allStudents = [], allVideos = [];
+let allStudents = [], allVideos = [], allBroadcasts = [];
 let videoFileToUpload = null;
 const AV_COLORS = ['#E67E22','#2E86AB','#6C3483','#117A65','#922B21','#1B4F72','#1E8449','#00796B'];
 
@@ -1008,6 +1008,7 @@ onAuthStateChanged(auth, async (user) => {
     loadSchedule(), loadTeachers(), loadCbtQuestions()
   ]);
   renderCharts();
+  renderRecentActivity();
   subscribeToActiveLive();
 });
 
@@ -1031,6 +1032,7 @@ window.loadStudents = async function() {
   renderRecentStudents();
   renderTopStudents();
   renderPlanChart();
+  renderRecentActivity();
   document.getElementById('studentBadge').textContent = allStudents.length;
 };
 
@@ -1115,6 +1117,54 @@ function renderTopStudents() {
       <div style="font-size:.8rem;font-weight:800;color:var(--gold);">${(s.xp||0).toLocaleString()} XP</div>
     </div>`;
   }).join('');
+}
+
+function renderRecentActivity() {
+  const el = document.getElementById('recentActivityFeed');
+  if (!el) return;
+  const items = [];
+  // New enrollments
+  allStudents.slice(0,10).forEach(s => {
+    if (!s.createdAt) return;
+    const name = `${s.firstName||''} ${s.lastName||''}`.trim() || s.email || 'A student';
+    items.push({
+      ts: s.createdAt.seconds ? s.createdAt.seconds*1000 : new Date(s.createdAt).getTime(),
+      icon:'fas fa-user-plus', iconBg:'#EFF6FF', iconColor:'#2563EB',
+      html:`<strong>${name}</strong> joined as a <strong>${s.plan||'free'}</strong> student`
+    });
+  });
+  // Video uploads
+  allVideos.slice(0,10).forEach(v => {
+    if (!v.createdAt) return;
+    items.push({
+      ts: v.createdAt.seconds ? v.createdAt.seconds*1000 : new Date(v.createdAt).getTime(),
+      icon:'fas fa-video', iconBg:'var(--gold-pale)', iconColor:'#92600A',
+      html:`New lesson uploaded: <strong>${v.title||'Untitled'}</strong>`
+    });
+  });
+  // Broadcasts
+  allBroadcasts.slice(0,10).forEach(b => {
+    if (!b.createdAt) return;
+    items.push({
+      ts: b.createdAt.seconds ? b.createdAt.seconds*1000 : new Date(b.createdAt).getTime(),
+      icon:'fas fa-bullhorn', iconBg:'var(--success-bg)', iconColor:'#059669',
+      html:`Broadcast sent: <strong>${b.title||'Untitled'}</strong>`
+    });
+  });
+  items.sort((a,b)=>b.ts-a.ts);
+  const recent = items.slice(0,10);
+  if (!recent.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🔔</div><div class="empty-title">No activity yet</div></div>';
+    return;
+  }
+  el.innerHTML = recent.map(it => `
+    <div class="activity-item">
+      <div class="act-icon" style="background:${it.iconBg};color:${it.iconColor};"><i class="${it.icon}"></i></div>
+      <div>
+        <div class="act-text">${it.html}</div>
+        <div class="act-time">${timeAgo({seconds:it.ts/1000})}</div>
+      </div>
+    </div>`).join('');
 }
 
 function renderPlanChart() {
@@ -1525,7 +1575,8 @@ window.startLiveClass = async function() {
 window.loadBroadcasts = async function() {
   try {
     const snap = await getDocs(query(collection(db,'broadcasts'), orderBy('createdAt','desc'), limit(50)));
-    const broadcasts = snap.docs.map(d=>({id:d.id,...d.data()}));
+    allBroadcasts = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const broadcasts = allBroadcasts;
     const total = broadcasts.length;
     const thisMonth = broadcasts.filter(b=>{
       if (!b.createdAt?.seconds) return false;
@@ -1548,6 +1599,7 @@ window.loadBroadcasts = async function() {
         <div style="font-size:.82rem;color:var(--text-2);">${b.message}</div>
         <div style="font-size:.7rem;color:var(--text-3);margin-top:6px;">${timeAgo(b.createdAt)}</div>
       </div>`).join('');
+    renderRecentActivity();
   } catch(e) {}
 };
 
@@ -1575,7 +1627,7 @@ window.loadSchedule = async function() {
     if (!classes.length) { el.innerHTML='<div class="empty-state">No scheduled classes</div>'; return; }
     el.innerHTML = classes.map(c => {
       const when = c.scheduledAt?.seconds ? new Date(c.scheduledAt.seconds*1000) : null;
-      const dateStr = when ? when.toLocaleDateString('en-NG',{weekday:'short',day:'numeric',month:'short'})+' · '+when.toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit'}) : '—';
+      const dateStr = when ? when.toLocaleDateString('en-NG',{weekday:'short',day:'numeric',month:'short'})+' · '+when.toLocaleTimeString('en-NG',{hour:'2-digit',minute:'2-digit',hour12:true}) : '—';
       return `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);">
         <div style="width:44px;height:44px;background:var(--navy);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-weight:800;">${when?.getDate()||'?'}<span style="font-size:.55rem;">${when?.toLocaleString('default',{month:'short'})||''}</span></div>
         <div style="flex:1;"><div style="font-weight:700;">${c.title}</div><div style="font-size:.72rem;color:var(--text-3);">${dateStr} · ${c.subject||'—'}</div></div>
@@ -1631,6 +1683,52 @@ function renderCharts() {
     const mrr = pro*5000 + elite*10000;
     const trend = [0.2,0.35,0.5,0.65,0.82,1].map(f=>Math.round(mrr*f));
     window._revChart = new Chart(revCtx, {type:'line', data:{labels:months,datasets:[{data:trend,fill:true,backgroundColor:'rgba(245,166,35,.08)',borderColor:'#F5A623',borderWidth:2,tension:.4}]}, options:chartOpts});
+  }
+
+  // Plan Distribution — Analytics page
+  const planAnCtx = document.getElementById('planChartAn'); if (planAnCtx) {
+    if (window._planChartAn) window._planChartAn.destroy();
+    const proA = allStudents.filter(s=>s.plan==='pro').length;
+    const eliteA = allStudents.filter(s=>s.plan==='elite').length;
+    const freeA = allStudents.filter(s=>!s.plan||s.plan==='free').length;
+    window._planChartAn = new Chart(planAnCtx, {
+      type:'bar',
+      data:{labels:['Free','Pro','Elite'],datasets:[{data:[freeA,proA,eliteA],backgroundColor:['#CBD5E1','#F5A623','#7C3AED'],borderRadius:6,borderSkipped:false}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.04)'}}}}
+    });
+  }
+
+  // Students by State — Analytics page
+  const stateCtx = document.getElementById('stateChart'); if (stateCtx) {
+    if (window._stateChart) window._stateChart.destroy();
+    const stateMap = {};
+    allStudents.forEach(s => { const st = s.state||'Unknown'; stateMap[st]=(stateMap[st]||0)+1; });
+    const stateEntries = Object.entries(stateMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    if (stateEntries.length) {
+      window._stateChart = new Chart(stateCtx, {
+        type:'bar',
+        data:{labels:stateEntries.map(e=>e[0]),datasets:[{data:stateEntries.map(e=>e[1]),backgroundColor:'#0A1628',borderRadius:5}]},
+        options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:'rgba(0,0,0,.04)'}}}}
+      });
+    } else {
+      stateCtx.parentElement.innerHTML = '<div class="empty-state"><div class="empty-icon">🗺️</div><div class="empty-title">No state data</div></div>';
+    }
+  }
+
+  // Exam Type Breakdown — Analytics page
+  const examEl = document.getElementById('examBreakdown'); if (examEl) {
+    const examMap = {};
+    allStudents.forEach(s => { const ex = s.targetExam||'Not Set'; examMap[ex]=(examMap[ex]||0)+1; });
+    const total = allStudents.length || 1;
+    const examColors = {'JAMB / UTME':'#E67E22','WAEC SSCE':'#2E86AB','NECO':'#6C3483','Not Set':'#CBD5E1'};
+    examEl.innerHTML = Object.entries(examMap).sort((a,b)=>b[1]-a[1]).map(([ex,count]) => {
+      const pct = Math.round(count/total*100);
+      const color = examColors[ex]||'#7B90AD';
+      return `<div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:.8rem;"><span style="font-weight:600;">${ex}</span><span style="color:var(--text-3);">${count} (${pct}%)</span></div>
+        <div style="height:8px;background:var(--surface-2);border-radius:100px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${color};border-radius:100px;transition:width .5s;"></div></div>
+      </div>`;
+    }).join('') || '<div class="empty-state"><div class="empty-icon">📱</div><div class="empty-title">No data</div></div>';
   }
 }
 
