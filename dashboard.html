@@ -448,6 +448,49 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
 .oq-score-num{font-family:var(--font-head);font-size:1.6rem;font-weight:900;line-height:1;}
 .oq-score-den{font-size:.7rem;opacity:.7;}
 
+/* OQ Tool buttons */
+.oq-tool-btn{padding:5px 10px;background:white;border:1.5px solid var(--border-2);border-radius:var(--r-sm);font-size:.76rem;font-weight:700;color:var(--navy);cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .18s;white-space:nowrap;}
+.oq-tool-btn:hover{border-color:var(--navy);background:var(--surface);}
+.oq-tool-btn.active{background:var(--navy);color:white;border-color:var(--navy);}
+
+/* OQ Calculator — floating fixed bottom-right */
+.oq-calc-overlay{position:fixed;bottom:84px;right:16px;z-index:500;display:none;filter:drop-shadow(0 8px 32px rgba(11,29,58,.22));}
+.oq-calc-overlay.show{display:block;}
+.oq-calc-box{background:var(--navy);border:1px solid rgba(255,255,255,.14);border-radius:16px;overflow:hidden;width:232px;}
+.oq-calc-display{padding:10px 13px 8px;background:var(--navy-2);text-align:right;}
+.oq-calc-expr{font-size:.65rem;color:rgba(255,255,255,.35);font-family:monospace;min-height:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.oq-calc-val{font-family:monospace;font-size:1.6rem;font-weight:600;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2;}
+.oq-calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.07);}
+.oq-cbtn{padding:13px 4px;font-size:.86rem;font-weight:700;cursor:pointer;border:none;text-align:center;transition:filter .1s,transform .1s;line-height:1;}
+.oq-cbtn:hover{filter:brightness(1.18);}
+.oq-cbtn:active{transform:scale(.92);}
+.oq-cb-num{background:#1A2D50;color:white;}
+.oq-cb-op{background:#243A60;color:var(--gold);}
+.oq-cb-fn{background:#1E3050;color:rgba(255,255,255,.75);}
+.oq-cb-clear{background:#3A1A1A;color:#FCA5A5;}
+.oq-cb-eq{background:var(--gold);color:var(--navy);}
+.oq-cb-zero{grid-column:span 2;text-align:left;padding-left:20px;}
+
+/* OQ Question Map — fixed right panel */
+.oq-qmap-panel{position:fixed;top:60px;right:0;bottom:0;width:210px;background:white;border-left:1px solid var(--border);box-shadow:-6px 0 24px rgba(11,29,58,.1);z-index:400;transform:translateX(100%);transition:transform .24s cubic-bezier(.4,0,.2,1);overflow-y:auto;padding:14px 12px;}
+.oq-qmap-panel.show{transform:translateX(0);}
+.oq-qmap-title{font-family:var(--font-head);font-size:.82rem;font-weight:800;color:var(--navy);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.oq-qmap-close{background:none;border:none;color:var(--text-3);cursor:pointer;font-size:.8rem;padding:2px;}
+.oq-qmap-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:14px;}
+.oq-qmap-btn{width:100%;aspect-ratio:1;border-radius:6px;border:1.5px solid var(--border-2);font-size:.7rem;font-weight:700;cursor:pointer;color:var(--text-3);background:var(--surface);transition:all .14s;}
+.oq-qmap-btn:hover:not(.oq-qm-answered){border-color:var(--navy);color:var(--navy);}
+.oq-qmap-btn.oq-qm-current{border-color:var(--gold) !important;background:var(--gold-pale);color:var(--navy);}
+.oq-qmap-btn.oq-qm-correct{background:#D1FAE5;border-color:var(--success);color:#065F46;}
+.oq-qmap-btn.oq-qm-wrong{background:#FEE2E2;border-color:#EF4444;color:#991B1B;}
+.oq-qmap-btn.oq-qm-answered{cursor:default;}
+.oq-qmap-stats{padding:10px;background:var(--surface);border-radius:var(--r-sm);margin-bottom:12px;display:flex;flex-direction:column;gap:5px;}
+.oq-qmap-stat{display:flex;justify-content:space-between;font-size:.74rem;}
+.oq-qmap-stat span:first-child{color:var(--text-2);}
+.oq-qmap-stat strong{color:var(--navy);}
+.oq-qmap-legend{display:flex;flex-direction:column;gap:5px;}
+.oq-qmap-leg{display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--text-2);}
+.oq-qmap-dot{width:11px;height:11px;border-radius:3px;flex-shrink:0;}
+
 /* ═══════════════════════════════════════════
    LEADERBOARD
 ═══════════════════════════════════════════ */
@@ -1107,8 +1150,10 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
     <div class="oq-quiz-wrap">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
         <span id="oqQLabel" style="font-size:.8rem;font-weight:700;color:var(--navy);"></span>
-        <div style="display:flex;align-items:center;gap:8px;">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span id="oqTimerDisplay" style="display:none;font-family:monospace;font-size:.88rem;font-weight:700;padding:4px 10px;border-radius:8px;background:var(--surface-2);color:var(--navy);"></span>
+          <button class="oq-tool-btn" id="oqCalcBtn" onclick="toggleOqCalc()"><i class="fas fa-calculator"></i> Calc</button>
+          <button class="oq-tool-btn" id="oqQMapBtn" onclick="toggleOqQMap()"><i class="fas fa-th"></i> Map</button>
           <button class="btn-outline btn-sm" onclick="endOfficialQuiz()"><i class="fas fa-times"></i> End</button>
         </div>
       </div>
@@ -1143,6 +1188,53 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
       </div>
     </div>
     <div class="oq-quiz-wrap" id="oqReviewList" style="margin-top:4px;"></div>
+  </div>
+</div>
+
+<!-- OQ Calculator Overlay -->
+<div class="oq-calc-overlay" id="oqCalcOverlay">
+  <div class="oq-calc-box">
+    <div class="oq-calc-display">
+      <div class="oq-calc-expr" id="oqCalcExpr"></div>
+      <div class="oq-calc-val" id="oqCalcVal">0</div>
+    </div>
+    <div class="oq-calc-grid">
+      <button class="oq-cbtn oq-cb-clear" onclick="oqCalcAction('clear')">AC</button>
+      <button class="oq-cbtn oq-cb-fn"    onclick="oqCalcAction('sign')">+/−</button>
+      <button class="oq-cbtn oq-cb-fn"    onclick="oqCalcAction('percent')">%</button>
+      <button class="oq-cbtn oq-cb-op"    onclick="oqCalcAction('op','/')">÷</button>
+      <button class="oq-cbtn oq-cb-num"   onclick="oqCalcAction('num','7')">7</button>
+      <button class="oq-cbtn oq-cb-num"   onclick="oqCalcAction('num','8')">8</button>
+      <button class="oq-cbtn oq-cb-num"   onclick="oqCalcAction('num','9')">9</button>
+      <button class="oq-cbtn oq-cb-op"    onclick="oqCalcAction('op','*')">×</button>
+      <button class="oq-cbtn oq-cb-num"   onclick="oqCalcAction('num','4')">4</button>
+      <button class="oq-cbtn oq-cb-num"   onclick="oqCalcAction('num','5')">5</button>
+      <button class="oq-cbtn oq-cb-num"   onclick="oqCalcAction('num','6')">6</button>
+      <button class="oq-cbtn oq-cb-op"    onclick="oqCalcAction('op','-')">−</button>
+      <button class="oq-cbtn oq-cb-num"   onclick="oqCalcAction('num','1')">1</button>
+      <button class="oq-cbtn oq-cb-num"   onclick="oqCalcAction('num','2')">2</button>
+      <button class="oq-cbtn oq-cb-num"   onclick="oqCalcAction('num','3')">3</button>
+      <button class="oq-cbtn oq-cb-op"    onclick="oqCalcAction('op','+')">+</button>
+      <button class="oq-cbtn oq-cb-num oq-cb-zero" onclick="oqCalcAction('num','0')">0</button>
+      <button class="oq-cbtn oq-cb-num"   onclick="oqCalcAction('dot')">.</button>
+      <button class="oq-cbtn oq-cb-eq"    onclick="oqCalcAction('equals')">=</button>
+    </div>
+  </div>
+</div>
+
+<!-- OQ Question Map Panel -->
+<div class="oq-qmap-panel" id="oqQMapPanel">
+  <div class="oq-qmap-title">
+    Question Map
+    <button class="oq-qmap-close" onclick="toggleOqQMap()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="oq-qmap-stats" id="oqQMapStats"></div>
+  <div class="oq-qmap-grid" id="oqQMapGrid"></div>
+  <div class="oq-qmap-legend">
+    <div class="oq-qmap-leg"><div class="oq-qmap-dot" style="background:var(--gold-pale);border:1.5px solid var(--gold);"></div>Current</div>
+    <div class="oq-qmap-leg"><div class="oq-qmap-dot" style="background:#D1FAE5;border:1.5px solid var(--success);"></div>Correct</div>
+    <div class="oq-qmap-leg"><div class="oq-qmap-dot" style="background:#FEE2E2;border:1.5px solid #EF4444;"></div>Wrong</div>
+    <div class="oq-qmap-leg"><div class="oq-qmap-dot" style="background:var(--surface);border:1.5px solid var(--border-2);"></div>Not yet reached</div>
   </div>
 </div>
 
@@ -1552,6 +1644,7 @@ window.startOfficialQuiz = async function() {
   pool = pool.slice(0, cnt);
   oqFiltered = pool; oqCurrent = 0; oqScore = 0; oqAnswered = false; oqResults = [];
   oqTimeLeft = parseInt(document.getElementById('oqTimeLimit')?.value || 0);
+  oqInitQMap();
   document.getElementById('oqSetup').style.display = 'none';
   document.getElementById('oqResultScreen').style.display = 'none';
   document.getElementById('oqQuizScreen').style.display = '';
@@ -1617,6 +1710,8 @@ window.oqSelectAnswer = function(letter) {
   const isRight = letter === correct;
   if(isRight) oqScore++;
   oqResults.push({q, chosen: letter, correct, isRight});
+  oqAnswerMap[oqCurrent] = isRight ? 'correct' : 'wrong';
+  oqUpdateQMap();
   ['A','B','C','D'].forEach(l => {
     const el = document.getElementById('oqOpt'+l);
     if(!el) return;
@@ -1638,10 +1733,12 @@ window.oqNext = function() {
   if(oqCurrent+1 >= oqFiltered.length) { oqShowResults(); return; }
   oqCurrent++;
   oqRenderQuestion();
+  oqUpdateQMap();
 };
 
 function oqShowResults() {
   clearInterval(oqTimerInterval);
+  oqCloseTools();
   document.getElementById('oqQuizScreen').style.display = 'none';
   document.getElementById('oqResultScreen').style.display = '';
   const total = oqFiltered.length;
@@ -1677,9 +1774,147 @@ window.endOfficialQuiz = function() {
 
 window.showOqSetup = function() {
   clearInterval(oqTimerInterval);
+  oqCloseTools();
   document.getElementById('oqQuizScreen').style.display = 'none';
   document.getElementById('oqResultScreen').style.display = 'none';
   document.getElementById('oqSetup').style.display = '';
+};
+
+function oqCloseTools() {
+  document.getElementById('oqCalcOverlay')?.classList.remove('show');
+  document.getElementById('oqQMapPanel')?.classList.remove('show');
+  document.getElementById('oqCalcBtn')?.classList.remove('active');
+  document.getElementById('oqQMapBtn')?.classList.remove('active');
+}
+
+/* ── OQ CALCULATOR ── */
+let oqCalc = {display:'0',expr:'',prevOp:null,prevVal:null,justEvaled:false,waitingForOperand:false};
+
+window.toggleOqCalc = function() {
+  const overlay = document.getElementById('oqCalcOverlay');
+  const btn = document.getElementById('oqCalcBtn');
+  const isOpen = overlay.classList.contains('show');
+  overlay.classList.toggle('show', !isOpen);
+  btn.classList.toggle('active', !isOpen);
+};
+
+window.oqCalcAction = function(type, val) {
+  switch(type) {
+    case 'num': {
+      if (oqCalc.waitingForOperand || oqCalc.justEvaled) {
+        oqCalc.display = val; oqCalc.waitingForOperand = false; oqCalc.justEvaled = false;
+      } else {
+        oqCalc.display = oqCalc.display === '0' ? val : oqCalc.display + val;
+      }
+      break;
+    }
+    case 'dot': {
+      if (oqCalc.waitingForOperand) { oqCalc.display = '0.'; oqCalc.waitingForOperand = false; }
+      else if (!oqCalc.display.includes('.')) oqCalc.display += '.';
+      break;
+    }
+    case 'op': {
+      if (oqCalc.prevOp && !oqCalc.waitingForOperand) {
+        try {
+          const res = oqCalcApply(parseFloat(oqCalc.prevVal), parseFloat(oqCalc.display), oqCalc.prevOp);
+          oqCalc.display = String(oqCalcRound(res));
+          oqCalc.prevVal = oqCalcRound(res);
+          oqCalc.expr = oqCalcRound(res) + ' ' + oqCalcSym(val) + ' ';
+        } catch(e) {}
+      } else {
+        oqCalc.prevVal = parseFloat(oqCalc.display);
+        oqCalc.expr = oqCalc.display + ' ' + oqCalcSym(val) + ' ';
+      }
+      oqCalc.prevOp = val; oqCalc.waitingForOperand = true; oqCalc.justEvaled = false;
+      break;
+    }
+    case 'equals': {
+      if (oqCalc.prevOp) {
+        try {
+          const res = oqCalcApply(parseFloat(oqCalc.prevVal), parseFloat(oqCalc.display), oqCalc.prevOp);
+          oqCalc.expr = oqCalc.expr + oqCalc.display + ' =';
+          oqCalc.display = String(oqCalcRound(res));
+          oqCalc.prevOp = null; oqCalc.prevVal = null;
+          oqCalc.justEvaled = true; oqCalc.waitingForOperand = false;
+        } catch(e) { oqCalc.display = 'Error'; }
+      }
+      break;
+    }
+    case 'clear': {
+      oqCalc = {display:'0',expr:'',prevOp:null,prevVal:null,justEvaled:false,waitingForOperand:false};
+      break;
+    }
+    case 'sign':    { if (oqCalc.display !== '0') oqCalc.display = String(parseFloat(oqCalc.display) * -1); break; }
+    case 'percent': { oqCalc.display = String(parseFloat(oqCalc.display) / 100); break; }
+  }
+  const v = oqCalc.display;
+  document.getElementById('oqCalcVal').textContent  = v.length > 11 ? parseFloat(v).toExponential(4) : v;
+  document.getElementById('oqCalcExpr').textContent = oqCalc.expr;
+};
+
+function oqCalcApply(a, b, op) {
+  if (op === '/') { if (b === 0) throw new Error(); return a / b; }
+  if (op === '*') return a * b;
+  if (op === '+') return a + b;
+  if (op === '-') return a - b;
+  return b;
+}
+function oqCalcRound(n) {
+  if (!isFinite(n)) return 0;
+  const s = n.toString();
+  return (s.includes('.') && s.split('.')[1].length > 10) ? parseFloat(n.toFixed(10)) : n;
+}
+function oqCalcSym(op) { return {'/':'÷','*':'×','+':'+','-':'−'}[op] || op; }
+
+/* ── OQ QUESTION MAP ── */
+let oqAnswerMap = {}; // { [index]: 'correct'|'wrong' }
+
+window.toggleOqQMap = function() {
+  const panel = document.getElementById('oqQMapPanel');
+  const btn = document.getElementById('oqQMapBtn');
+  const isOpen = panel.classList.contains('show');
+  panel.classList.toggle('show', !isOpen);
+  btn.classList.toggle('active', !isOpen);
+  if (!isOpen) oqUpdateQMap();
+};
+
+function oqInitQMap() {
+  oqAnswerMap = {};
+  oqUpdateQMap();
+}
+
+function oqUpdateQMap() {
+  const panel = document.getElementById('oqQMapPanel');
+  if (!panel || !panel.classList.contains('show')) return;
+  const total = oqFiltered.length;
+  const answered = Object.keys(oqAnswerMap).length;
+  const correct = Object.values(oqAnswerMap).filter(v => v === 'correct').length;
+  const wrong = answered - correct;
+
+  document.getElementById('oqQMapStats').innerHTML = `
+    <div class="oq-qmap-stat"><span>Total</span><strong>${total}</strong></div>
+    <div class="oq-qmap-stat"><span>Answered</span><strong>${answered}</strong></div>
+    <div class="oq-qmap-stat"><span style="color:var(--success);">Correct</span><strong style="color:var(--success);">${correct}</strong></div>
+    <div class="oq-qmap-stat"><span style="color:#EF4444;">Wrong</span><strong style="color:#EF4444;">${wrong}</strong></div>
+  `;
+
+  const grid = document.getElementById('oqQMapGrid');
+  grid.innerHTML = Array.from({length: total}, (_, i) => {
+    let cls = 'oq-qmap-btn';
+    if (i === oqCurrent) cls += ' oq-qm-current';
+    else if (oqAnswerMap[i] === 'correct') cls += ' oq-qm-correct oq-qm-answered';
+    else if (oqAnswerMap[i] === 'wrong') cls += ' oq-qm-wrong oq-qm-answered';
+    const clickable = i > oqCurrent; // allow jumping ahead to unanswered
+    return `<button class="${cls}" onclick="oqJumpTo(${i})" ${i <= oqCurrent && oqAnswerMap[i] ? 'disabled title="Already answered"' : ''}>${i + 1}</button>`;
+  }).join('');
+}
+
+window.oqJumpTo = function(idx) {
+  if (idx === oqCurrent) return;
+  if (oqAnswerMap[idx] !== undefined) return; // already answered, can't revisit
+  oqCurrent = idx;
+  oqRenderQuestion();
+  oqUpdateQMap();
 };
 
 (function checkLastCBT(){

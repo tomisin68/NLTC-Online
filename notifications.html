@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Notifications — NLTC Online</title>
+<link rel="icon" type="image/png" href="NLTC.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root {
+  --navy:#0A1628; --navy-2:#122040; --navy-3:#1A3060;
+  --gold:#F0A500; --gold-2:#FFBE33; --gold-pale:#FFF8E7;
+  --white:#FFFFFF; --surface:#F5F7FC; --surface-2:#EBF0FA;
+  --text-1:#0A1628; --text-2:#3A5070; --text-3:#7A90B0;
+  --success:#12B76A; --error:#EF4444; --warning:#F59E0B;
+  --border:rgba(10,22,40,.08); --border-2:rgba(10,22,40,.14);
+  --r-sm:10px; --r-md:16px; --r-lg:24px;
+  --shadow-sm:0 2px 12px rgba(10,22,40,.06);
+  --shadow-md:0 8px 32px rgba(10,22,40,.12);
+  --font:'Plus Jakarta Sans',sans-serif;
+  --topbar-h:58px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:16px;scroll-behavior:smooth;}
+body{font-family:var(--font);color:var(--text-1);background:var(--surface);min-height:100vh;}
+
+/* ── TOPBAR ── */
+.topbar{position:sticky;top:0;z-index:100;height:var(--topbar-h);background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 16px;box-shadow:var(--shadow-sm);}
+.tb-back{width:36px;height:36px;border-radius:50%;background:var(--surface);border:1.5px solid var(--border-2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--navy);font-size:.82rem;flex-shrink:0;transition:all .18s;}
+.tb-back:hover{background:var(--navy);color:white;border-color:var(--navy);}
+.tb-title{font-size:1rem;font-weight:800;color:var(--navy);flex:1;min-width:0;}
+.tb-badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;border-radius:100px;background:var(--error);color:white;font-size:.68rem;font-weight:800;padding:0 6px;}
+.tb-action{padding:7px 14px;background:var(--navy);color:white;border:none;border-radius:var(--r-sm);font-size:.78rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .18s;white-space:nowrap;}
+.tb-action:hover{background:var(--navy-3);}
+.tb-action-ghost{padding:7px 14px;background:white;color:var(--navy);border:1.5px solid var(--border-2);border-radius:var(--r-sm);font-size:.78rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .18s;}
+.tb-action-ghost:hover{border-color:var(--navy);}
+.admin-tag{background:rgba(240,165,0,.15);color:var(--gold);border:1px solid rgba(240,165,0,.3);font-size:.66rem;font-weight:800;padding:2px 8px;border-radius:100px;white-space:nowrap;}
+
+/* ── TABS ── */
+.tabs-bar{background:white;border-bottom:1px solid var(--border);padding:0 16px;display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tabs-bar::-webkit-scrollbar{display:none;}
+.tab-btn{padding:12px 16px;font-size:.82rem;font-weight:700;color:var(--text-3);border:none;background:none;cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;transition:all .18s;position:relative;}
+.tab-btn.active{color:var(--navy);border-bottom-color:var(--gold);}
+.tab-btn .tab-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:100px;background:var(--error);color:white;font-size:.62rem;font-weight:800;padding:0 5px;margin-left:5px;vertical-align:middle;}
+
+/* ── FILTER CHIPS ── */
+.filter-bar{padding:10px 16px;display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch;background:white;border-bottom:1px solid var(--border);}
+.filter-bar::-webkit-scrollbar{display:none;}
+.chip{padding:5px 12px;border-radius:100px;border:1.5px solid var(--border-2);font-size:.74rem;font-weight:700;cursor:pointer;color:var(--text-2);background:white;white-space:nowrap;transition:all .16s;}
+.chip:hover{border-color:var(--navy);color:var(--navy);}
+.chip.active{background:var(--navy);color:white;border-color:var(--navy);}
+
+/* ── MAIN CONTENT ── */
+.page-content{max-width:680px;margin:0 auto;padding:16px 16px 80px;}
+
+/* ── DATE GROUP ── */
+.date-group{margin-bottom:4px;}
+.date-label{font-size:.68rem;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;padding:14px 0 8px;position:sticky;top:var(--topbar-h);background:var(--surface);z-index:10;}
+
+/* ── NOTIFICATION ITEM ── */
+.notif-card{background:white;border-radius:var(--r-md);border:1px solid var(--border);margin-bottom:8px;overflow:hidden;cursor:pointer;transition:all .18s;position:relative;}
+.notif-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px);}
+.notif-card.unread{border-left:3px solid var(--gold);background:white;}
+.notif-card.unread::before{content:'';position:absolute;top:14px;right:14px;width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;}
+.notif-inner{display:flex;align-items:flex-start;gap:12px;padding:14px 36px 14px 14px;}
+.notif-icon-wrap{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.notif-body{flex:1;min-width:0;}
+.notif-title{font-size:.86rem;font-weight:700;color:var(--navy);margin-bottom:3px;line-height:1.35;}
+.notif-text{font-size:.78rem;color:var(--text-2);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.notif-meta{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.notif-time{font-size:.68rem;color:var(--text-3);}
+.notif-type-chip{font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:100px;}
+.notif-actions{display:flex;gap:6px;padding:0 14px 10px 66px;}
+.notif-act-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--border-2);font-size:.72rem;font-weight:700;cursor:pointer;background:white;color:var(--text-2);transition:all .16s;}
+.notif-act-btn:hover{border-color:var(--navy);color:var(--navy);}
+.notif-act-btn.del:hover{border-color:var(--error);color:var(--error);}
+
+/* Icon bg colours per type */
+.ni-welcome{background:#EFF6FF;}.ni-announcement{background:#FFF7ED;}.ni-new_lesson{background:#F0FDF4;}
+.ni-live{background:#FEF2F2;}.ni-payment{background:#ECFDF5;}.ni-achievement{background:#FEFCE8;}
+.ni-new_signup{background:#F5F3FF;}.ni-default{background:var(--surface-2);}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:60px 20px;}
+.empty-icon{font-size:3rem;margin-bottom:14px;opacity:.35;}
+.empty-title{font-size:.95rem;font-weight:800;color:var(--navy);margin-bottom:6px;}
+.empty-sub{font-size:.82rem;color:var(--text-3);line-height:1.55;}
+
+/* ── BROADCAST ITEM (admin) ── */
+.bc-card{background:white;border-radius:var(--r-md);border:1px solid var(--border);margin-bottom:10px;padding:14px;}
+.bc-card-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.bc-title{font-size:.88rem;font-weight:700;color:var(--navy);flex:1;line-height:1.3;}
+.bc-meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.bc-msg{font-size:.8rem;color:var(--text-2);line-height:1.5;margin-bottom:8px;}
+.badge{display:inline-flex;align-items:center;font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:100px;}
+.badge-blue{background:#EFF6FF;color:#1D4ED8;}
+.badge-gold{background:var(--gold-pale);color:#92400E;}
+.badge-green{background:#F0FDF4;color:#065F46;}
+.badge-purple{background:#F5F3FF;color:#6D28D9;}
+.badge-gray{background:var(--surface-2);color:var(--text-2);}
+
+/* ── FAB (admin send) ── */
+.fab{position:fixed;bottom:24px;right:20px;width:54px;height:54px;border-radius:50%;background:var(--gold);color:var(--navy);border:none;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(240,165,0,.4);transition:all .2s;z-index:200;}
+.fab:hover{transform:scale(1.08);box-shadow:0 10px 32px rgba(240,165,0,.5);}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,22,40,.55);z-index:500;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.show{display:flex;}
+.modal{background:white;border-radius:var(--r-lg);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid var(--border);}
+.modal-title{font-size:.98rem;font-weight:800;color:var(--navy);}
+.modal-close{width:30px;height:30px;border-radius:50%;background:var(--surface);border:none;color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem;}
+.modal-body{padding:20px;flex:1;}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+.form-group{margin-bottom:14px;}
+.form-label{display:block;font-size:.78rem;font-weight:700;color:var(--text-1);margin-bottom:5px;}
+.form-input{width:100%;padding:9px 12px;border:1.5px solid var(--border-2);border-radius:var(--r-sm);font-size:.86rem;font-family:var(--font);color:var(--text-1);background:white;outline:none;transition:border-color .18s;}
+.form-input:focus{border-color:var(--navy);}
+textarea.form-input{resize:vertical;min-height:80px;}
+.btn-gold{padding:9px 18px;background:var(--gold);color:var(--navy);border:none;border-radius:var(--r-sm);font-size:.82rem;font-weight:700;cursor:pointer;}
+.btn-navy{padding:9px 18px;background:var(--navy);color:white;border:none;border-radius:var(--r-sm);font-size:.82rem;font-weight:700;cursor:pointer;}
+.btn-outline{padding:9px 18px;background:white;color:var(--navy);border:1.5px solid var(--border-2);border-radius:var(--r-sm);font-size:.82rem;font-weight:700;cursor:pointer;}
+
+/* ── TOAST ── */
+#toastWrap{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:90%;max-width:360px;}
+.toast{padding:10px 16px;border-radius:var(--r-md);font-size:.82rem;font-weight:600;display:flex;align-items:center;gap:8px;animation:toastIn .25s ease;box-shadow:var(--shadow-md);}
+.toast.success{background:#12B76A;color:white;}
+.toast.error{background:#EF4444;color:white;}
+.toast.info{background:var(--navy-2);color:white;border-left:3px solid var(--gold);}
+@keyframes toastIn{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:none;}}
+
+/* ── SKELETON LOADING ── */
+.skeleton{background:linear-gradient(90deg,var(--surface-2) 25%,var(--surface) 50%,var(--surface-2) 75%);background-size:200% 100%;animation:shimmer 1.3s infinite;border-radius:8px;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+.skel-card{background:white;border-radius:var(--r-md);border:1px solid var(--border);padding:14px;margin-bottom:8px;display:flex;gap:12px;}
+.skel-icon{width:40px;height:40px;border-radius:12px;flex-shrink:0;}
+.skel-body{flex:1;display:flex;flex-direction:column;gap:8px;}
+.skel-line{height:12px;border-radius:6px;}.skel-line.w80{width:80%;}.skel-line.w50{width:50%;}.skel-line.w65{width:65%;}
+
+/* ── NOTIFICATION SETTINGS PANEL ── */
+.settings-panel{background:white;border-radius:var(--r-md);border:1px solid var(--border);padding:14px;margin-bottom:12px;}
+.sp-title{font-size:.82rem;font-weight:800;color:var(--navy);margin-bottom:12px;}
+.sp-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
+.sp-row:last-child{border-bottom:none;}
+.sp-label{font-size:.82rem;color:var(--text-1);font-weight:600;}
+.sp-sub{font-size:.72rem;color:var(--text-3);margin-top:2px;}
+.toggle{width:40px;height:22px;border-radius:100px;cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0;}
+.toggle.on{background:var(--success);}
+.toggle.off{background:var(--border-2);}
+.toggle::after{content:'';position:absolute;top:3px;width:16px;height:16px;border-radius:50%;background:white;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.toggle.on::after{left:21px;}
+.toggle.off::after{left:3px;}
+
+@media(max-width:480px){
+  .page-content{padding:12px 12px 80px;}
+  .notif-actions{padding-left:54px;}
+  .modal{border-radius:var(--r-lg) var(--r-lg) 0 0;position:fixed;bottom:0;max-height:85vh;}
+  .modal-overlay{align-items:flex-end;padding:0;}
+}
+</style>
+</head>
+<body>
+
+<div id="toastWrap"></div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <button class="tb-back" onclick="goBack()" title="Back"><i class="fas fa-arrow-left"></i></button>
+  <div class="tb-title">
+    Notifications
+    <span class="tb-badge" id="topbarBadge" style="display:none;margin-left:6px;vertical-align:middle;"></span>
+  </div>
+  <span class="admin-tag" id="adminTag" style="display:none;"><i class="fas fa-shield-alt"></i> Admin</span>
+  <button class="tb-action-ghost" id="markAllBtn" onclick="markAllRead()" style="display:none;">
+    <i class="fas fa-check-double"></i> Mark all read
+  </button>
+</div>
+
+<!-- TABS -->
+<div class="tabs-bar" id="tabsBar">
+  <button class="tab-btn active" data-tab="all" onclick="switchTab('all',this)">
+    All <span class="tab-count" id="tabCountAll" style="display:none;"></span>
+  </button>
+  <button class="tab-btn" data-tab="unread" onclick="switchTab('unread',this)">
+    Unread <span class="tab-count" id="tabCountUnread" style="display:none;"></span>
+  </button>
+  <!-- Admin-only tabs injected by JS -->
+</div>
+
+<!-- FILTER CHIPS -->
+<div class="filter-bar" id="filterBar">
+  <div class="chip active" data-filter="all" onclick="setFilter('all',this)">All</div>
+  <div class="chip" data-filter="announcement" onclick="setFilter('announcement',this)">📢 Announcements</div>
+  <div class="chip" data-filter="new_lesson" onclick="setFilter('new_lesson',this)">🎬 Lessons</div>
+  <div class="chip" data-filter="live_class_start" onclick="setFilter('live_class_start',this)">📡 Live</div>
+  <div class="chip" data-filter="achievement" onclick="setFilter('achievement',this)">🏆 Achievements</div>
+  <div class="chip" data-filter="payment" onclick="setFilter('payment',this)">💳 Payments</div>
+</div>
+
+<!-- MAIN CONTENT AREA -->
+<div class="page-content" id="pageContent">
+  <!-- Skeleton while loading -->
+  <div id="skeletonLoader">
+    ${[1,2,3,4].map(()=>`
+    <div class="skel-card">
+      <div class="skeleton skel-icon"></div>
+      <div class="skel-body">
+        <div class="skeleton skel-line w80"></div>
+        <div class="skeleton skel-line w65"></div>
+        <div class="skeleton skel-line w50"></div>
+      </div>
+    </div>`).join('')}
+  </div>
+  <div id="notifList" style="display:none;"></div>
+  <div id="broadcastList" style="display:none;"></div>
+  <div id="settingsPane" style="display:none;"></div>
+</div>
+
+<!-- FAB (admin: send new broadcast) -->
+<button class="fab" id="fabBtn" onclick="openModal('broadcastModal')" style="display:none;" title="Send Broadcast">
+  <i class="fas fa-paper-plane"></i>
+</button>
+
+<!-- BROADCAST MODAL (admin) -->
+<div class="modal-overlay" id="broadcastModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📢 Send Broadcast</div>
+      <button class="modal-close" onclick="closeModal('broadcastModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Title *</label>
+        <input type="text" class="form-input" id="bcTitle" placeholder="e.g. JAMB Update 2025">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Message *</label>
+        <textarea class="form-input" id="bcMsg" rows="4" placeholder="Write your announcement here…"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-input" id="bcCat">
+            <option>General</option><option>JAMB</option><option>WAEC</option><option>NECO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Send To</label>
+          <select class="form-input" id="bcTarget">
+            <option>All Students</option><option>Pro Users Only</option><option>Free Users Only</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('broadcastModal')">Cancel</button>
+      <button class="btn-gold" onclick="sendBroadcast()"><i class="fas fa-paper-plane"></i> Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ FIREBASE + LOGIC ═══════════════ -->
+<script type="module">
+import { initializeApp }                    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged }      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, orderBy, limit, where, serverTimestamp, onSnapshot, writeBatch }
+                                             from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const FIREBASE_CONFIG = {
+  apiKey:"AIzaSyA9vzT1TBpTdRJUfyYm51goS-5HfL3FcbU",
+  authDomain:"nltc-online.firebaseapp.com",
+  projectId:"nltc-online",
+  storageBucket:"nltc-online.firebasestorage.app",
+  messagingSenderId:"267993935158",
+  appId:"1:267993935158:web:723c13b2564b817fbc9797"
+};
+const BACKEND_URL = 'https://nltc-backend.onrender.com';
+const NOTIF_ICONS = {
+  welcome:'🎓', live_class_start:'📡', session_ended:'📡',
+  announcement:'📢', new_lesson:'🎬', class_reminder:'📅',
+  new_signup:'👤', payment:'💳', achievement:'🏆'
+};
+const NOTIF_ICON_BG = {
+  welcome:'ni-welcome', announcement:'ni-announcement', new_lesson:'ni-new_lesson',
+  live_class_start:'ni-live', session_ended:'ni-live',
+  payment:'ni-payment', achievement:'ni-achievement',
+  new_signup:'ni-new_signup', class_reminder:'ni-default'
+};
+const TYPE_LABELS = {
+  welcome:'Welcome', live_class_start:'Live Class', session_ended:'Live Class',
+  announcement:'Announcement', new_lesson:'Lesson', class_reminder:'Reminder',
+  new_signup:'Sign Up', payment:'Payment', achievement:'Achievement'
+};
+const BC_CAT_COLORS = { JAMB:'badge-blue', WAEC:'badge-green', NECO:'badge-purple', General:'badge-gray' };
+
+const app  = initializeApp(FIREBASE_CONFIG);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+let currentUser = null, isAdmin = false;
+let allNotifs = [], allBroadcasts = [];
+let activeTab = 'all', activeFilter = 'all';
+let unsubUnread = null;
+
+// ── AUTH GUARD ──
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = 'auth.html'; return; }
+  currentUser = user;
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    const data = snap.exists() ? snap.data() : {};
+    isAdmin = data.role === 'admin';
+    if (isAdmin) {
+      document.getElementById('adminTag').style.display = '';
+      document.getElementById('fabBtn').style.display = '';
+      injectAdminTabs();
+    }
+  } catch(e) {}
+
+  // Real-time unread badge
+  const badgeEl = document.getElementById('topbarBadge');
+  unsubUnread = onSnapshot(
+    query(collection(db,'users',user.uid,'notifications'), where('read','==',false)),
+    snap => {
+      const c = snap.size;
+      badgeEl.textContent = c || '';
+      badgeEl.style.display = c ? '' : 'none';
+      const tab = document.getElementById('tabCountUnread');
+      if (tab) { tab.textContent = c || ''; tab.style.display = c ? '' : 'none'; }
+    }
+  );
+
+  loadCurrentTab();
+});
+
+// ── SKELETON HTML helper ──
+function skeletonHTML() {
+  return [1,2,3,4].map(()=>`
+    <div class="skel-card">
+      <div class="skeleton skel-icon"></div>
+      <div class="skel-body">
+        <div class="skeleton skel-line w80"></div>
+        <div class="skeleton skel-line w65"></div>
+        <div class="skeleton skel-line w50"></div>
+      </div>
+    </div>`).join('');
+}
+
+// ── TABS ──
+function injectAdminTabs() {
+  const bar = document.getElementById('tabsBar');
+  bar.insertAdjacentHTML('beforeend', `
+    <button class="tab-btn" data-tab="broadcasts" onclick="switchTab('broadcasts',this)">
+      Broadcasts <span class="tab-count" id="tabCountBC" style="display:none;"></span>
+    </button>
+    <button class="tab-btn" data-tab="settings" onclick="switchTab('settings',this)">
+      ⚙️ Settings
+    </button>
+  `);
+}
+
+window.switchTab = function(tab, btn) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const filterBar = document.getElementById('filterBar');
+  filterBar.style.display = (tab === 'all' || tab === 'unread') ? '' : 'none';
+
+  document.getElementById('fabBtn').style.display = (isAdmin && tab === 'broadcasts') ? '' : 'none';
+  document.getElementById('markAllBtn').style.display = (tab === 'all' || tab === 'unread') ? '' : 'none';
+
+  loadCurrentTab();
+};
+
+// ── FILTERS ──
+window.setFilter = function(filter, el) {
+  activeFilter = filter;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderNotifications();
+};
+
+// ── BACKEND FETCH ──
+async function backendFetch(method, path, body = null) {
+  const token = await currentUser.getIdToken();
+  const opts  = { method, headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(`${BACKEND_URL}/api${path}`, opts);
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json().catch(() => ({}));
+}
+
+// ── LOAD TAB CONTENT ──
+async function loadCurrentTab() {
+  show('skeletonLoader');
+  hide('notifList'); hide('broadcastList'); hide('settingsPane');
+
+  if (activeTab === 'all' || activeTab === 'unread') {
+    document.getElementById('markAllBtn').style.display = '';
+    await loadNotifications();
+  } else if (activeTab === 'broadcasts') {
+    await loadBroadcasts();
+  } else if (activeTab === 'settings') {
+    renderSettings();
+  }
+}
+
+// ── NOTIFICATIONS ──
+async function loadNotifications() {
+  try {
+    const { notifications = [] } = await backendFetch('GET', '/notifications/me');
+    allNotifs = notifications;
+    const all  = notifications.length;
+    const unrd = notifications.filter(n => !n.read).length;
+    const tabAllCount = document.getElementById('tabCountAll');
+    if (tabAllCount) { tabAllCount.textContent = all || ''; tabAllCount.style.display = all ? '' : 'none'; }
+  } catch(e) {
+    allNotifs = await loadNotifsFromFirestore();
+  }
+  hide('skeletonLoader');
+  show('notifList');
+  renderNotifications();
+}
+
+// Firestore fallback
+async function loadNotifsFromFirestore() {
+  try {
+    const snap = await getDocs(query(collection(db,'users',currentUser.uid,'notifications'), orderBy('createdAt','desc'), limit(100)));
+    return snap.docs.map(d => ({ id: d.id, ...d.data(), createdAt: d.data().createdAt?.toDate?.()?.toISOString() }));
+  } catch(e) { return []; }
+}
+
+function renderNotifications() {
+  let items = activeTab === 'unread' ? allNotifs.filter(n => !n.read) : allNotifs;
+  if (activeFilter !== 'all') items = items.filter(n => n.type === activeFilter);
+
+  const el = document.getElementById('notifList');
+  if (!items.length) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">🔔</div>
+      <div class="empty-title">${activeFilter !== 'all' ? 'No notifications of this type' : activeTab === 'unread' ? 'All caught up!' : 'No notifications yet'}</div>
+      <div class="empty-sub">${activeTab === 'unread' ? 'You've read all your notifications.' : 'Notifications will appear here when admins send announcements, when lessons are uploaded, or when you earn achievements.'}</div>
+    </div>`;
+    return;
+  }
+
+  // Group by date
+  const groups = groupByDate(items);
+  el.innerHTML = groups.map(g => `
+    <div class="date-group">
+      <div class="date-label">${g.label}</div>
+      ${g.items.map((n, gi) => notifCardHTML(n, gi + g.offset)).join('')}
+    </div>
+  `).join('');
+}
+
+function notifCardHTML(n, idx) {
+  const icon    = NOTIF_ICONS[n.type] || n.iconEmoji || '🔔';
+  const bgCls   = NOTIF_ICON_BG[n.type] || 'ni-default';
+  const label   = TYPE_LABELS[n.type] || n.type || '';
+  const unread  = !n.read;
+  const chipCls = unread ? 'notif-type-chip' : 'notif-type-chip';
+  return `<div class="notif-card${unread?' unread':''}" onclick="handleNotifClick(${idx})">
+    <div class="notif-inner">
+      <div class="notif-icon-wrap ${bgCls}">${icon}</div>
+      <div class="notif-body">
+        <div class="notif-title">${escHtml(n.title || 'Notification')}</div>
+        <div class="notif-text">${escHtml(n.body || '')}</div>
+        <div class="notif-meta">
+          <span class="notif-time">${timeAgo(n.createdAt)}</span>
+          ${label ? `<span class="notif-type-chip badge badge-gray">${label}</span>` : ''}
+        </div>
+      </div>
+    </div>
+    <div class="notif-actions">
+      ${unread ? `<button class="notif-act-btn" onclick="markOneRead(event,'${n.id}')"><i class="fas fa-check"></i> Mark read</button>` : ''}
+      <button class="notif-act-btn del" onclick="deleteNotif(event,'${n.id}')"><i class="fas fa-trash"></i></button>
+    </div>
+  </div>`;
+}
+
+window.handleNotifClick = function(idx) {
+  const notif = allNotifs[idx];
+  if (!notif) return;
+  const dest = isAdmin ? 'admin.html' : 'dashboard.html';
+  const hashMap = {
+    announcement:'announcements', new_lesson:'lessons', live_class_start:'live',
+    session_ended:'live', class_reminder:'schedule', achievement:'leaderboard', payment:'settings'
+  };
+  const view = hashMap[notif.type];
+  if (notif.data?.url) { window.location.href = notif.data.url; return; }
+  if (view) window.location.href = `${dest}#${view}`;
+};
+
+window.markOneRead = async function(e, id) {
+  e.stopPropagation();
+  try {
+    await backendFetch('POST', '/notifications/mark-read', { notifIds: [id] }).catch(async () => {
+      await updateDoc(doc(db,'users',currentUser.uid,'notifications',id), { read: true });
+    });
+    allNotifs = allNotifs.map(n => n.id === id ? {...n, read:true} : n);
+    renderNotifications();
+  } catch(err) { showToast('Could not mark as read', 'error'); }
+};
+
+window.markAllRead = async function() {
+  try {
+    await backendFetch('POST', '/notifications/mark-read', { all: true }).catch(async () => {
+      const batch = writeBatch(db);
+      const unread = allNotifs.filter(n => !n.read);
+      unread.forEach(n => batch.update(doc(db,'users',currentUser.uid,'notifications',n.id), { read: true }));
+      await batch.commit();
+    });
+    allNotifs = allNotifs.map(n => ({...n, read:true}));
+    renderNotifications();
+    showToast('All notifications marked as read', 'success');
+  } catch(err) { showToast('Could not mark all read', 'error'); }
+};
+
+window.deleteNotif = async function(e, id) {
+  e.stopPropagation();
+  if (!confirm('Delete this notification?')) return;
+  try {
+    await deleteDoc(doc(db,'users',currentUser.uid,'notifications',id));
+    allNotifs = allNotifs.filter(n => n.id !== id);
+    renderNotifications();
+    showToast('Deleted', 'info');
+  } catch(err) { showToast('Could not delete', 'error'); }
+};
+
+// ── BROADCASTS (admin) ──
+async function loadBroadcasts() {
+  try {
+    const snap = await getDocs(query(collection(db,'broadcasts'), orderBy('createdAt','desc'), limit(80)));
+    allBroadcasts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const bc = document.getElementById('tabCountBC');
+    if (bc) { bc.textContent = allBroadcasts.length||''; bc.style.display = allBroadcasts.length ? '' : 'none'; }
+  } catch(e) { allBroadcasts = []; }
+  hide('skeletonLoader');
+  show('broadcastList');
+  renderBroadcasts();
+}
+
+function renderBroadcasts() {
+  const el = document.getElementById('broadcastList');
+  if (!allBroadcasts.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📢</div><div class="empty-title">No broadcasts yet</div><div class="empty-sub">Tap the ✉ button to send your first broadcast to students.</div></div>`;
+    return;
+  }
+  el.innerHTML = allBroadcasts.map(b => {
+    const catCls = BC_CAT_COLORS[b.category] || 'badge-gray';
+    const targetCls = b.sentTo === 'Pro Users Only' ? 'badge-gold' : b.sentTo === 'Free Users Only' ? 'badge-purple' : 'badge-green';
+    return `<div class="bc-card">
+      <div class="bc-card-header">
+        <div>
+          <div class="bc-title">${escHtml(b.title||'Untitled')}</div>
+          <div class="bc-msg">${escHtml(b.message||'')}</div>
+        </div>
+      </div>
+      <div class="bc-meta">
+        <span class="badge ${catCls}">${b.category||'General'}</span>
+        <span class="badge ${targetCls}">${b.sentTo||'All Students'}</span>
+        <span class="badge badge-gray" style="margin-left:auto;">${timeAgo(b.createdAt)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.sendBroadcast = async function() {
+  const title = document.getElementById('bcTitle').value.trim();
+  const msg   = document.getElementById('bcMsg').value.trim();
+  if (!title || !msg) { showToast('Enter title and message', 'error'); return; }
+  try {
+    await addDoc(collection(db,'broadcasts'), {
+      title, message: msg,
+      category: document.getElementById('bcCat').value,
+      sentTo:   document.getElementById('bcTarget').value,
+      sentBy: currentUser.uid, createdAt: serverTimestamp()
+    });
+    showToast('Broadcast sent!', 'success');
+    closeModal('broadcastModal');
+    ['bcTitle','bcMsg'].forEach(id => { document.getElementById(id).value = ''; });
+    if (activeTab === 'broadcasts') loadBroadcasts();
+  } catch(e) { showToast('Failed: ' + e.message, 'error'); }
+};
+
+// ── SETTINGS PANE ──
+function renderSettings() {
+  hide('skeletonLoader');
+  show('settingsPane');
+  document.getElementById('settingsPane').innerHTML = `
+    <div class="settings-panel">
+      <div class="sp-title">🔔 Push Notifications</div>
+      <div class="sp-row">
+        <div><div class="sp-label">Enable Push Notifications</div><div class="sp-sub">Receive alerts even when the app is closed</div></div>
+        <button class="toggle ${Notification?.permission==='granted'?'on':'off'}" id="pushToggle" onclick="togglePush(this)"></button>
+      </div>
+      <div id="pushStatus" style="font-size:.74rem;color:var(--text-3);margin-top:8px;padding:8px;background:var(--surface);border-radius:var(--r-sm);">
+        ${Notification?.permission==='granted'?'✅ Push notifications are enabled for this device.':Notification?.permission==='denied'?'❌ Notifications are blocked. Enable them in your browser settings.':'ℹ️ Click the toggle to enable push notifications.'}
+      </div>
+    </div>
+    <div class="settings-panel">
+      <div class="sp-title">📋 Notification Types</div>
+      ${[
+        ['Announcements','📢','Show exam news & school updates','announcement'],
+        ['Lesson Uploads','🎬','New video lesson alerts','new_lesson'],
+        ['Live Classes','📡','Live class start reminders','live'],
+        ['Achievements','🏆','XP and leaderboard updates','achievement'],
+        ['Schedule','📅','Class reminders & timetable','schedule'],
+        ['Payments','💳','Payment confirmations','payment'],
+      ].map(([label,icon,sub,key])=>`
+        <div class="sp-row">
+          <div><div class="sp-label">${icon} ${label}</div><div class="sp-sub">${sub}</div></div>
+          <button class="toggle on" id="toggle-${key}" onclick="this.classList.toggle('on');this.classList.toggle('off');"></button>
+        </div>`).join('')}
+    </div>
+    ${isAdmin ? `
+    <div class="settings-panel">
+      <div class="sp-title">👤 Admin Controls</div>
+      <div class="sp-row">
+        <div><div class="sp-label">Admin Mode</div><div class="sp-sub">You have admin access to this platform</div></div>
+        <span class="badge badge-gold">Active</span>
+      </div>
+      <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
+        <a href="admin.html" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border-radius:var(--r-sm);text-decoration:none;color:var(--navy);font-size:.82rem;font-weight:700;">
+          <i class="fas fa-tachometer-alt"></i> Go to Admin Dashboard
+        </a>
+        <a href="dashboard.html" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border-radius:var(--r-sm);text-decoration:none;color:var(--navy);font-size:.82rem;font-weight:700;">
+          <i class="fas fa-graduation-cap"></i> Go to Student Dashboard
+        </a>
+      </div>
+    </div>` : ''}
+  `;
+}
+
+window.togglePush = async function(btn) {
+  if (Notification?.permission === 'denied') {
+    showToast('Notifications are blocked in your browser. Please enable them in site settings.', 'error');
+    return;
+  }
+  if (Notification?.permission !== 'granted') {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') { showToast('Permission denied', 'error'); return; }
+    btn.className = 'toggle on';
+    document.getElementById('pushStatus').textContent = '✅ Push notifications are enabled for this device.';
+    showToast('Push notifications enabled!', 'success');
+  } else {
+    btn.classList.toggle('on'); btn.classList.toggle('off');
+    showToast('Setting saved (toggle will re-enable on next login)', 'info');
+  }
+};
+
+// ── NAVIGATION ──
+window.goBack = function() {
+  if (document.referrer && document.referrer.includes(location.hostname)) {
+    history.back();
+  } else {
+    window.location.href = isAdmin ? 'admin.html' : 'dashboard.html';
+  }
+};
+
+// ── MODAL helpers ──
+window.openModal  = m => document.getElementById(m)?.classList.add('show');
+window.closeModal = m => document.getElementById(m)?.classList.remove('show');
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-overlay')) e.target.classList.remove('show');
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.show').forEach(m => m.classList.remove('show'));
+});
+
+// ── UTILITIES ──
+function show(id) { const el=document.getElementById(id); if(el) el.style.display=''; }
+function hide(id) { const el=document.getElementById(id); if(el) el.style.display='none'; }
+
+function groupByDate(items) {
+  const now   = new Date();
+  const today = now.toDateString();
+  const yest  = new Date(now - 86400000).toDateString();
+  const weekAgo = new Date(now - 7*86400000);
+  const map   = { Today:[], Yesterday:[], 'This Week':[], Earlier:[] };
+  items.forEach(n => {
+    const d = n.createdAt ? new Date(n.createdAt) : new Date();
+    const ds = d.toDateString();
+    if (ds === today) map['Today'].push(n);
+    else if (ds === yest) map['Yesterday'].push(n);
+    else if (d >= weekAgo) map['This Week'].push(n);
+    else map['Earlier'].push(n);
+  });
+  let offset = 0;
+  return Object.entries(map)
+    .filter(([,arr]) => arr.length)
+    .map(([label, arr]) => { const g = {label, items: arr, offset}; offset += arr.length; return g; });
+}
+
+function timeAgo(ts) {
+  if (!ts) return '';
+  const d = ts?.seconds ? new Date(ts.seconds*1000) : new Date(ts);
+  if (isNaN(d)) return '';
+  const s = Math.floor((Date.now() - d) / 1000);
+  if (s < 60)  return 'Just now';
+  if (s < 3600) return `${Math.floor(s/60)}m ago`;
+  if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+  if (s < 604800) return `${Math.floor(s/86400)}d ago`;
+  return d.toLocaleDateString('en-NG', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+window.showToast = function(msg, type='info') {
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':type==='error'?'exclamation-circle':'bell'}"></i> ${msg}`;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+};
+</script>
+</body>
+</html>

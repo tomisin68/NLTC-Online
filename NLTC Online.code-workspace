@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../Downloads/testimonial"
+		}
+	],
+	"settings": {
+		"liveServer.settings.port": 5501
+	}
+}
