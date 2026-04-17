@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fraunces:opsz,wght@9..144,700;9..144,800;9..144,900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 /* ═══════════════════════════════════════════
    ROOT VARIABLES — MATCH STUDENT DASHBOARD
@@ -62,7 +63,7 @@ input,select,textarea{font-family:var(--font-body);}
 .sidebar::-webkit-scrollbar{display:none;}
 
 .sb-logo{display:flex;align-items:center;gap:10px;padding:16px 20px 14px;border-bottom:1px solid rgba(255,255,255,.06);}
-.sb-logo-img{height:28px;width:auto;object-fit:contain;display:block;}
+.sb-logo-img{height:40px;width:auto;object-fit:contain;display:block;}
 
 .sb-admin-badge{margin:10px 20px 4px;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.2);border-radius:8px;padding:7px 12px;display:flex;align-items:center;gap:8px;}
 .sb-admin-badge i{color:var(--gold);font-size:.78rem;}
@@ -531,7 +532,10 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
 <div class="view" id="view-cbt">
   <div class="page-hdr-row">
     <div class="page-hdr"><h2>📝 CBT Question Manager</h2><p>Manage past questions and CBT sessions</p></div>
-    <button class="btn-gold" onclick="openModal('addQuestionModal')"><i class="fas fa-plus"></i> Add Question</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-outline btn-sm" onclick="openModal('bulkImportModal')"><i class="fas fa-file-excel"></i> Bulk Import Excel</button>
+      <button class="btn-gold" onclick="openModal('addQuestionModal')"><i class="fas fa-plus"></i> Add Question</button>
+    </div>
   </div>
   <div class="stats-grid">
     <div class="stat-card s1"><div class="sc-icon blue"><i class="fas fa-question-circle"></i></div><div class="sc-num" id="cbt-total">—</div><div class="sc-label">Total Questions</div></div>
@@ -540,9 +544,13 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
     <div class="stat-card s4"><div class="sc-icon red"><i class="fas fa-flag"></i></div><div class="sc-num" id="cbt-flagged">—</div><div class="sc-label">Flagged</div></div>
   </div>
   <div class="card">
+    <div class="card-header" style="justify-content:flex-end;gap:8px;padding:10px 14px;">
+      <span id="cbtSelectCount" style="font-size:.78rem;color:var(--text-3);display:none;"></span>
+      <button id="cbtDeleteSelectedBtn" class="btn-danger btn-sm" onclick="deleteSelectedQuestions()" style="display:none;"><i class="fas fa-trash"></i> Delete Selected</button>
+    </div>
     <div class="card-body" style="padding:0;"><div class="table-wrap"><table>
-      <thead><tr><th>Question Preview</th><th>Subject</th><th>Exam</th><th>Year</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody id="cbtBody"><tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
+      <thead><tr><th style="width:36px;"><input type="checkbox" id="cbtSelectAll" onchange="toggleSelectAllQuestions(this.checked)" title="Select all"></th><th>Question Preview</th><th>Subject</th><th>Exam</th><th>Year</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="cbtBody"><tr><td colspan="7"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
     </table></div></div>
   </div>
 </div>
@@ -888,6 +896,71 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
       </div>
     </div>
     <div class="modal-footer"><button class="btn-outline btn-sm" onclick="closeModal('addTeacherModal')">Cancel</button><button class="btn-navy btn-sm" onclick="addTeacher()"><i class="fas fa-user-plus"></i> Add Teacher</button></div>
+  </div>
+</div>
+
+<!-- BULK IMPORT -->
+<div class="modal-overlay" id="bulkImportModal">
+  <div class="modal modal-lg" style="max-width:780px;">
+    <div class="modal-header">
+      <div class="modal-title">📥 Bulk Import Questions (Excel)</div>
+      <button class="modal-close" onclick="closeModal('bulkImportModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--surface);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:14px;font-size:.8rem;color:var(--text-2);line-height:1.6;">
+        <strong>Expected columns:</strong> Q_ID, Year, Topic, Question, Option A–D, Correct Answer (Letter), Explanation, Difficulty, Source<br>
+        Use the <strong>Question Database</strong> sheet. Rows with empty Question field are skipped.
+      </div>
+      <!-- Subject selector shown BEFORE upload -->
+      <div style="margin-bottom:14px;">
+        <label class="form-label">Assign Subject <span style="color:var(--error);">*</span></label>
+        <select class="form-input" id="bulkSubjectSelect" style="max-width:320px;">
+          <option value="">— Select subject for all imported questions —</option>
+          <option>Mathematics</option>
+          <option>English Language</option>
+          <option>Chemistry</option>
+          <option>Physics</option>
+          <option>Biology</option>
+          <option>Economics</option>
+          <option>Government</option>
+          <option>Geography</option>
+          <option>Literature in English</option>
+          <option>Commerce</option>
+          <option>Accounting</option>
+          <option>Agricultural Science</option>
+          <option>History</option>
+          <option>Further Mathematics</option>
+          <option>Use of English</option>
+        </select>
+        <div style="font-size:.74rem;color:var(--text-3);margin-top:4px;">This subject will be assigned to every question in the file.</div>
+      </div>
+      <div id="bulkDropZone" style="border:2px dashed var(--border-2);border-radius:var(--r-md);padding:32px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px;" onclick="document.getElementById('bulkFileInput').click()" ondragover="event.preventDefault();this.style.borderColor='var(--navy)'" ondragleave="this.style.borderColor=''" ondrop="handleBulkDrop(event)">
+        <i class="fas fa-file-excel" style="font-size:2rem;color:var(--success);margin-bottom:8px;display:block;"></i>
+        <div style="font-weight:700;font-size:.88rem;margin-bottom:4px;">Drop your Excel file here or click to browse</div>
+        <div style="font-size:.76rem;color:var(--text-3);">.xlsx files only</div>
+        <input type="file" id="bulkFileInput" accept=".xlsx,.xls" style="display:none;" onchange="handleBulkFile(this.files[0])">
+      </div>
+      <div id="bulkPreviewWrap" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span id="bulkPreviewCount" style="font-size:.82rem;font-weight:700;color:var(--navy);"></span>
+          <button class="btn-outline btn-sm" onclick="clearBulkImport()"><i class="fas fa-times"></i> Clear</button>
+        </div>
+        <div style="max-height:260px;overflow-y:auto;border:1px solid var(--border-2);border-radius:var(--r-sm);">
+          <table style="min-width:600px;">
+            <thead><tr><th>#</th><th>Question</th><th>Subject</th><th>Year</th><th>Answer</th><th>Difficulty</th></tr></thead>
+            <tbody id="bulkPreviewBody"></tbody>
+          </table>
+        </div>
+        <div id="bulkImportProgress" style="display:none;margin-top:12px;">
+          <div style="display:flex;justify-content:space-between;font-size:.74rem;margin-bottom:4px;"><span id="bulkProgressText">Importing…</span><span id="bulkProgressPct">0%</span></div>
+          <div style="height:6px;background:var(--surface-2);border-radius:100px;"><div id="bulkProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,var(--navy),var(--gold));border-radius:100px;transition:width .3s;"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline btn-sm" onclick="closeModal('bulkImportModal')">Cancel</button>
+      <button class="btn-navy btn-sm" id="bulkImportBtn" onclick="runBulkImport()" style="display:none;"><i class="fas fa-database"></i> Import to Database</button>
+    </div>
   </div>
 </div>
 
@@ -1402,11 +1475,14 @@ window.loadCbtQuestions = async function() {
     document.getElementById('cbt-flagged').textContent = flagged;
     document.getElementById('an-questions').textContent = total;
     const tbody = document.getElementById('cbtBody');
-    if (!questions.length) { tbody.innerHTML='<tr><td colspan="6"><div class="empty-state">No questions</div></td></tr>'; return; }
+    document.getElementById('cbtSelectAll').checked = false;
+    updateCbtSelectUI();
+    if (!questions.length) { tbody.innerHTML='<tr><td colspan="7"><div class="empty-state">No questions</div></td></tr>'; return; }
     tbody.innerHTML = questions.map(q => `<tr>
-      <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;">${q.question||'—'}</td>
+      <td><input type="checkbox" class="cbt-row-chk" data-id="${q.id}" onchange="updateCbtSelectUI()"></td>
+      <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${q.question||'—'}</td>
       <td><span class="badge badge-blue">${q.subject||'—'}</span></td>
-      <td>${q.examType||'—'}</td><td>${q.year||'—'}</td>
+      <td style="font-size:.78rem;">${q.examType||'—'}</td><td>${q.year||'—'}</td>
       <td>${q.flagged?'<span class="badge badge-red">Flagged</span>':'<span class="badge badge-green">Approved</span>'}</td>
       <td><button class="btn-outline btn-sm" onclick="flagQuestion('${q.id}',${!q.flagged})">${q.flagged?'Unflag':'Flag'}</button><button class="btn-danger btn-sm" onclick="deleteQuestion('${q.id}')"><i class="fas fa-trash"></i></button></td>
     </tr>`).join('');
@@ -1443,6 +1519,221 @@ window.deleteQuestion = async function(id) {
   await deleteDoc(doc(db,'questions',id));
   showToast('Deleted','error');
   await loadCbtQuestions();
+};
+
+window.updateCbtSelectUI = function() {
+  const checks = [...document.querySelectorAll('.cbt-row-chk')];
+  const selected = checks.filter(c=>c.checked);
+  const countEl = document.getElementById('cbtSelectCount');
+  const btnEl = document.getElementById('cbtDeleteSelectedBtn');
+  if (selected.length > 0) {
+    countEl.textContent = `${selected.length} selected`;
+    countEl.style.display = '';
+    btnEl.style.display = '';
+  } else {
+    countEl.style.display = 'none';
+    btnEl.style.display = 'none';
+  }
+  const allChk = document.getElementById('cbtSelectAll');
+  if (allChk) allChk.indeterminate = selected.length > 0 && selected.length < checks.length;
+};
+
+window.toggleSelectAllQuestions = function(checked) {
+  document.querySelectorAll('.cbt-row-chk').forEach(c => c.checked = checked);
+  updateCbtSelectUI();
+};
+
+window.deleteSelectedQuestions = async function() {
+  const ids = [...document.querySelectorAll('.cbt-row-chk:checked')].map(c=>c.dataset.id);
+  if (!ids.length) return;
+  if (!confirm(`Delete ${ids.length} question${ids.length>1?'s':''}? This cannot be undone.`)) return;
+  try {
+    const CHUNK = 500;
+    for (let i=0; i<ids.length; i+=CHUNK) {
+      const batch = writeBatch(db);
+      ids.slice(i,i+CHUNK).forEach(id => batch.delete(doc(db,'questions',id)));
+      await batch.commit();
+    }
+    showToast(`${ids.length} question${ids.length>1?'s':''} deleted`, 'error');
+    await loadCbtQuestions();
+  } catch(e) { showToast('Delete failed: '+e.message,'error'); }
+};
+
+/* ── BULK IMPORT ── */
+let bulkRows = [], bulkHeaders = [];
+
+// Normalise a string to lowercase alphanumerics only
+const normKey = s => String(s == null ? '' : s).toLowerCase().replace(/[^a-z0-9]/g, '');
+
+// Find the value in a row object for any of the given key variants
+function colVal(row, ...keys) {
+  for (const k of keys) {
+    const nk = normKey(k);
+    const col = Object.keys(row).find(c => {
+      const nc = normKey(c);
+      return nc === nk || (nk.length >= 5 && nc.startsWith(nk));
+    });
+    const v = col != null ? String(row[col] ?? '').trim() : '';
+    if (v) return v;
+  }
+  return '';
+}
+
+window.handleBulkDrop = function(e) {
+  e.preventDefault();
+  document.getElementById('bulkDropZone').style.borderColor = '';
+  const file = e.dataTransfer.files[0];
+  if (file) handleBulkFile(file);
+};
+
+window.handleBulkFile = function(file) {
+  if (!file) return;
+  if (!document.getElementById('bulkSubjectSelect').value) {
+    showToast('Please select a subject before uploading.', 'error');
+    document.getElementById('bulkFileInput').value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const wb = XLSX.read(evt.target.result, {type:'array'});
+      // Prefer "Question Database" sheet
+      const sheetName = wb.SheetNames.find(n => /question.*database/i.test(n)) || wb.SheetNames[0];
+      const ws = wb.Sheets[sheetName];
+
+      // Read as raw 2-D array so we can find the header row ourselves
+      const grid = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+
+      // Find the header row: first row containing a cell that looks like "question"
+      let hdrIdx = -1;
+      for (let i = 0; i < Math.min(grid.length, 10); i++) {
+        if (grid[i].some(cell => normKey(cell) === 'question' || normKey(cell).startsWith('question'))) {
+          hdrIdx = i; break;
+        }
+      }
+      if (hdrIdx === -1) {
+        showToast('Cannot find a "Question" column in this sheet. Check your file.', 'error');
+        return;
+      }
+
+      bulkHeaders = grid[hdrIdx].map(h => String(h == null ? '' : h).trim());
+      const dataRows = grid.slice(hdrIdx + 1);
+
+      // Convert rows to objects using the headers
+      const raw = dataRows
+        .filter(row => row.some(cell => String(cell).trim()))
+        .map(row => {
+          const obj = {};
+          bulkHeaders.forEach((h, i) => { obj[h] = row[i] ?? ''; });
+          return obj;
+        });
+
+      bulkRows = raw.filter(r => colVal(r,'Question','questiontext','questionbody').length > 3);
+      if (!bulkRows.length) {
+        showToast(`Sheet: "${sheetName}" — headers found (${bulkHeaders.slice(0,5).join(', ')}…) but no data rows matched.`, 'error');
+        return;
+      }
+      renderBulkPreview();
+    } catch(err) { showToast('Failed to parse Excel: ' + err.message, 'error'); }
+  };
+  reader.readAsArrayBuffer(file);
+};
+
+function renderBulkPreview() {
+  const tbody = document.getElementById('bulkPreviewBody');
+  tbody.innerHTML = bulkRows.slice(0,50).map((r,i) => {
+    const q = colVal(r,'Question','questiontext','questionbody');
+    const subj = document.getElementById('bulkSubjectSelect').value || colVal(r,'Topic','Subject','subjectname');
+    const yr = colVal(r,'Year');
+    const ans = colVal(r,'Correct Answer (Letter)','correctanswer','answer','correct');
+    const diff = colVal(r,'Difficulty','level');
+    return `<tr>
+      <td style="color:var(--text-3);font-size:.74rem;">${i+1}</td>
+      <td style="max-width:260px;font-size:.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${q}</td>
+      <td style="font-size:.78rem;">${subj||'—'}</td>
+      <td style="font-size:.78rem;">${yr||'—'}</td>
+      <td style="font-size:.78rem;">${ans||'—'}</td>
+      <td style="font-size:.78rem;">${diff||'—'}</td>
+    </tr>`;
+  }).join('');
+  if (bulkRows.length > 50) {
+    tbody.innerHTML += `<tr><td colspan="6" style="text-align:center;font-size:.76rem;color:var(--text-3);padding:8px;">… and ${bulkRows.length-50} more rows</td></tr>`;
+  }
+  document.getElementById('bulkPreviewCount').textContent = `✅ ${bulkRows.length} questions ready to import`;
+  document.getElementById('bulkPreviewWrap').style.display = '';
+  document.getElementById('bulkImportBtn').style.display = '';
+}
+
+window.clearBulkImport = function() {
+  bulkRows = [];
+  document.getElementById('bulkPreviewWrap').style.display = 'none';
+  document.getElementById('bulkImportBtn').style.display = 'none';
+  document.getElementById('bulkFileInput').value = '';
+  document.getElementById('bulkSubjectSelect').value = '';
+};
+
+window.runBulkImport = async function() {
+  if (!bulkRows.length) return;
+  const selectedSubject = document.getElementById('bulkSubjectSelect').value;
+  if (!selectedSubject) { showToast('Please select a subject first.', 'error'); return; }
+  const btn = document.getElementById('bulkImportBtn');
+  btn.disabled = true;
+  const progWrap = document.getElementById('bulkImportProgress');
+  progWrap.style.display = '';
+  const fill = document.getElementById('bulkProgressFill');
+  const pct = document.getElementById('bulkProgressPct');
+  const txt = document.getElementById('bulkProgressText');
+  const BATCH_SIZE = 400;
+  let done = 0;
+  try {
+    for (let i = 0; i < bulkRows.length; i += BATCH_SIZE) {
+      const chunk = bulkRows.slice(i, i + BATCH_SIZE);
+      const batch = writeBatch(db);
+      for (const r of chunk) {
+        const q = colVal(r,'Question','questiontext','questionbody');
+        if (!q || q.length < 4) continue;
+        const optA = colVal(r,'Option A','optiona','option_a','opta');
+        const optB = colVal(r,'Option B','optionb','option_b','optb');
+        const optC = colVal(r,'Option C','optionc','option_c','optc');
+        const optD = colVal(r,'Option D','optiond','option_d','optd');
+        const ans = colVal(r,'Correct Answer (Letter)','correctanswer','answer','correct').toUpperCase().charAt(0);
+        const subj = selectedSubject;
+        const yr = parseInt(colVal(r,'Year','year')) || 0;
+        const expl = colVal(r,'Explanation','explanation','explain','detail');
+        const diff = colVal(r,'Difficulty','difficulty','level');
+        const source = colVal(r,'Source','examtype','exam') || 'JAMB / UTME';
+        const qid = colVal(r,'Q_ID','qid','id','questionid');
+        const ref = doc(collection(db,'questions'));
+        batch.set(ref, {
+          question: q,
+          options: {A:optA, B:optB, C:optC, D:optD},
+          correctAnswer: ans || 'A',
+          subject: subj,
+          examType: source,
+          year: yr,
+          explanation: expl,
+          difficulty: diff,
+          qId: qid,
+          flagged: false,
+          createdAt: serverTimestamp()
+        });
+        done++;
+      }
+      await batch.commit();
+      const p = Math.round(done/bulkRows.length*100);
+      fill.style.width = p+'%';
+      pct.textContent = p+'%';
+      txt.textContent = `Imported ${done} of ${bulkRows.length}…`;
+    }
+    showToast(`✅ ${done} questions imported!`, 'success');
+    closeModal('bulkImportModal');
+    clearBulkImport();
+    await loadCbtQuestions();
+  } catch(err) {
+    showToast('Import error: '+err.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
 };
 
 /* ── TEACHERS ── */

@@ -62,7 +62,7 @@ input,select,textarea{font-family:var(--font-body);}
 .sidebar::-webkit-scrollbar{display:none;}
 
 .sb-logo{display:flex;align-items:center;gap:10px;padding:16px 20px 14px;border-bottom:1px solid rgba(255,255,255,.06);}
-.sb-logo-img{height:28px;width:auto;object-fit:contain;display:block;}
+.sb-logo-img{height:40px;width:auto;object-fit:contain;display:block;}
 
 .sb-user{padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;}
 .sb-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-2));display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:var(--navy);flex-shrink:0;font-family:var(--font-head);}
@@ -418,6 +418,37 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
 .cbt-launch-meta{font-size:.72rem;color:var(--text-3);margin-bottom:10px;line-height:1.5;}
 
 /* ═══════════════════════════════════════════
+   NLTC OFFICIAL QUIZ
+═══════════════════════════════════════════ */
+.oq-setup-card{background:white;border-radius:var(--r-lg);border:1px solid var(--border);box-shadow:var(--shadow-sm);padding:24px;max-width:600px;margin:0 auto;}
+.oq-filter-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+@media(max-width:480px){.oq-filter-row{grid-template-columns:1fr;}}
+.oq-quiz-wrap{max-width:640px;margin:0 auto;}
+.oq-progress-bar{height:5px;background:var(--surface-2);border-radius:100px;margin-bottom:20px;overflow:hidden;}
+.oq-progress-fill{height:100%;background:linear-gradient(90deg,var(--navy),var(--gold));border-radius:100px;transition:width .3s;}
+.oq-question-card{background:white;border-radius:var(--r-lg);border:1px solid var(--border);box-shadow:var(--shadow-sm);padding:24px;margin-bottom:14px;}
+.oq-q-meta{font-size:.72rem;color:var(--text-3);margin-bottom:10px;display:flex;gap:10px;flex-wrap:wrap;}
+.oq-q-text{font-size:.95rem;font-weight:600;color:var(--navy);line-height:1.55;margin-bottom:18px;}
+.oq-options{display:flex;flex-direction:column;gap:9px;}
+.oq-option{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-radius:var(--r-sm);border:1.5px solid var(--border);cursor:pointer;transition:all .18s;font-size:.86rem;background:white;}
+.oq-option:hover:not(.oq-opt-disabled){border-color:var(--navy);background:var(--surface);}
+.oq-opt-label{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border-2);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;flex-shrink:0;transition:all .18s;}
+.oq-option:hover:not(.oq-opt-disabled) .oq-opt-label{background:var(--navy);color:white;border-color:var(--navy);}
+.oq-option.selected{border-color:var(--navy);background:rgba(10,22,40,.04);}
+.oq-option.selected .oq-opt-label{background:var(--navy);color:white;border-color:var(--navy);}
+.oq-option.correct{border-color:var(--success);background:rgba(18,183,106,.06);}
+.oq-option.correct .oq-opt-label{background:var(--success);color:white;border-color:var(--success);}
+.oq-option.wrong{border-color:#EF4444;background:rgba(239,68,68,.05);}
+.oq-option.wrong .oq-opt-label{background:#EF4444;color:white;border-color:#EF4444;}
+.oq-opt-disabled{cursor:default;}
+.oq-explanation{margin-top:12px;padding:10px 12px;background:var(--gold-pale);border-radius:var(--r-sm);font-size:.8rem;color:var(--text-2);line-height:1.55;border-left:3px solid var(--gold);}
+.oq-nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
+.oq-result-card{background:white;border-radius:var(--r-lg);border:1px solid var(--border);box-shadow:var(--shadow-sm);padding:32px 24px;text-align:center;max-width:500px;margin:0 auto 20px;}
+.oq-score-circle{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--navy-3));color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 16px;}
+.oq-score-num{font-family:var(--font-head);font-size:1.6rem;font-weight:900;line-height:1;}
+.oq-score-den{font-size:.7rem;opacity:.7;}
+
+/* ═══════════════════════════════════════════
    LEADERBOARD
 ═══════════════════════════════════════════ */
 .lb-row{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border);}
@@ -739,6 +770,7 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
     <button class="sb-link active" onclick="showView('home',this)"><i class="fas fa-th-large"></i>Dashboard</button>
     <button class="sb-link" onclick="showView('lessons',this)"><i class="fas fa-play-circle"></i>Video Lessons</button>
     <button class="sb-link" onclick="showView('cbt',this)"><i class="fas fa-laptop-code"></i>CBT Practice</button>
+    <button class="sb-link" onclick="showView('officialquiz',this)"><i class="fas fa-graduation-cap"></i>NLTC Official Quiz</button>
     <div class="sb-sec">Live &amp; Community</div>
     <button class="sb-link" onclick="showView('live',this)" id="navLive"><i class="fas fa-circle" style="font-size:.45rem;color:var(--error);"></i>Live Classes<div class="sb-live-dot" id="liveDot" style="display:none;"></div></button>
     <button class="sb-link" onclick="showView('leaderboard',this)"><i class="fas fa-trophy"></i>Leaderboard</button>
@@ -823,30 +855,19 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
       </div>
       <div class="card">
         <div class="card-header">
-          <div class="card-title">📝 Quick CBT Practice</div>
-          <button class="card-action" onclick="showView('cbt',null)">All Subjects <i class="fas fa-arrow-right fa-xs"></i></button>
+          <div class="card-title">📝 Quick Practice</div>
         </div>
         <div class="card-body" style="padding:12px;">
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px;">
-            <div onclick="openCBTPage()" style="cursor:pointer;background:linear-gradient(135deg,var(--navy),var(--navy-3));border-radius:var(--r-md);padding:14px;text-align:center;transition:transform .2s,box-shadow .2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(10,22,40,.2)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-              <div style="font-size:1.3rem;margin-bottom:4px;">🎓</div>
-              <div style="font-family:var(--font-head);font-size:.75rem;font-weight:800;color:white;letter-spacing:-.01em;">JAMB Simulation</div>
-              <div style="font-size:.63rem;color:rgba(255,255,255,.4);margin-top:2px;">Full exam · 4 subjects</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div onclick="openCBTPage()" style="cursor:pointer;background:linear-gradient(135deg,var(--navy),var(--navy-3));border-radius:var(--r-md);padding:14px 12px;text-align:center;transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column;align-items:center;gap:6px;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(10,22,40,.25)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+              <img src="jamb-logo.png" alt="JAMB" style="width:52px;height:49px;object-fit:contain;display:block;flex-shrink:0;">
+              <div style="font-family:var(--font-head);font-size:.78rem;font-weight:800;color:white;letter-spacing:-.01em;line-height:1.2;">JAMB Simulation</div>
+              <div style="font-size:.62rem;color:rgba(255,255,255,.45);line-height:1.4;">4 subjects · 2 hrs</div>
             </div>
-            <div onclick="openCBTPage('Mathematics')" class="quick-cbt-card">
-              <div style="font-size:1.3rem;margin-bottom:4px;">📐</div>
-              <div class="qcc-name">Mathematics</div>
-              <div class="qcc-sub">JAMB/WAEC</div>
-            </div>
-            <div onclick="openCBTPage('English Language')" class="quick-cbt-card">
-              <div style="font-size:1.3rem;margin-bottom:4px;">📖</div>
-              <div class="qcc-name">English</div>
-              <div class="qcc-sub">JAMB/WAEC</div>
-            </div>
-            <div onclick="openCBTPage('Physics')" class="quick-cbt-card">
-              <div style="font-size:1.3rem;margin-bottom:4px;">⚡</div>
-              <div class="qcc-name">Physics</div>
-              <div class="qcc-sub">JAMB/WAEC</div>
+            <div onclick="showView('officialquiz',document.querySelector('.sb-link[onclick*=officialquiz]'))" style="cursor:pointer;background:linear-gradient(135deg,var(--gold),var(--gold-2));border-radius:var(--r-md);padding:14px 12px;text-align:center;transition:transform .2s,box-shadow .2s;display:flex;flex-direction:column;align-items:center;gap:6px;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(240,165,0,.3)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+              <img src="nltc-dark.png" alt="NLTC" style="height:34px;width:auto;max-width:110px;object-fit:contain;display:block;flex-shrink:0;">
+              <div style="font-family:var(--font-head);font-size:.78rem;font-weight:800;color:var(--navy);letter-spacing:-.01em;line-height:1.2;">NLTC Question DB</div>
+              <div style="font-size:.62rem;color:rgba(10,22,40,.55);line-height:1.4;">Topic · Year · Timed</div>
             </div>
           </div>
         </div>
@@ -906,7 +927,46 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
 
 <!-- ─────────── CBT ─────────── -->
 <div class="view" id="view-cbt">
-  <div class="page-hdr"><h2>📝 CBT Practice</h2><p>Choose a subject below — you'll set exam type, number of questions &amp; time on the next screen</p></div>
+  <div class="page-hdr"><h2>📝 CBT Practice</h2><p>Set your preferences below, then click any subject to launch</p></div>
+  <!-- CBT Config Strip -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-body" style="padding:12px 14px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;align-items:end;">
+        <div class="form-group" style="margin:0;">
+          <label class="form-label" style="font-size:.72rem;">Mode</label>
+          <select class="form-input" id="cbtMode" style="height:34px;font-size:.8rem;">
+            <option value="jamb">JAMB Exam (2hrs)</option>
+            <option value="practice">Quick Practice</option>
+            <option value="waec">WAEC (45 min)</option>
+            <option value="postutme">Post-UTME (30 min)</option>
+            <option value="custom">Custom Timer</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;" id="cbtCustomTimeWrap" hidden>
+          <label class="form-label" style="font-size:.72rem;">Time (minutes)</label>
+          <input type="number" class="form-input" id="cbtCustomMins" value="60" min="5" max="300" style="height:34px;font-size:.8rem;">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label" style="font-size:.72rem;">Questions</label>
+          <select class="form-input" id="cbtQCount" style="height:34px;font-size:.8rem;">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+            <option value="60">60</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label" style="font-size:.72rem;">Exam Type</label>
+          <select class="form-input" id="cbtExamType" style="height:34px;font-size:.8rem;">
+            <option value="utme">JAMB/UTME</option>
+            <option value="waec">WAEC</option>
+            <option value="neco">NECO</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="cbt-launch-grid">
     <div class="cbt-launch-card" onclick="openCBTPage()">
       <div style="position:absolute;top:10px;right:10px;"><span class="badge badge-red">HOT</span></div>
@@ -971,6 +1031,118 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
         </table>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ─────────── NLTC OFFICIAL QUIZ ─────────── -->
+<div class="view" id="view-officialquiz">
+  <div class="page-hdr"><h2>🎓 NLTC Official Quiz</h2><p>Practice with questions added by NLTC instructors — filter by subject, year, or difficulty</p></div>
+
+  <!-- Setup Screen -->
+  <div id="oqSetup">
+    <div class="oq-setup-card">
+      <h3 style="font-family:var(--font-head);font-size:1rem;font-weight:800;margin-bottom:14px;">Configure Your Quiz</h3>
+      <div class="oq-filter-row">
+        <div class="form-group">
+          <label class="form-label">Subject</label>
+          <select class="form-input" id="oqSubject">
+            <option value="">All Subjects</option>
+            <option>Mathematics</option>
+            <option>English Language</option>
+            <option>Chemistry</option>
+            <option>Physics</option>
+            <option>Biology</option>
+            <option>Economics</option>
+            <option>Government</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Exam Year</label>
+          <select class="form-input" id="oqYear">
+            <option value="">Any Year</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Difficulty</label>
+          <select class="form-input" id="oqDifficulty">
+            <option value="">Any Difficulty</option>
+            <option>Easy</option>
+            <option>Medium</option>
+            <option>Hard</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Number of Questions</label>
+          <select class="form-input" id="oqCount">
+            <option value="10">10 Questions</option>
+            <option value="20">20 Questions</option>
+            <option value="30">30 Questions</option>
+            <option value="40">40 Questions</option>
+            <option value="50">50 Questions</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Time Limit</label>
+          <select class="form-input" id="oqTimeLimit">
+            <option value="0">No Timer</option>
+            <option value="300">5 minutes</option>
+            <option value="600">10 minutes</option>
+            <option value="900">15 minutes</option>
+            <option value="1200">20 minutes</option>
+            <option value="1800">30 minutes</option>
+            <option value="2700">45 minutes</option>
+            <option value="3600">60 minutes</option>
+          </select>
+        </div>
+      </div>
+      <div id="oqBankStat" style="font-size:.78rem;color:var(--text-3);margin-bottom:14px;">Loading question bank…</div>
+      <button class="btn-gold" style="width:100%;justify-content:center;" onclick="startOfficialQuiz()">
+        <i class="fas fa-play"></i> Start Quiz
+      </button>
+    </div>
+  </div>
+
+  <!-- Quiz Screen -->
+  <div id="oqQuizScreen" style="display:none;">
+    <div class="oq-quiz-wrap">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+        <span id="oqQLabel" style="font-size:.8rem;font-weight:700;color:var(--navy);"></span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span id="oqTimerDisplay" style="display:none;font-family:monospace;font-size:.88rem;font-weight:700;padding:4px 10px;border-radius:8px;background:var(--surface-2);color:var(--navy);"></span>
+          <button class="btn-outline btn-sm" onclick="endOfficialQuiz()"><i class="fas fa-times"></i> End</button>
+        </div>
+      </div>
+      <div class="oq-progress-bar"><div class="oq-progress-fill" id="oqProgressFill" style="width:0%"></div></div>
+      <div class="oq-question-card">
+        <div class="oq-q-meta" id="oqQMeta"></div>
+        <div class="oq-q-text" id="oqQText"></div>
+        <div class="oq-options" id="oqOptions"></div>
+        <div class="oq-explanation" id="oqExplanation" style="display:none;"></div>
+      </div>
+      <div class="oq-nav-row">
+        <div style="font-size:.78rem;color:var(--text-3);">Score: <strong id="oqRunningScore">0</strong></div>
+        <button class="btn-navy btn-sm" id="oqNextBtn" onclick="oqNext()" style="display:none;">
+          Next <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Screen -->
+  <div id="oqResultScreen" style="display:none;">
+    <div class="oq-result-card">
+      <div class="oq-score-circle">
+        <div class="oq-score-num" id="oqFinalScore">0</div>
+        <div class="oq-score-den" id="oqFinalTotal">/ 0</div>
+      </div>
+      <h3 style="font-family:var(--font-head);font-size:1.1rem;font-weight:900;margin-bottom:6px;" id="oqResultTitle">Well done!</h3>
+      <p style="font-size:.84rem;color:var(--text-2);margin-bottom:20px;" id="oqResultSub"></p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn-navy" onclick="startOfficialQuiz()"><i class="fas fa-redo"></i> Retry</button>
+        <button class="btn-outline" onclick="showOqSetup()"><i class="fas fa-sliders-h"></i> New Config</button>
+      </div>
+    </div>
+    <div class="oq-quiz-wrap" id="oqReviewList" style="margin-top:4px;"></div>
   </div>
 </div>
 
@@ -1296,20 +1468,219 @@ function showLevelUpToast(level) {
 }
 
 /* ── CBT ── */
-window.openCBTPage = function(subject,mode) {
+window.openCBTPage = function(subject, mode) {
   const map={'Mathematics':'mathematics','English Language':'english','Chemistry':'chemistry','Physics':'physics','Biology':'biology','Economics':'economics','Government':'government','Geography':'geography','Literature':'literature','Accounting':'accounting','History':'history','Commerce':'commerce'};
-  if(subject){
-    const key=map[subject]||subject.toLowerCase().replace(/\s+/g,'');
-    const resolvedMode=mode||'practice';
-    try{sessionStorage.setItem('nltc_cbt_preset',JSON.stringify({key,mode:resolvedMode}));}catch(e){}
+  const modeEl = document.getElementById('cbtMode');
+  const resolvedMode = mode || (modeEl ? modeEl.value : 'practice');
+  const qCount = parseInt(document.getElementById('cbtQCount')?.value || 20);
+  const examType = document.getElementById('cbtExamType')?.value || 'utme';
+  let timeOverride = null;
+  if (resolvedMode === 'custom') {
+    const mins = parseInt(document.getElementById('cbtCustomMins')?.value || 60);
+    timeOverride = mins * 60;
   }
-  window.location.href=CBT_PAGE+'?v='+Date.now();
+  if (subject) {
+    const key = map[subject] || subject.toLowerCase().replace(/\s+/g,'');
+    const preset = {key, mode: resolvedMode === 'custom' ? 'practice' : resolvedMode, qCount, examType};
+    if (timeOverride) preset.timeOverride = timeOverride;
+    try { sessionStorage.setItem('nltc_cbt_preset', JSON.stringify(preset)); } catch(e) {}
+  } else if (resolvedMode === 'jamb') {
+    // JAMB simulation — just go, no preset needed
+  }
+  window.location.href = CBT_PAGE + '?v=' + Date.now();
 };
+
+// Show/hide custom time input
+document.addEventListener('change', function(e) {
+  if (e.target && e.target.id === 'cbtMode') {
+    const wrap = document.getElementById('cbtCustomTimeWrap');
+    if (wrap) wrap.hidden = e.target.value !== 'custom';
+  }
+});
 
 window.addEventListener('message',(e)=>{
   if(!e.data||e.data.type!=='nltc_cbt_score')return;
   handleCBTScore(e.data);
 });
+
+/* ── NLTC OFFICIAL QUIZ ── */
+let oqAllQuestions = [], oqFiltered = [], oqCurrent = 0, oqScore = 0, oqAnswered = false, oqResults = [];
+let oqTimerInterval = null, oqTimeLeft = 0;
+
+window.loadOfficialQuizBank = async function() {
+  try {
+    // Fetch without ordering so ALL questions are reachable, not just the 500 most recent
+    const snap = await getDocs(collection(db,'questions'));
+    // Fisher-Yates shuffle the full bank so every load gives a different random order
+    const arr = snap.docs.map(d=>({id:d.id,...d.data()}));
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    oqAllQuestions = arr;
+    // Populate year dropdown from full bank
+    const years = [...new Set(oqAllQuestions.map(q=>q.year).filter(y=>y&&Number(y)>1900))].sort((a,b)=>b-a);
+    const sel = document.getElementById('oqYear');
+    if(sel) { sel.innerHTML = '<option value="">Any Year</option>' + years.map(y=>`<option>${y}</option>`).join(''); }
+    // Populate subject dropdown from actual data
+    const subjects = [...new Set(oqAllQuestions.map(q=>q.subject).filter(Boolean))].sort();
+    const subjSel = document.getElementById('oqSubject');
+    if(subjSel) {
+      subjSel.innerHTML = '<option value="">All Subjects</option>' + subjects.map(s=>`<option>${s}</option>`).join('');
+    }
+    const stat = document.getElementById('oqBankStat');
+    if(stat) stat.textContent = `${oqAllQuestions.length} questions in the bank — shuffled randomly each session.`;
+  } catch(e) { console.error(e); }
+};
+
+window.startOfficialQuiz = async function() {
+  if(!oqAllQuestions.length) await loadOfficialQuizBank();
+  const subj = document.getElementById('oqSubject')?.value || '';
+  const yr   = document.getElementById('oqYear')?.value || '';
+  const diff = document.getElementById('oqDifficulty')?.value || '';
+  const cnt  = parseInt(document.getElementById('oqCount')?.value||'10');
+  let pool = oqAllQuestions;
+  if(subj) pool = pool.filter(q=>(q.subject||'').toLowerCase()===subj.toLowerCase());
+  if(yr)   pool = pool.filter(q=>String(q.year||'')=== yr);
+  if(diff) pool = pool.filter(q=>(q.difficulty||'').toLowerCase()===diff.toLowerCase());
+  if(!pool.length){ showToast('No questions match these filters','error'); return; }
+  // Fisher-Yates shuffle then slice
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  pool = pool.slice(0, cnt);
+  oqFiltered = pool; oqCurrent = 0; oqScore = 0; oqAnswered = false; oqResults = [];
+  oqTimeLeft = parseInt(document.getElementById('oqTimeLimit')?.value || 0);
+  document.getElementById('oqSetup').style.display = 'none';
+  document.getElementById('oqResultScreen').style.display = 'none';
+  document.getElementById('oqQuizScreen').style.display = '';
+  oqStartTimer();
+  oqRenderQuestion();
+};
+
+function oqStartTimer() {
+  clearInterval(oqTimerInterval);
+  const el = document.getElementById('oqTimerDisplay');
+  if (!oqTimeLeft || !el) { if(el) el.style.display='none'; return; }
+  el.style.display = '';
+  oqUpdateTimerDisplay();
+  oqTimerInterval = setInterval(() => {
+    oqTimeLeft--;
+    oqUpdateTimerDisplay();
+    if (oqTimeLeft <= 0) { clearInterval(oqTimerInterval); oqShowResults(); }
+  }, 1000);
+}
+
+function oqUpdateTimerDisplay() {
+  const el = document.getElementById('oqTimerDisplay');
+  if (!el) return;
+  const m = Math.floor(oqTimeLeft / 60), s = oqTimeLeft % 60;
+  el.textContent = `⏱ ${m}:${String(s).padStart(2,'0')}`;
+  el.style.background = oqTimeLeft <= 30 ? 'rgba(239,68,68,.1)' : oqTimeLeft <= 60 ? 'rgba(255,165,0,.12)' : 'var(--surface-2)';
+  el.style.color = oqTimeLeft <= 30 ? '#EF4444' : oqTimeLeft <= 60 ? '#F59E0B' : 'var(--navy)';
+}
+
+function oqRenderQuestion() {
+  const q = oqFiltered[oqCurrent];
+  const total = oqFiltered.length;
+  const pct = Math.round(oqCurrent/total*100);
+  document.getElementById('oqProgressFill').style.width = pct+'%';
+  document.getElementById('oqQLabel').textContent = `Question ${oqCurrent+1} of ${total}`;
+  document.getElementById('oqRunningScore').textContent = oqScore;
+  document.getElementById('oqQMeta').innerHTML = [
+    q.subject ? `<span class="badge badge-blue">${q.subject}</span>` : '',
+    q.year ? `<span class="badge" style="background:var(--surface-2);color:var(--text-2);">${q.year}</span>` : '',
+    q.difficulty ? `<span class="badge" style="background:var(--surface-2);color:var(--text-2);">${q.difficulty}</span>` : '',
+    q.examType ? `<span class="badge" style="background:var(--surface-2);color:var(--text-2);">${q.examType}</span>` : ''
+  ].join('');
+  document.getElementById('oqQText').textContent = q.question || '—';
+  document.getElementById('oqExplanation').style.display = 'none';
+  document.getElementById('oqNextBtn').style.display = 'none';
+  oqAnswered = false;
+  const opts = q.options || {};
+  document.getElementById('oqOptions').innerHTML = ['A','B','C','D'].map(l => {
+    const text = opts[l] || '';
+    if(!text) return '';
+    return `<div class="oq-option" id="oqOpt${l}" onclick="oqSelectAnswer('${l}')">
+      <div class="oq-opt-label">${l}</div>
+      <div style="flex:1;line-height:1.45;">${text}</div>
+    </div>`;
+  }).join('');
+}
+
+window.oqSelectAnswer = function(letter) {
+  if(oqAnswered) return;
+  oqAnswered = true;
+  const q = oqFiltered[oqCurrent];
+  const correct = (q.correctAnswer||'').toUpperCase();
+  const isRight = letter === correct;
+  if(isRight) oqScore++;
+  oqResults.push({q, chosen: letter, correct, isRight});
+  ['A','B','C','D'].forEach(l => {
+    const el = document.getElementById('oqOpt'+l);
+    if(!el) return;
+    el.classList.add('oq-opt-disabled');
+    if(l===correct) el.classList.add('correct');
+    else if(l===letter && !isRight) el.classList.add('wrong');
+  });
+  document.getElementById('oqRunningScore').textContent = oqScore;
+  if(q.explanation) {
+    const expEl = document.getElementById('oqExplanation');
+    expEl.textContent = '💡 ' + q.explanation;
+    expEl.style.display = '';
+  }
+  document.getElementById('oqNextBtn').style.display = '';
+  document.getElementById('oqNextBtn').textContent = oqCurrent+1 < oqFiltered.length ? 'Next →' : 'Finish';
+};
+
+window.oqNext = function() {
+  if(oqCurrent+1 >= oqFiltered.length) { oqShowResults(); return; }
+  oqCurrent++;
+  oqRenderQuestion();
+};
+
+function oqShowResults() {
+  clearInterval(oqTimerInterval);
+  document.getElementById('oqQuizScreen').style.display = 'none';
+  document.getElementById('oqResultScreen').style.display = '';
+  const total = oqFiltered.length;
+  const pct = Math.round(oqScore/total*100);
+  document.getElementById('oqFinalScore').textContent = oqScore;
+  document.getElementById('oqFinalTotal').textContent = '/ '+total;
+  let title = pct>=80?'Excellent! 🔥':pct>=60?'Good Job! 👍':pct>=40?'Keep Practicing 💪':'Review Needed 📚';
+  document.getElementById('oqResultTitle').textContent = title;
+  document.getElementById('oqResultSub').textContent = `You scored ${oqScore} out of ${total} (${pct}%)`;
+  document.getElementById('oqReviewList').innerHTML = oqResults.map((r,i)=>{
+    const opts = r.q.options||{};
+    return `<div class="oq-question-card" style="margin-bottom:12px;">
+      <div class="oq-q-meta">${i+1}. ${r.isRight?'<span style="color:var(--success);font-weight:700;">✓ Correct</span>':'<span style="color:#EF4444;font-weight:700;">✗ Wrong</span>'}</div>
+      <div class="oq-q-text">${r.q.question||''}</div>
+      <div class="oq-options" style="pointer-events:none;">
+        ${['A','B','C','D'].map(l=>{
+          if(!opts[l]) return '';
+          let cls='oq-option oq-opt-disabled';
+          if(l===r.correct) cls+=' correct';
+          else if(l===r.chosen && !r.isRight) cls+=' wrong';
+          return `<div class="${cls}"><div class="oq-opt-label">${l}</div><div style="flex:1;">${opts[l]}</div></div>`;
+        }).join('')}
+      </div>
+      ${r.q.explanation?`<div class="oq-explanation">💡 ${r.q.explanation}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+window.endOfficialQuiz = function() {
+  if(!confirm('End quiz? Progress will be lost.')) return;
+  showOqSetup();
+};
+
+window.showOqSetup = function() {
+  clearInterval(oqTimerInterval);
+  document.getElementById('oqQuizScreen').style.display = 'none';
+  document.getElementById('oqResultScreen').style.display = 'none';
+  document.getElementById('oqSetup').style.display = '';
+};
 
 (function checkLastCBT(){
   try{
@@ -2432,10 +2803,11 @@ function showView(name,btn){
       if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes(`'${name}'`))b.classList.add('active');
     });
   }
-  const titles={home:'Dashboard',lessons:'Video Lessons',cbt:'CBT Practice',live:'Live Classes',leaderboard:'Leaderboard',announcements:'Announcements',schedule:'Schedule',settings:'Settings'};
+  const titles={home:'Dashboard',lessons:'Video Lessons',cbt:'CBT Practice',officialquiz:'NLTC Official Quiz',live:'Live Classes',leaderboard:'Leaderboard',announcements:'Announcements',schedule:'Schedule',settings:'Settings'};
   document.getElementById('topbarTitle').textContent=titles[name]||'Dashboard';
   closeSidebar();
   window.scrollTo({top:0,behavior:'smooth'});
+  if(name==='officialquiz' && typeof loadOfficialQuizBank==='function') loadOfficialQuizBank();
 }
 window.showView=showView;
 

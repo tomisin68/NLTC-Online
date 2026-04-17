@@ -44,7 +44,7 @@ img{max-width:100%;height:auto;}
 .setup-card{background:white;border-radius:24px;width:100%;max-width:620px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,0.4);margin:0 auto;}
 .setup-top{background:linear-gradient(135deg,var(--navy-2),var(--navy-3));padding:28px 32px 24px;text-align:center;}
 .setup-logo{display:inline-flex;align-items:center;gap:10px;margin-bottom:16px;}
-.setup-logo-img{height:32px;width:auto;object-fit:contain;display:block;}
+.setup-logo-img{height:44px;width:auto;object-fit:contain;display:block;}
 .setup-logo-text{font-family:var(--font-head);font-size:1rem;font-weight:800;color:white;}
 .setup-logo-text em{color:var(--gold);font-style:normal;}
 .back-btn{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:16px;cursor:pointer;transition:color .15s;background:none;border:none;}
@@ -97,7 +97,7 @@ img{max-width:100%;height:auto;}
 /* ═══ LOADING SCREEN ═══ */
 #loading-screen{background:#0A1628;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:20px;}
 .loading-logo{display:flex;align-items:center;justify-content:center;margin-bottom:6px;}
-.loading-logo img{height:34px;width:auto;object-fit:contain;}
+.loading-logo img{height:48px;width:auto;object-fit:contain;}
 .loading-status-txt{font-size:.83rem;color:rgba(255,255,255,.4);margin-bottom:16px;text-align:center;}
 .load-subjects{display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px;}
 .load-subj-row{display:flex;align-items:center;gap:11px;}
@@ -118,7 +118,7 @@ img{max-width:100%;height:auto;}
 #exam-screen{background:#0A1628;}
 .exam-topbar{background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.07);padding:0 16px;height:56px;display:flex;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:50;}
 .exam-logo-sm{display:flex;align-items:center;flex-shrink:0;}
-.exam-logo-sm img{height:22px;width:auto;object-fit:contain;display:block;}
+.exam-logo-sm img{height:32px;width:auto;object-fit:contain;display:block;}
 .exam-subject-tabs{display:flex;gap:3px;flex:1;overflow-x:auto;scrollbar-width:none;}
 .exam-subject-tabs::-webkit-scrollbar{display:none;}
 .etab{padding:5px 12px;border-radius:100px;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .18s;white-space:nowrap;color:rgba(255,255,255,.4);border:1px solid transparent;flex-shrink:0;}
@@ -693,6 +693,7 @@ let state = {
   customQCount: 20,
   customExamType: 'utme',
   jambQueue: [],
+  timeOverride: null,
 };
 
 /* ════════════════════════════════════════
@@ -1018,7 +1019,7 @@ async function startJambExam() {
   state.currentQIdx   = 0;
   state.submitted     = false;
   state.startTime     = Date.now();
-  state.timeLeft      = 7200;
+  state.timeLeft      = state.timeOverride || 7200;
 
   // Load ALL subjects in parallel — show loading screen with 4 progress bars
   await loadAllJambSubjects();
@@ -1203,7 +1204,8 @@ function closeSubjectBridge() {
    SINGLE SUBJECT FLOW
 ════════════════════════════════════════ */
 async function startSingleSubjectExam() {
-  if (state.mode === 'waec')          state.timeLeft = 2700;
+  if (state.timeOverride)             state.timeLeft = state.timeOverride;
+  else if (state.mode === 'waec')     state.timeLeft = 2700;
   else if (state.mode === 'postutme') state.timeLeft = 1800;
   else                                state.timeLeft = 0;
 
@@ -1975,6 +1977,9 @@ renderPastSessions();
         const qcEl = document.getElementById('custom-q-count');
         if (qcEl) qcEl.value = String(preset.qCount);
         state.customQCount = parseInt(preset.qCount);
+      }
+      if (preset.timeOverride) {
+        state.timeOverride = parseInt(preset.timeOverride);
       }
       updateStartBtn();
       showToast(`${SUBJECTS_CONFIG[key].name} ready — adjust settings then press Begin`, 'info');
