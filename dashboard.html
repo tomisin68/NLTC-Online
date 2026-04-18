@@ -1148,6 +1148,12 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
 
   <!-- Quiz Screen -->
   <div id="oqQuizScreen" style="display:none;">
+    <!-- Anti-cheat warning bar -->
+    <div id="oqWarnBar" style="display:none;align-items:center;gap:10px;background:#450a0a;border:1px solid #ef4444;border-radius:10px;padding:9px 14px;margin-bottom:12px;font-size:.8rem;font-weight:700;color:#fca5a5;">
+      <i class="fas fa-exclamation-triangle"></i>
+      <span id="oqWarnText">Warning: Do not leave the quiz!</span>
+      <span id="oqViolCount" style="margin-left:auto;font-size:.75rem;opacity:.85;"></span>
+    </div>
     <div class="oq-quiz-wrap">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
         <span id="oqQLabel" style="font-size:.8rem;font-weight:700;color:var(--navy);"></span>
@@ -1716,6 +1722,94 @@ window.loadOfficialQuizBank = async function() {
   } catch(e) { console.error(e); }
 };
 
+/* ── Official Quiz Anti-Cheat ── */
+let _oqViol = 0, _oqAcOn = false;
+const _oqH = {};
+
+function installOQAntiCheat() {
+  if (_oqAcOn) return;
+  _oqAcOn = true;
+  _oqViol = 0;
+  const bar = document.getElementById('oqWarnBar');
+  if (bar) bar.style.display = 'none';
+
+  try {
+    const el = document.getElementById('view-officialquiz');
+    (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
+  } catch(e) {}
+
+  _oqH.ctx  = e => e.preventDefault();
+  _oqH.copy = e => e.preventDefault();
+  _oqH.cut  = e => e.preventDefault();
+  document.addEventListener('contextmenu', _oqH.ctx);
+  document.addEventListener('copy',        _oqH.copy);
+  document.addEventListener('cut',         _oqH.cut);
+
+  _oqH.key = e => {
+    if (document.getElementById('oqQuizScreen').style.display === 'none') return;
+    const ctrl = e.ctrlKey || e.metaKey;
+    if (e.key === 'F12') { e.preventDefault(); recordOQViolation('devtools'); return; }
+    if (ctrl && e.shiftKey && 'IJC'.includes(e.key)) { e.preventDefault(); recordOQViolation('devtools'); return; }
+    if (ctrl && 'cCvVuUaA'.includes(e.key)) e.preventDefault();
+  };
+  document.addEventListener('keydown', _oqH.key);
+
+  _oqH.vis = () => {
+    if (document.getElementById('oqQuizScreen').style.display === 'none') return;
+    if (document.hidden) recordOQViolation('tab_switch');
+  };
+  document.addEventListener('visibilitychange', _oqH.vis);
+
+  _oqH.blur = () => {
+    if (document.getElementById('oqQuizScreen').style.display === 'none') return;
+    recordOQViolation('window_blur');
+  };
+  window.addEventListener('blur', _oqH.blur);
+
+  _oqH.fs = () => {
+    if (document.getElementById('oqQuizScreen').style.display === 'none') return;
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) recordOQViolation('fullscreen_exit');
+  };
+  document.addEventListener('fullscreenchange',       _oqH.fs);
+  document.addEventListener('webkitfullscreenchange', _oqH.fs);
+}
+
+function uninstallOQAntiCheat() {
+  if (!_oqAcOn) return;
+  _oqAcOn = false;
+  document.removeEventListener('contextmenu',          _oqH.ctx);
+  document.removeEventListener('copy',                 _oqH.copy);
+  document.removeEventListener('cut',                  _oqH.cut);
+  document.removeEventListener('keydown',              _oqH.key);
+  document.removeEventListener('visibilitychange',     _oqH.vis);
+  window.removeEventListener('blur',                   _oqH.blur);
+  document.removeEventListener('fullscreenchange',     _oqH.fs);
+  document.removeEventListener('webkitfullscreenchange', _oqH.fs);
+  try { (document.exitFullscreen || document.webkitExitFullscreen)?.call(document); } catch(e) {}
+}
+
+function recordOQViolation(type) {
+  if (document.getElementById('oqQuizScreen').style.display === 'none') return;
+  _oqViol++;
+  const labels = { tab_switch:'Tab switch detected', window_blur:'You left the quiz window', fullscreen_exit:'You exited fullscreen', devtools:'Developer tools detected' };
+  const msg = labels[type] || 'Violation detected';
+  const bar = document.getElementById('oqWarnBar');
+  const txt = document.getElementById('oqWarnText');
+  const cnt = document.getElementById('oqViolCount');
+  if (bar) { bar.style.display = 'flex'; }
+  if (txt) txt.textContent = `⚠ ${msg}! Violation ${_oqViol}/3`;
+  if (cnt) cnt.textContent = _oqViol >= 2 ? '⛔ Next violation = auto-submit!' : '';
+  if (type === 'fullscreen_exit' || type === 'tab_switch') {
+    try { const el = document.getElementById('view-officialquiz'); (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el); } catch(e) {}
+  }
+  showToast(`Violation ${_oqViol}/3: ${msg}`, 'error');
+  if (_oqViol >= 3) {
+    if (txt) txt.textContent = '🚫 3 violations — quiz auto-submitting…';
+    showToast('3 violations — auto-submitting quiz!', 'error');
+    setTimeout(() => { uninstallOQAntiCheat(); oqShowResults(); }, 1500);
+  }
+}
+
 window.startOfficialQuiz = async function() {
   if(!oqAllQuestions.length) await loadOfficialQuizBank();
   const subj = document.getElementById('oqSubject')?.value || '';
@@ -1739,6 +1833,7 @@ window.startOfficialQuiz = async function() {
   document.getElementById('oqSetup').style.display = 'none';
   document.getElementById('oqResultScreen').style.display = 'none';
   document.getElementById('oqQuizScreen').style.display = '';
+  installOQAntiCheat();
   oqStartTimer();
   oqRenderQuestion();
 };
@@ -1829,6 +1924,7 @@ window.oqNext = function() {
 
 function oqShowResults() {
   clearInterval(oqTimerInterval);
+  uninstallOQAntiCheat();
   oqCloseTools();
   document.getElementById('oqQuizScreen').style.display = 'none';
   document.getElementById('oqResultScreen').style.display = '';
@@ -1860,11 +1956,13 @@ function oqShowResults() {
 
 window.endOfficialQuiz = function() {
   if(!confirm('End quiz? Progress will be lost.')) return;
+  uninstallOQAntiCheat();
   showOqSetup();
 };
 
 window.showOqSetup = function() {
   clearInterval(oqTimerInterval);
+  uninstallOQAntiCheat();
   oqCloseTools();
   document.getElementById('oqQuizScreen').style.display = 'none';
   document.getElementById('oqResultScreen').style.display = 'none';

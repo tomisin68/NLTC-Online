@@ -372,6 +372,14 @@ img{max-width:100%;height:auto;}
   .exam-timer{font-size:.88rem;padding:4px 10px;}
   .nav-btn{padding:9px 14px;font-size:.78rem;}
 }
+/* ── Anti-cheat warning bar ── */
+.ac-warn-bar{
+  display:none;align-items:center;gap:10px;
+  background:#450a0a;border-bottom:2px solid #ef4444;
+  padding:9px 18px;font-size:.8rem;font-weight:700;color:#fca5a5;
+  animation:acShake .35s ease;flex-shrink:0;
+}
+@keyframes acShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 </style>
 </head>
 <body>
@@ -500,6 +508,11 @@ img{max-width:100%;height:auto;}
 
 <!-- ═══════════════════════ EXAM SCREEN ═══════════════════════ -->
 <div class="screen" id="exam-screen">
+  <div class="ac-warn-bar" id="cbtWarnBar">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span id="cbtWarnText">Warning: Do not leave the exam screen!</span>
+    <span id="cbtViolCount" style="margin-left:auto;font-size:.75rem;opacity:.85;"></span>
+  </div>
   <div class="exam-topbar">
     <div class="exam-logo-sm"><img src="nltc-light.png" alt="NLTC"></div>
     <div class="exam-subject-tabs" id="exam-tabs"></div>
@@ -1102,6 +1115,7 @@ async function loadAllJambSubjects() {
   startTimer();
   initExamScreen();
   showScreen('exam-screen');
+  installCBTAntiCheat();
   showToast(`${state.subjects.length} subjects loaded — good luck! 🎓`, 'success');
 }
 
@@ -1243,6 +1257,7 @@ async function startSingleSubjectExam() {
 
     initExamScreen();
     showScreen('exam-screen');
+    installCBTAntiCheat();
     startTimer();
   } catch(e) {
     showLoadError(e.message);
@@ -1646,6 +1661,7 @@ function closeModal() { document.getElementById('submit-modal').classList.remove
 
 function submitExam() {
   closeModal();
+  uninstallCBTAntiCheat();
   clearInterval(state.timerInterval);
   state.timerInterval = null;
   state.submitted = true;
@@ -1894,6 +1910,7 @@ function showScreen(id) {
 }
 
 function goToSetup() {
+  uninstallCBTAntiCheat();
   clearInterval(state.timerInterval);
   state.timerInterval = null;
   state.selectedJambSubs = [];
@@ -1934,6 +1951,114 @@ function showToast(msg, type = 'info') {
 document.getElementById('submit-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
 document.getElementById('custom-q-count').addEventListener('change', updateStartBtn);
 document.getElementById('custom-exam-type').addEventListener('change', updateStartBtn);
+
+/* ════════════════════════════════════════
+   ANTI-CHEAT
+════════════════════════════════════════ */
+let acViolations = 0;
+let acInstalled  = false;
+const _acH = {}; // handler refs for clean removal
+
+function installCBTAntiCheat() {
+  if (acInstalled) return;
+  acInstalled  = true;
+  acViolations = 0;
+  const bar = document.getElementById('cbtWarnBar');
+  if (bar) bar.style.display = 'none';
+
+  // Fullscreen — whole page
+  try {
+    const el = document.documentElement;
+    (el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen)?.call(el);
+  } catch(e) {}
+
+  _acH.ctx   = e => e.preventDefault();
+  _acH.copy  = e => e.preventDefault();
+  _acH.paste = e => e.preventDefault();
+  _acH.cut   = e => e.preventDefault();
+  document.addEventListener('contextmenu',   _acH.ctx);
+  document.addEventListener('copy',          _acH.copy);
+  document.addEventListener('paste',         _acH.paste);
+  document.addEventListener('cut',           _acH.cut);
+
+  _acH.key = e => {
+    if (!document.getElementById('exam-screen').classList.contains('active')) return;
+    const ctrl = e.ctrlKey || e.metaKey;
+    if (e.key === 'F12') { e.preventDefault(); recordCBTViolation('devtools'); return; }
+    if (ctrl && e.shiftKey && 'IJC'.includes(e.key)) { e.preventDefault(); recordCBTViolation('devtools'); return; }
+    if (ctrl && 'cCvVuUaAsSpP'.includes(e.key)) e.preventDefault();
+    if (e.altKey && e.key === 'F4') e.preventDefault();
+  };
+  document.addEventListener('keydown', _acH.key);
+
+  _acH.vis = () => {
+    if (!document.getElementById('exam-screen').classList.contains('active')) return;
+    if (document.hidden) recordCBTViolation('tab_switch');
+  };
+  document.addEventListener('visibilitychange', _acH.vis);
+
+  _acH.blur = () => {
+    if (!document.getElementById('exam-screen').classList.contains('active')) return;
+    recordCBTViolation('window_blur');
+  };
+  window.addEventListener('blur', _acH.blur);
+
+  _acH.fs = () => {
+    if (!document.getElementById('exam-screen').classList.contains('active')) return;
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) recordCBTViolation('fullscreen_exit');
+  };
+  document.addEventListener('fullscreenchange',       _acH.fs);
+  document.addEventListener('webkitfullscreenchange', _acH.fs);
+}
+
+function uninstallCBTAntiCheat() {
+  if (!acInstalled) return;
+  acInstalled = false;
+  document.removeEventListener('contextmenu',          _acH.ctx);
+  document.removeEventListener('copy',                 _acH.copy);
+  document.removeEventListener('paste',                _acH.paste);
+  document.removeEventListener('cut',                  _acH.cut);
+  document.removeEventListener('keydown',              _acH.key);
+  document.removeEventListener('visibilitychange',     _acH.vis);
+  window.removeEventListener('blur',                   _acH.blur);
+  document.removeEventListener('fullscreenchange',     _acH.fs);
+  document.removeEventListener('webkitfullscreenchange', _acH.fs);
+  try { (document.exitFullscreen || document.webkitExitFullscreen)?.call(document); } catch(e) {}
+}
+
+function recordCBTViolation(type) {
+  if (state.submitted || !document.getElementById('exam-screen').classList.contains('active')) return;
+  acViolations++;
+  const labels = {
+    tab_switch:     'Tab switch detected',
+    window_blur:    'You left the exam window',
+    fullscreen_exit:'You exited fullscreen',
+    devtools:       'Developer tools detected'
+  };
+  const msg = labels[type] || 'Cheating detected';
+  const bar  = document.getElementById('cbtWarnBar');
+  const txt  = document.getElementById('cbtWarnText');
+  const cnt  = document.getElementById('cbtViolCount');
+  if (bar) { bar.style.display = 'flex'; bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = ''; }
+  if (txt) txt.textContent = `⚠ ${msg}! Violation ${acViolations}/3`;
+  if (cnt) cnt.textContent = acViolations >= 2 ? '⛔ Next violation = auto-submit!' : '';
+
+  // Re-enter fullscreen if they left it
+  if (type === 'fullscreen_exit' || type === 'tab_switch') {
+    try {
+      const el = document.documentElement;
+      (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
+    } catch(e) {}
+  }
+
+  showToast(`Violation ${acViolations}/3: ${msg}`, 'error');
+
+  if (acViolations >= 3) {
+    if (txt) txt.textContent = '🚫 3 violations — exam is being auto-submitted…';
+    showToast('3 violations — auto-submitting exam!', 'error');
+    setTimeout(() => { uninstallCBTAntiCheat(); submitExam(); }, 1500);
+  }
+}
 
 /* ════════════════════════════════════════
    INIT
