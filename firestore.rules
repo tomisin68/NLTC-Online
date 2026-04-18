@@ -257,6 +257,26 @@ service cloud.firestore {
     }
 
     // ───────────────────────────────────────────────────────────────
+    //  QUICK TESTS  /quickTests/{testId}
+    // ───────────────────────────────────────────────────────────────
+
+    match /quickTests/{testId} {
+      // Students can read published tests only
+      allow read: if isSignedIn() &&
+                     (resource.data.get('status','') == 'published' || isAdmin());
+      allow create, update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Quick test results — students write their own, admins read all
+    match /quickTestResults/{resultId} {
+      allow read:   if isSignedIn() &&
+                       (resource.data.get('uid','') == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && validQTResult();
+      allow update, delete: if isAdmin();
+    }
+
+    // ───────────────────────────────────────────────────────────────
     //  DENY ALL CATCH-ALL  (must be last)
     // ───────────────────────────────────────────────────────────────
 
@@ -349,6 +369,18 @@ service cloud.firestore {
       let delta = next - cur;
       return changed.hasOnly(['viewerCount'])
           && (delta == 1 || delta == -1);
+    }
+
+    // ── Quick test result written by student ──
+    function validQTResult() {
+      let d = request.resource.data;
+      return d.get('uid', '') == request.auth.uid
+          && d.get('testId', '') is string
+          && d.get('testId', '').size() > 0
+          && d.get('score', 0) is int
+          && d.get('total', 1) is int
+          && d.get('score', 0) >= 0
+          && d.get('score', 0) <= d.get('total', 1);
     }
 
     // ── Chat message validation ──

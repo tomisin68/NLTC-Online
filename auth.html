@@ -872,6 +872,14 @@ body {
         <img src="nltc-dark.png" alt="NLTC" class="mb-icon">
       </div>
 
+      <!-- Plan banner (shown when coming from pricing page) -->
+      <div id="planNotice" style="display:none;background:linear-gradient(135deg,#FFF8E7,#FEF3C7);border:1.5px solid #F0A500;border-radius:10px;padding:11px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+        <i class="fas fa-crown" style="color:#F0A500;font-size:.9rem;flex-shrink:0;"></i>
+        <div style="font-size:.78rem;color:#92400E;line-height:1.4;">
+          <strong id="planNoticeText">Sign in or create an account</strong> to complete your subscription.
+        </div>
+      </div>
+
       <!-- ROLE SELECTOR -->
       <div class="role-selector fade-up">
         <button class="role-btn active" id="role-student" onclick="setRole('student')">
@@ -1123,7 +1131,24 @@ body {
 ═══════════════════════════════════════════════════════ */
 let currentRole    = 'student'; // 'student' | 'admin'
 let currentTab     = 'in';      // 'in' | 'up'
-let redirectTarget = 'dashboard.html';
+
+// If visitor came from landing page pricing buttons (?plan=pro / ?plan=elite),
+// carry the plan param to dashboard so it auto-opens the payment modal.
+const _urlPlan = new URLSearchParams(window.location.search).get('plan');
+let redirectTarget = _urlPlan && _urlPlan !== 'free'
+  ? `dashboard.html?pay=${encodeURIComponent(_urlPlan)}`
+  : 'dashboard.html';
+
+// Show plan notice banner if coming from pricing
+if (_urlPlan && _urlPlan !== 'free') {
+  const planLabels = { pro: 'Pro Scholar (₦5,000/mo)', elite: 'Elite Bundle (₦12,000/term)' };
+  const notice = document.getElementById('planNotice');
+  const noticeText = document.getElementById('planNoticeText');
+  if (notice && noticeText) {
+    noticeText.textContent = `You selected ${planLabels[_urlPlan] || _urlPlan} — `;
+    notice.style.display = 'flex';
+  }
+}
 
 /* Admin invite code — keep this server-side in production */
 const ADMIN_INVITE_CODE = 'NLTC-ADMIN-2025';

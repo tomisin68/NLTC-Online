@@ -612,44 +612,62 @@ h2.section-title .accent { color: var(--gold); }
    TESTIMONIALS
    ============================================================ */
 .testi-bg { background: var(--surface); }
-.testi-head { text-align: center; margin-bottom: 52px; }
+.testi-head { text-align: center; margin-bottom: 44px; }
 .testi-head .section-sub { margin: 0 auto; }
-.testi-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 22px;
+
+/* ── Flyer Carousel ── */
+.testi-carousel-wrap { position: relative; }
+.testi-track-outer {
+  overflow: hidden;
+  border-radius: var(--r-xl);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
 }
-.testi-card {
-  background: white; border-radius: var(--r-lg);
-  overflow: hidden; box-shadow: var(--shadow-sm);
-  transition: all 0.3s; display: flex; flex-direction: column;
+.testi-track-outer:active { cursor: grabbing; }
+.testi-track {
+  display: flex;
+  gap: 20px;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
 }
-.testi-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
-.tc-img-wrap { width: 100%; height: 190px; overflow: hidden; position: relative; flex-shrink: 0; }
-.tc-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
-.testi-card:hover .tc-img-wrap img { transform: scale(1.05); }
-.tc-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(to top, rgba(11,29,58,0.88) 0%, rgba(11,29,58,0.18) 55%, transparent 100%);
+.testi-flyer {
+  flex-shrink: 0;
+  width: 320px;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s, box-shadow 0.3s;
+  background: var(--navy);
 }
-.tc-name-block { position: absolute; bottom: 12px; left: 14px; }
-.tc-name { font-size: 0.88rem; font-weight: 700; color: white; }
-.tc-meta { font-size: 0.68rem; color: rgba(255,255,255,0.6); margin-top: 2px; }
-.tc-body { padding: 20px 20px 22px; flex: 1; display: flex; flex-direction: column; }
-.tc-stars { color: var(--gold); font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 11px; }
-.tc-quote {
-  font-size: 0.875rem; line-height: 1.75; color: var(--text-2);
-  font-style: italic; flex: 1;
+.testi-flyer:hover { transform: translateY(-6px) scale(1.02); box-shadow: var(--shadow-lg); }
+.testi-flyer img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
 }
-.tc-quote::before {
-  content: '\201C'; font-size: 1.6rem; color: var(--gold);
-  line-height: 0; vertical-align: -0.3em; margin-right: 3px;
+.testi-nav {
+  display: flex; justify-content: center; align-items: center;
+  gap: 12px; margin-top: 28px;
 }
-.tc-score {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--surface); border-radius: 100px;
-  padding: 5px 11px; font-size: 0.73rem; font-weight: 700; color: var(--navy);
-  margin-top: 13px; align-self: flex-start;
+.testi-nav-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--border-2);
+  background: white; color: var(--navy);
+  font-size: 1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; box-shadow: var(--shadow-xs);
 }
+.testi-nav-btn:hover { background: var(--navy); color: white; border-color: var(--navy); }
+.testi-dots { display: flex; gap: 7px; align-items: center; }
+.testi-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--surface-3); cursor: pointer; transition: all 0.25s;
+}
+.testi-dot.active { background: var(--navy); width: 22px; border-radius: 4px; }
 
 /* ============================================================
    FAQ
@@ -670,6 +688,72 @@ h2.section-title .accent { color: var(--gold); }
   max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s;
 }
 .faq-item.open .faq-answer { max-height: 200px; padding-bottom: 18px; }
+
+/* ============================================================
+   LIVE LEADERBOARD SECTION
+   ============================================================ */
+.live-lb-bg { background: linear-gradient(160deg, #0A1628 0%, #122040 60%, #0A1628 100%); }
+.live-lb-inner { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+.live-lb-head { text-align: center; margin-bottom: 40px; }
+.live-badge-dot {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3);
+  border-radius: 100px; padding: 5px 13px; font-size: .72rem; font-weight: 700;
+  color: #FCA5A5; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 16px;
+}
+.live-badge-dot::before {
+  content: ''; width: 7px; height: 7px; border-radius: 50%;
+  background: #EF4444; animation: livePulse 1.6s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%,100%{opacity:1;transform:scale(1);}
+  50%{opacity:.45;transform:scale(1.4);}
+}
+.live-lb-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+}
+.live-lb-card {
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07);
+  border-radius: var(--r-xl); padding: 24px; backdrop-filter: blur(10px);
+}
+.live-lb-card-title {
+  font-size: .68rem; font-weight: 700; color: rgba(255,255,255,.3);
+  text-transform: uppercase; letter-spacing: .12em; margin-bottom: 16px;
+}
+.live-lb-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.live-lb-row:last-child { border-bottom: none; }
+.live-lb-rank {
+  width: 28px; text-align: center; font-size: .85rem;
+  font-weight: 800; color: rgba(255,255,255,.3); flex-shrink: 0;
+}
+.live-lb-rank.r1 { color: #FFD700; }
+.live-lb-rank.r2 { color: #CBD5E1; }
+.live-lb-rank.r3 { color: #CD7F32; }
+.live-lb-av {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 800; flex-shrink: 0;
+  color: var(--navy);
+}
+.live-lb-name { flex: 1; min-width: 0; }
+.live-lb-name-text { font-size: .84rem; font-weight: 700; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.live-lb-sub { font-size: .67rem; color: rgba(255,255,255,.3); margin-top: 1px; }
+.live-lb-xp { font-size: .78rem; font-weight: 800; color: var(--gold); white-space: nowrap; }
+.live-lb-skeleton {
+  display: flex; align-items: center; gap: 12px; padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.live-lb-skeleton:last-child { border-bottom: none; }
+.sk-circle { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.06); flex-shrink: 0; animation: skPulse 1.4s ease-in-out infinite; }
+.sk-line { height: 10px; border-radius: 6px; background: rgba(255,255,255,.06); animation: skPulse 1.4s ease-in-out infinite; }
+@keyframes skPulse { 0%,100%{opacity:.5;} 50%{opacity:1;} }
+.live-lb-cta {
+  text-align: center; margin-top: 32px;
+}
+.live-lb-cta p { font-size: .84rem; color: rgba(255,255,255,.35); margin-bottom: 14px; }
 
 /* ============================================================
    COMMUNITY
@@ -838,6 +922,7 @@ footer { background: #04101F; padding: 64px 24px 36px; }
   .gamif-grid { grid-template-columns: 1fr; gap: 40px; }
   .faq-grid { grid-template-columns: 1fr; gap: 40px; }
   .community-grid { grid-template-columns: 1fr; gap: 40px; }
+  .live-lb-grid { grid-template-columns: 1fr; gap: 20px; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 36px; }
   .steps-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
   .step::after { display: none !important; }
@@ -851,7 +936,7 @@ footer { background: #04101F; padding: 64px 24px 36px; }
   .feats-grid { grid-template-columns: 1fr; }
   .exams-grid { grid-template-columns: 1fr 1fr; }
   .steps-grid { grid-template-columns: 1fr; }
-  .testi-grid { grid-template-columns: 1fr; }
+  .testi-flyer { width: 260px; }
   .pricing-grid { grid-template-columns: 1fr; max-width: 100%; }
   .plan.popular { transform: scale(1); }
   .plan.popular:hover { transform: translateY(-6px); }
@@ -1278,6 +1363,73 @@ footer { background: #04101F; padding: 64px 24px 36px; }
 </section>
 
 <!-- ============================================================
+     LIVE LEADERBOARD
+     ============================================================ -->
+<section class="section live-lb-bg" id="leaderboard">
+  <div class="live-lb-inner">
+    <div class="live-lb-head anim">
+      <div class="live-badge-dot">Live Data</div>
+      <h2 class="section-title on-dark">The National <span class="accent">Leaderboard</span></h2>
+      <p class="section-sub on-dark">Real students. Real scores. Updated live from our platform.</p>
+    </div>
+    <div class="live-lb-grid anim">
+      <!-- Top Students Card -->
+      <div class="live-lb-card">
+        <div class="live-lb-card-title">🏆 Top Students by XP</div>
+        <div id="lbTopList">
+          <!-- skeleton rows -->
+          <div class="live-lb-skeleton"><div class="sk-circle"></div><div style="flex:1;display:flex;flex-direction:column;gap:5px;"><div class="sk-line" style="width:60%;"></div><div class="sk-line" style="width:35%;height:8px;"></div></div><div class="sk-line" style="width:50px;"></div></div>
+          <div class="live-lb-skeleton"><div class="sk-circle"></div><div style="flex:1;display:flex;flex-direction:column;gap:5px;"><div class="sk-line" style="width:55%;"></div><div class="sk-line" style="width:40%;height:8px;"></div></div><div class="sk-line" style="width:50px;"></div></div>
+          <div class="live-lb-skeleton"><div class="sk-circle"></div><div style="flex:1;display:flex;flex-direction:column;gap:5px;"><div class="sk-line" style="width:65%;"></div><div class="sk-line" style="width:30%;height:8px;"></div></div><div class="sk-line" style="width:50px;"></div></div>
+          <div class="live-lb-skeleton"><div class="sk-circle"></div><div style="flex:1;display:flex;flex-direction:column;gap:5px;"><div class="sk-line" style="width:50%;"></div><div class="sk-line" style="width:45%;height:8px;"></div></div><div class="sk-line" style="width:50px;"></div></div>
+          <div class="live-lb-skeleton"><div class="sk-circle"></div><div style="flex:1;display:flex;flex-direction:column;gap:5px;"><div class="sk-line" style="width:70%;"></div><div class="sk-line" style="width:35%;height:8px;"></div></div><div class="sk-line" style="width:50px;"></div></div>
+        </div>
+      </div>
+      <!-- Platform Stats Card -->
+      <div class="live-lb-card">
+        <div class="live-lb-card-title">📊 Platform Snapshot</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div style="background:rgba(255,255,255,.04);border-radius:var(--r-md);padding:16px;text-align:center;">
+            <div id="lbStatStudents" style="font-family:var(--font-head);font-size:1.8rem;font-weight:900;color:var(--gold);">—</div>
+            <div style="font-size:.68rem;color:rgba(255,255,255,.4);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;">Students</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:var(--r-md);padding:16px;text-align:center;">
+            <div id="lbStatAvgXP" style="font-family:var(--font-head);font-size:1.8rem;font-weight:900;color:var(--gold);">—</div>
+            <div style="font-size:.68rem;color:rgba(255,255,255,.4);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;">Avg XP</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:var(--r-md);padding:16px;text-align:center;">
+            <div id="lbStatTopXP" style="font-family:var(--font-head);font-size:1.8rem;font-weight:900;color:var(--gold);">—</div>
+            <div style="font-size:.68rem;color:rgba(255,255,255,.4);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;">Top XP</div>
+          </div>
+          <div style="background:rgba(255,255,255,.04);border-radius:var(--r-md);padding:16px;text-align:center;">
+            <div id="lbStatStates" style="font-family:var(--font-head);font-size:1.8rem;font-weight:900;color:var(--gold);">—</div>
+            <div style="font-size:.68rem;color:rgba(255,255,255,.4);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;">States</div>
+          </div>
+        </div>
+        <div style="margin-top:16px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.15);border-radius:var(--r-md);padding:14px;">
+          <div style="font-size:.75rem;color:rgba(255,255,255,.5);line-height:1.6;">
+            <i class="fas fa-fire" style="color:var(--gold);margin-right:5px;"></i>
+            <strong style="color:var(--gold);">Top students</strong> earn up to <strong style="color:var(--gold);">500 XP/day</strong> through live classes, CBT practice, and daily streaks.
+          </div>
+        </div>
+        <div style="margin-top:14px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:var(--r-md);padding:14px;">
+          <div style="font-size:.75rem;color:rgba(255,255,255,.5);line-height:1.6;">
+            <i class="fas fa-trophy" style="color:#10B981;margin-right:5px;"></i>
+            Your rank updates in <strong style="color:#10B981;">real time</strong>. Sign up today to claim your spot.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="live-lb-cta">
+      <p>Join thousands of students already competing on the national leaderboard</p>
+      <a href="auth.html" class="hero-cta-btn" style="display:inline-flex;align-items:center;gap:9px;background:var(--gold);color:var(--navy);border-radius:100px;padding:13px 30px;font-weight:800;font-size:.92rem;text-decoration:none;transition:transform .2s,box-shadow .2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 32px rgba(245,166,35,.4)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <i class="fas fa-user-plus"></i> Join the Leaderboard Free
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
      PRICING
      ============================================================ -->
 <section class="section pricing-bg" id="pricing">
@@ -1362,105 +1514,27 @@ footer { background: #04101F; padding: 64px 24px 36px; }
 <section class="section testi-bg" id="testimonials">
   <div class="section-inner">
     <div class="testi-head anim">
-      <div class="section-tag"><i class="fas fa-quote-right"></i> Student Success</div>
+      <div class="section-tag"><i class="fas fa-star"></i> Student Success</div>
       <h2 class="section-title">Real Results from <span class="accent">Real Students</span></h2>
       <p class="section-sub">Thousands of Nigerian students have transformed their exam scores with NLTC.</p>
     </div>
-    <div class="testi-grid">
-      <div class="testi-card anim">
-        <div class="tc-img-wrap">
-          <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600&q=80" alt="Adaeze">
-          <div class="tc-overlay"></div>
-          <div class="tc-name-block">
-            <div class="tc-name">Adaeze Okonkwo</div>
-            <div class="tc-meta">University of Lagos · Lagos</div>
-          </div>
-        </div>
-        <div class="tc-body">
-          <div class="tc-stars">★★★★★</div>
-          <p class="tc-quote">I scored 312 in JAMB after just 3 months on NLTC. The CBT engine mirrors the real exam. I walked in completely confident.</p>
-          <div class="tc-score"><i class="fas fa-trophy" style="color: var(--gold);"></i>JAMB 2025 — 312/400</div>
+    <div class="testi-carousel-wrap anim">
+      <div class="testi-track-outer" id="testiOuter">
+        <div class="testi-track" id="testiTrack">
+          <div class="testi-flyer"><img src="testimonial.jpeg" alt="NLTC Student Result" loading="lazy"></div>
+          <div class="testi-flyer"><img src="testimonial0.jpeg" alt="NLTC Student Result" loading="lazy"></div>
+          <div class="testi-flyer"><img src="testimonial1.jpeg" alt="NLTC Student Result" loading="lazy"></div>
+          <div class="testi-flyer"><img src="testimonial2.jpeg" alt="NLTC Student Result" loading="lazy"></div>
+          <div class="testi-flyer"><img src="testimonial3.jpeg" alt="NLTC Student Result" loading="lazy"></div>
+          <div class="testi-flyer"><img src="testimonial4.jpeg" alt="NLTC Student Result" loading="lazy"></div>
+          <div class="testi-flyer"><img src="testimonial5.jpeg" alt="NLTC Student Result" loading="lazy"></div>
+          <div class="testi-flyer"><img src="testimonial6.jpeg" alt="NLTC Student Result" loading="lazy"></div>
         </div>
       </div>
-
-      <div class="testi-card anim">
-        <div class="tc-img-wrap">
-          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80" alt="Babatunde">
-          <div class="tc-overlay"></div>
-          <div class="tc-name-block">
-            <div class="tc-name">Babatunde Afolabi</div>
-            <div class="tc-meta">Lagos State</div>
-          </div>
-        </div>
-        <div class="tc-body">
-          <div class="tc-stars">★★★★★</div>
-          <p class="tc-quote">The live classes are amazing. My tutor explains so clearly and I could ask questions directly. I got 8 A's in WAEC — my family couldn't believe it!</p>
-          <div class="tc-score"><i class="fas fa-star" style="color: var(--gold);"></i>WAEC 2025 — 8 A's</div>
-        </div>
-      </div>
-
-      <div class="testi-card anim">
-        <div class="tc-img-wrap">
-          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80" alt="Hauwa">
-          <div class="tc-overlay"></div>
-          <div class="tc-name-block">
-            <div class="tc-name">Hauwa Ibrahim</div>
-            <div class="tc-meta">Kano State</div>
-          </div>
-        </div>
-        <div class="tc-body">
-          <div class="tc-stars">★★★★★</div>
-          <p class="tc-quote">I'm from a small town in Kano without good tutors. NLTC gave me the same quality education as students in Lagos. I passed NECO with distinction!</p>
-          <div class="tc-score"><i class="fas fa-award" style="color: var(--gold);"></i>NECO 2025 — Distinction</div>
-        </div>
-      </div>
-
-      <div class="testi-card anim">
-        <div class="tc-img-wrap">
-          <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&q=80" alt="Chidera">
-          <div class="tc-overlay"></div>
-          <div class="tc-name-block">
-            <div class="tc-name">Chidera Ezenwachi</div>
-            <div class="tc-meta">Enugu State</div>
-          </div>
-        </div>
-        <div class="tc-body">
-          <div class="tc-stars">★★★★★</div>
-          <p class="tc-quote">The gamification kept me studying even when I felt lazy. Climbing the leaderboard became addictive! I scored 298 in JAMB — my family is so proud.</p>
-          <div class="tc-score"><i class="fas fa-trophy" style="color: var(--gold);"></i>JAMB 2025 — 298/400</div>
-        </div>
-      </div>
-
-      <div class="testi-card anim">
-        <div class="tc-img-wrap">
-          <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&q=80" alt="Oluwaseun">
-          <div class="tc-overlay"></div>
-          <div class="tc-name-block">
-            <div class="tc-name">Oluwaseun Badmus</div>
-            <div class="tc-meta">Ogun State</div>
-          </div>
-        </div>
-        <div class="tc-body">
-          <div class="tc-stars">★★★★★</div>
-          <p class="tc-quote">I failed JAMB twice before NLTC. After 4 months of consistent studying, I finally scored 276. This platform changed my life completely.</p>
-          <div class="tc-score"><i class="fas fa-trophy" style="color: var(--gold);"></i>JAMB 2025 — 276/400</div>
-        </div>
-      </div>
-
-      <div class="testi-card anim">
-        <div class="tc-img-wrap">
-          <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&q=80" alt="Mrs. Adeyemi">
-          <div class="tc-overlay"></div>
-          <div class="tc-name-block">
-            <div class="tc-name">Mrs. Oluwafunke Adeyemi</div>
-            <div class="tc-meta">Parent · Rivers State</div>
-          </div>
-        </div>
-        <div class="tc-body">
-          <div class="tc-stars">★★★★★</div>
-          <p class="tc-quote">My daughter used NLTC for her GCE prep. The SMS notifications kept her on track and I could monitor her progress. Incredible platform for Nigerian families.</p>
-          <div class="tc-score"><i class="fas fa-heart" style="color: var(--gold);"></i>GCE 2025 — Passed</div>
-        </div>
+      <div class="testi-nav">
+        <button class="testi-nav-btn" id="testiPrev" onclick="testiScroll(-1)" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+        <div class="testi-dots" id="testiDots"></div>
+        <button class="testi-nav-btn" id="testiNext" onclick="testiScroll(1)" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
       </div>
     </div>
   </div>
@@ -1733,9 +1807,68 @@ document.querySelectorAll('.anim').forEach((el, i) => {
   observer.observe(el);
 });
 /* Reset stagger for grid children */
-['.feats-grid .feat-card', '.testi-grid .testi-card', '.exams-grid .exam-card', '.steps-grid .step', '.stats-grid > div', '.pricing-grid .plan'].forEach(sel => {
+['.feats-grid .feat-card', '.exams-grid .exam-card', '.steps-grid .step', '.stats-grid > div', '.pricing-grid .plan'].forEach(sel => {
   document.querySelectorAll(sel).forEach((el, i) => { el.style.transitionDelay = (i * 0.07) + 's'; });
 });
+
+/* --- Testimonial Flyer Carousel --- */
+(function() {
+  const track = document.getElementById('testiTrack');
+  const outer = document.getElementById('testiOuter');
+  const dotsWrap = document.getElementById('testiDots');
+  if (!track || !outer) return;
+  const items = track.querySelectorAll('.testi-flyer');
+  const total = items.length;
+  let current = 0;
+  let autoTimer;
+  const itemW = () => items[0].offsetWidth + 20; // width + gap
+
+  // Build dots
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'testi-dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotsWrap.appendChild(d);
+  }
+
+  function updateDots() {
+    dotsWrap.querySelectorAll('.testi-dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  }
+
+  function goTo(idx) {
+    current = Math.max(0, Math.min(idx, total - 1));
+    track.style.transform = `translateX(-${current * itemW()}px)`;
+    updateDots();
+  }
+
+  window.testiScroll = function(dir) {
+    goTo((current + dir + total) % total);
+    resetAuto();
+  };
+
+  function resetAuto() {
+    clearInterval(autoTimer);
+    autoTimer = setInterval(() => goTo((current + 1) % total), 4500);
+  }
+  resetAuto();
+
+  // Drag-to-scroll
+  let startX = 0, isDragging = false;
+  outer.addEventListener('mousedown', e => { isDragging = true; startX = e.clientX; clearInterval(autoTimer); });
+  window.addEventListener('mouseup', e => {
+    if (!isDragging) return;
+    isDragging = false;
+    const diff = e.clientX - startX;
+    if (Math.abs(diff) > 40) testiScroll(diff < 0 ? 1 : -1);
+    resetAuto();
+  });
+  outer.addEventListener('touchstart', e => { startX = e.touches[0].clientX; clearInterval(autoTimer); }, {passive:true});
+  outer.addEventListener('touchend', e => {
+    const diff = e.changedTouches[0].clientX - startX;
+    if (Math.abs(diff) > 40) testiScroll(diff < 0 ? 1 : -1);
+    resetAuto();
+  }, {passive:true});
+})();
 
 /* --- FAQ --- */
 function toggleFaq(btn) {
@@ -1758,55 +1891,105 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 
 /* ============================================================
    PAYSTACK PAYMENT — Landing page
-   Mirrors the same backend endpoint used in the dashboard.
+   Visitors must be signed in. Redirect to auth.html with the
+   chosen plan; auth.html will forward to dashboard.html?pay=<plan>
+   which auto-opens the upgrade/payment modal.
    ============================================================ */
-const BACKEND_URL = 'https://nltc-backend.onrender.com';
-
-async function initiateLandingPayment(plan, btn) {
-  const errEl = document.getElementById('pricingErr');
-  errEl.style.display = 'none';
-
-  // Disable both buttons to prevent double-clicks
-  const btnPro   = document.getElementById('btnProPay');
-  const btnElite = document.getElementById('btnElitePay');
+function initiateLandingPayment(plan, btn) {
+  // Show brief loading state then redirect to sign-in/up
   const originalHTML = btn.innerHTML;
+  btn.innerHTML = '<span class="pay-spinner"></span> Redirecting…';
+  btn.disabled = true;
+  setTimeout(() => {
+    window.location.href = 'auth.html?plan=' + encodeURIComponent(plan);
+  }, 400);
+}
+</script>
 
-  btnPro.disabled   = true;
-  btnElite.disabled = true;
-  btn.innerHTML = '<span class="pay-spinner"></span> Please wait…';
+<!-- ============================================================
+     LIVE LEADERBOARD — Firebase anonymous auth + Firestore
+     ============================================================ -->
+<script type="module">
+import { initializeApp, getApps } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, collection, getDocs, query, orderBy, limit }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyA9vzT1TBpTdRJUfyYm51goS-5HfL3FcbU',
+  authDomain: 'nltc-online.firebaseapp.com',
+  projectId: 'nltc-online',
+  storageBucket: 'nltc-online.firebasestorage.app',
+  messagingSenderId: '267993935158',
+  appId: '1:267993935158:web:723c13b2564b817fbc9797'
+};
+
+const lbApp = getApps().find(a=>a.name==='lb') || initializeApp(FIREBASE_CONFIG, 'lb');
+const lbAuth = getAuth(lbApp);
+const lbDb   = getFirestore(lbApp);
+
+const AV_COLORS = ['#E67E22','#2E86AB','#6C3483','#27AE60','#C0392B','#2980B9','#8E44AD','#16A085','#D35400','#1ABC9C'];
+const MEDALS = ['🥇','🥈','🥉'];
+
+async function loadLandingLeaderboard() {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/paystack/initialize`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        plan: plan,
-        callbackUrl: window.location.origin + '/auth.html?payment=success&plan=' + plan
-      })
-    });
+    // Sign in anonymously so Firestore rules (isSignedIn) are satisfied
+    await signInAnonymously(lbAuth).catch(()=>{});
 
-    const data = await res.json().catch(() => ({}));
+    const snap = await getDocs(query(collection(lbDb,'users'), orderBy('xp','desc'), limit(15)));
+    const all = snap.docs.map(d=>({id:d.id,...d.data()})).filter(u=>u.role!=='admin');
+    const top10 = all.slice(0,10);
 
-    if (!res.ok) {
-      throw new Error(data.error || 'Payment initialisation failed. Please try again.');
+    // Render top list
+    const listEl = document.getElementById('lbTopList');
+    if (!listEl) return;
+    if (!top10.length) {
+      listEl.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,.3);font-size:.82rem;">No data yet — be the first!</div>';
+      return;
     }
+    listEl.innerHTML = top10.map((s,i) => {
+      const rank = i+1;
+      const firstName = s.firstName || s.displayName?.split(' ')[0] || 'Student';
+      const lastInit  = (s.lastName || s.displayName?.split(' ')[1] || '')[0] || '';
+      const name = firstName + (lastInit ? ' ' + lastInit + '.' : '');
+      const initials = (firstName[0]||'?').toUpperCase() + (lastInit||'').toUpperCase();
+      const xp = (s.xp||0).toLocaleString();
+      const rankClass = rank<=3 ? ` r${rank}` : '';
+      return `<div class="live-lb-row">
+        <div class="live-lb-rank${rankClass}">${rank<=3 ? MEDALS[rank-1] : rank}</div>
+        <div class="live-lb-av" style="background:${AV_COLORS[i%AV_COLORS.length]};">${initials}</div>
+        <div class="live-lb-name">
+          <div class="live-lb-name-text">${name}</div>
+          <div class="live-lb-sub">${s.state||'Nigeria'} · ${s.targetExam||'Student'}</div>
+        </div>
+        <div class="live-lb-xp">${xp} XP</div>
+      </div>`;
+    }).join('');
 
-    if (data.authorizationUrl) {
-      // Redirect to Paystack checkout
-      window.location.href = data.authorizationUrl;
-    } else {
-      throw new Error('No payment URL returned. Please try again.');
-    }
-  } catch (err) {
-    // Re-enable buttons and show error
-    btnPro.disabled   = false;
-    btnElite.disabled = false;
-    btn.innerHTML = originalHTML;
-    errEl.textContent = err.message;
-    errEl.style.display = 'block';
-    // Scroll error into view
-    errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Update stats
+    const totalXP = all.reduce((s,u)=>s+(u.xp||0),0);
+    const avgXP   = all.length ? Math.round(totalXP/all.length) : 0;
+    const topXP   = all[0]?.xp||0;
+    const states  = new Set(all.map(u=>u.state).filter(Boolean)).size;
+    document.getElementById('lbStatStudents').textContent = all.length >= 100 ? all.length.toLocaleString()+'+' : all.length.toLocaleString();
+    document.getElementById('lbStatAvgXP').textContent    = avgXP >= 1000 ? (avgXP/1000).toFixed(1)+'k' : avgXP.toLocaleString();
+    document.getElementById('lbStatTopXP').textContent    = topXP >= 1000 ? (topXP/1000).toFixed(1)+'k' : topXP.toLocaleString();
+    document.getElementById('lbStatStates').textContent   = states || '—';
+  } catch(e) {
+    const el = document.getElementById('lbTopList');
+    if (el) el.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,.3);font-size:.82rem;">Could not load data</div>';
   }
+}
+
+// Load when leaderboard section scrolls into view (avoids blocking page load)
+const lbSection = document.getElementById('leaderboard');
+if (lbSection && 'IntersectionObserver' in window) {
+  const obs = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) { obs.disconnect(); loadLandingLeaderboard(); }
+  }, { threshold: 0.1 });
+  obs.observe(lbSection);
+} else {
+  loadLandingLeaderboard();
 }
 </script>
 </body>

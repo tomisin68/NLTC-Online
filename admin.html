@@ -384,6 +384,7 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
     <button class="sb-link" onclick="showView('students',this)"><i class="fas fa-users"></i>Students<span class="sb-badge" id="studentBadge">0</span></button>
     <button class="sb-link" onclick="showView('courses',this)"><i class="fas fa-play-circle"></i>Video Lessons</button>
     <button class="sb-link" onclick="showView('cbt',this)"><i class="fas fa-laptop-code"></i>CBT Manager</button>
+    <button class="sb-link" onclick="showView('quicktest',this)"><i class="fas fa-bolt"></i>Quick Tests<span class="sb-badge" id="quicktestBadge" style="display:none;">0</span></button>
     <button class="sb-link" onclick="showView('teachers',this)"><i class="fas fa-chalkboard-teacher"></i>Teachers</button>
     <div class="sb-sec">Live & Comms</div>
     <button class="sb-link" onclick="showView('live',this)"><i class="fas fa-circle" style="color:var(--error);font-size:.45rem;"></i>Live Classes<div class="sb-live-dot" id="liveDot" style="display:none;"></div></button>
@@ -552,6 +553,102 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
       <thead><tr><th style="width:36px;"><input type="checkbox" id="cbtSelectAll" onchange="toggleSelectAllQuestions(this.checked)" title="Select all"></th><th>Question Preview</th><th>Subject</th><th>Exam</th><th>Year</th><th>Status</th><th>Actions</th></tr></thead>
       <tbody id="cbtBody"><tr><td colspan="7"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
     </table></div></div>
+  </div>
+</div>
+
+<!-- ─────────── QUICK TESTS ─────────── -->
+<div class="view" id="view-quicktest">
+  <div class="page-hdr-row">
+    <div class="page-hdr"><h2>⚡ Quick Test Manager</h2><p>Create custom tests for students — with real-time scores and anti-cheat tracking</p></div>
+    <button class="btn-gold" onclick="openModal('createTestModal')"><i class="fas fa-plus"></i> Create New Test</button>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card s1"><div class="sc-icon blue"><i class="fas fa-file-alt"></i></div><div class="sc-num" id="qt-total">—</div><div class="sc-label">Total Tests</div></div>
+    <div class="stat-card s2"><div class="sc-icon green"><i class="fas fa-globe"></i></div><div class="sc-num" id="qt-published">—</div><div class="sc-label">Published</div></div>
+    <div class="stat-card s3"><div class="sc-icon gold"><i class="fas fa-users"></i></div><div class="sc-num" id="qt-attempts">—</div><div class="sc-label">Total Attempts</div></div>
+    <div class="stat-card s4"><div class="sc-icon teal"><i class="fas fa-chart-line"></i></div><div class="sc-num" id="qt-avg">—</div><div class="sc-label">Avg Score %</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">📋 All Tests</div><button class="btn-outline btn-sm" onclick="loadQuickTests()"><i class="fas fa-sync"></i></button></div>
+    <div class="card-body" style="padding:0;"><div class="table-wrap"><table>
+      <thead><tr><th>Title</th><th>Subject</th><th>Questions</th><th>Duration</th><th>Status</th><th>Attempts</th><th>Avg Score</th><th>Actions</th></tr></thead>
+      <tbody id="quicktestBody"><tr><td colspan="8"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
+    </table></div></div>
+  </div>
+
+  <!-- Scores Panel (shown when viewing a specific test) -->
+  <div id="qtScoresPanel" style="display:none;">
+    <div class="page-hdr-row" style="margin-top:24px;">
+      <div class="page-hdr"><h3 id="qtScoresTitle">Test Scores</h3><p id="qtScoresSub">All student submissions for this test</p></div>
+      <button class="btn-outline btn-sm" onclick="closeQTScores()"><i class="fas fa-arrow-left"></i> Back to Tests</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card s1"><div class="sc-icon blue"><i class="fas fa-users"></i></div><div class="sc-num" id="qts-count">—</div><div class="sc-label">Submissions</div></div>
+      <div class="stat-card s2"><div class="sc-icon green"><i class="fas fa-award"></i></div><div class="sc-num" id="qts-highest">—</div><div class="sc-label">Highest Score</div></div>
+      <div class="stat-card s3"><div class="sc-icon gold"><i class="fas fa-chart-bar"></i></div><div class="sc-num" id="qts-avg">—</div><div class="sc-label">Average %</div></div>
+      <div class="stat-card s4"><div class="sc-icon red"><i class="fas fa-exclamation-triangle"></i></div><div class="sc-num" id="qts-violations">—</div><div class="sc-label">Violations Flagged</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📊 Student Scores</div>
+        <button class="btn-outline btn-sm" onclick="exportQTScoresCSV()"><i class="fas fa-download"></i> Export CSV</button>
+      </div>
+      <div class="card-body" style="padding:0;"><div class="table-wrap"><table>
+        <thead><tr><th>Student</th><th>Score</th><th>Percentage</th><th>Time Spent</th><th>Violations</th><th>Submitted</th></tr></thead>
+        <tbody id="qtScoresBody"><tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
+      </table></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Create Test Modal ── -->
+<div class="modal-overlay" id="createTestModal">
+  <div class="modal" style="max-width:680px;width:95vw;max-height:90vh;overflow-y:auto;">
+    <div class="modal-header">
+      <div class="modal-title" id="ctModalTitle">Create Quick Test</div>
+      <button class="modal-close" onclick="closeModal('createTestModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ctTestId">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+        <div class="form-group" style="grid-column:1/-1;margin:0;">
+          <label class="form-label">Test Title *</label>
+          <input class="form-input" id="ctTitle" placeholder="e.g. Mid-Term Mathematics Test" maxlength="80">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Subject</label>
+          <select class="form-input" id="ctSubject">
+            <option value="">General</option>
+            <option>Mathematics</option><option>English Language</option>
+            <option>Chemistry</option><option>Physics</option>
+            <option>Biology</option><option>Economics</option>
+            <option>Government</option><option>Literature</option>
+            <option>Geography</option><option>Accounting</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Duration (minutes) *</label>
+          <input class="form-input" id="ctDuration" type="number" value="30" min="5" max="180">
+        </div>
+        <div class="form-group" style="grid-column:1/-1;margin:0;">
+          <label class="form-label">Instructions for Students</label>
+          <textarea class="form-input" id="ctInstructions" rows="2" placeholder="Read all questions carefully before answering…" style="resize:vertical;min-height:60px;"></textarea>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--border);padding-top:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-weight:700;font-size:.9rem;">Questions</div>
+          <button class="btn-outline btn-sm" type="button" onclick="addQTQuestion()"><i class="fas fa-plus"></i> Add Question</button>
+        </div>
+        <div id="ctQuestionsWrap"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('createTestModal')">Cancel</button>
+      <button class="btn-outline" onclick="saveTest('draft')"><i class="fas fa-save"></i> Save Draft</button>
+      <button class="btn-gold" onclick="saveTest('published')"><i class="fas fa-globe"></i> Publish Test</button>
+    </div>
   </div>
 </div>
 
@@ -1076,7 +1173,7 @@ onAuthStateChanged(auth, async (user) => {
   
   await Promise.all([
     loadStudents(), loadVideos(), loadBroadcasts(), loadLiveSessions(),
-    loadSchedule(), loadTeachers(), loadCbtQuestions()
+    loadSchedule(), loadTeachers(), loadCbtQuestions(), loadQuickTests()
   ]);
   renderCharts();
   renderRecentActivity();
@@ -2021,6 +2118,229 @@ function renderCharts() {
   }
 }
 
+/* ══════════════════════════════════════════════════════
+   QUICK TEST MANAGER
+══════════════════════════════════════════════════════ */
+let qtQuestionIndex = 0;
+let currentQTId = null;
+
+window.loadQuickTests = async function() {
+  const tbody = document.getElementById('quicktestBody');
+  tbody.innerHTML = '<tr><td colspan="8"><div class="loading"><div class="spinner"></div></div></td></tr>';
+  try {
+    const snap = await getDocs(query(collection(db,'quickTests'), orderBy('createdAt','desc'), limit(50)));
+    const tests = snap.docs.map(d=>({id:d.id,...d.data()}));
+    document.getElementById('qt-total').textContent = tests.length;
+    document.getElementById('qt-published').textContent = tests.filter(t=>t.status==='published').length;
+    // Load attempt counts from results
+    const rsSnap = await getDocs(collection(db,'quickTestResults'));
+    const results = rsSnap.docs.map(d=>d.data());
+    document.getElementById('qt-attempts').textContent = results.length;
+    const avgPct = results.length ? Math.round(results.reduce((s,r)=>s+(r.percentage||0),0)/results.length) : 0;
+    document.getElementById('qt-avg').textContent = avgPct + '%';
+    if (!tests.length) { tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-3);">No tests yet. Click "Create New Test" to get started.</td></tr>'; return; }
+    tbody.innerHTML = tests.map(t => {
+      const qs = (t.questions||[]).length;
+      const tRes = results.filter(r=>r.testId===t.id);
+      const tAvg = tRes.length ? Math.round(tRes.reduce((s,r)=>s+(r.percentage||0),0)/tRes.length) : '—';
+      const statusBadge = t.status==='published'
+        ? `<span class="badge badge-green">Published</span>`
+        : `<span class="badge" style="background:var(--warning-bg);color:var(--warning);">Draft</span>`;
+      return `<tr>
+        <td><strong>${t.title}</strong></td>
+        <td>${t.subject||'General'}</td>
+        <td>${qs}</td>
+        <td>${t.durationMinutes||30} min</td>
+        <td>${statusBadge}</td>
+        <td>${tRes.length}</td>
+        <td>${tRes.length ? tAvg+'%' : '—'}</td>
+        <td style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="btn-outline btn-sm" onclick="viewQTScores('${t.id}','${(t.title||'').replace(/'/g,"\\'")}',${qs})"><i class="fas fa-chart-bar"></i> Scores</button>
+          <button class="btn-outline btn-sm" onclick="editTest('${t.id}')"><i class="fas fa-edit"></i></button>
+          <button class="btn-danger btn-sm" onclick="deleteQT('${t.id}')"><i class="fas fa-trash"></i></button>
+          ${t.status==='draft' ? `<button class="btn-gold btn-sm" onclick="toggleQTStatus('${t.id}','published')"><i class="fas fa-globe"></i></button>` : `<button class="btn-outline btn-sm" onclick="toggleQTStatus('${t.id}','draft')"><i class="fas fa-eye-slash"></i></button>`}
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) { tbody.innerHTML=`<tr><td colspan="8" style="color:var(--error);padding:16px;">${e.message}</td></tr>`; }
+};
+
+window.viewQTScores = async function(testId, testTitle, totalQ) {
+  currentQTId = testId;
+  document.getElementById('qtScoresTitle').textContent = testTitle + ' — Scores';
+  document.getElementById('qtScoresSub').textContent = 'All student submissions';
+  document.getElementById('qtScoresPanel').style.display = '';
+  document.getElementById('qtScoresPanel').scrollIntoView({behavior:'smooth'});
+  const tbody = document.getElementById('qtScoresBody');
+  tbody.innerHTML = '<tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr>';
+  try {
+    let snap; try { snap = await getDocs(query(collection(db,'quickTestResults'), where('testId','==',testId), orderBy('submittedAt','desc'))); } catch(_) { snap = await getDocs(query(collection(db,'quickTestResults'), where('testId','==',testId))); }
+    const results = snap.docs.map(d=>({id:d.id,...d.data()}));
+    document.getElementById('qts-count').textContent = results.length;
+    if (results.length) {
+      document.getElementById('qts-highest').textContent = Math.max(...results.map(r=>r.percentage||0))+'%';
+      document.getElementById('qts-avg').textContent = Math.round(results.reduce((s,r)=>s+(r.percentage||0),0)/results.length)+'%';
+      document.getElementById('qts-violations').textContent = results.filter(r=>(r.violations||0)>0).length;
+    } else {
+      ['qts-highest','qts-avg','qts-violations'].forEach(id=>document.getElementById(id).textContent='—');
+    }
+    if (!results.length) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-3);">No submissions yet.</td></tr>'; return; }
+    tbody.innerHTML = results.map(r => {
+      const when = r.submittedAt?.seconds ? new Date(r.submittedAt.seconds*1000).toLocaleString('en-NG',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}) : '—';
+      const mins = r.timeSpentSeconds ? Math.floor(r.timeSpentSeconds/60)+'m '+Math.round(r.timeSpentSeconds%60)+'s' : '—';
+      const viol = r.violations||0;
+      const violBadge = viol>0 ? `<span class="badge badge-red">${viol} violations</span>` : `<span class="badge badge-green">Clean</span>`;
+      const pct = r.percentage||0;
+      const pctColor = pct>=70?'var(--success)':pct>=50?'var(--warning)':'var(--error)';
+      return `<tr>
+        <td>${r.studentName||r.uid||'—'}</td>
+        <td>${r.score||0}/${r.total||totalQ}</td>
+        <td><strong style="color:${pctColor};">${pct}%</strong></td>
+        <td>${mins}</td>
+        <td>${violBadge}</td>
+        <td style="font-size:.73rem;">${when}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) { tbody.innerHTML=`<tr><td colspan="6" style="color:var(--error);padding:16px;">${e.message}</td></tr>`; }
+};
+
+window.closeQTScores = function() {
+  document.getElementById('qtScoresPanel').style.display='none';
+  currentQTId = null;
+};
+
+window.exportQTScoresCSV = async function() {
+  if (!currentQTId) return;
+  const snap = await getDocs(query(collection(db,'quickTestResults'), where('testId','==',currentQTId)));
+  const rows = [['Student','Score','Total','Percentage','Time(s)','Violations','Submitted']];
+  snap.docs.forEach(d=>{const r=d.data();rows.push([r.studentName||r.uid,r.score,r.total,r.percentage,r.timeSpentSeconds,r.violations,r.submittedAt?.seconds?new Date(r.submittedAt.seconds*1000).toLocaleString():'']);});
+  const csv = rows.map(r=>r.join(',')).join('\n');
+  const a = document.createElement('a'); a.href='data:text/csv,'+encodeURIComponent(csv); a.download='qt_scores.csv'; a.click();
+};
+
+window.toggleQTStatus = async function(id, status) {
+  await updateDoc(doc(db,'quickTests',id),{status});
+  showToast(status==='published'?'Test published!':'Test unpublished','success');
+  loadQuickTests();
+};
+
+window.deleteQT = async function(id) {
+  if (!confirm('Delete this test? Student results will be preserved.')) return;
+  await deleteDoc(doc(db,'quickTests',id));
+  showToast('Test deleted','error');
+  loadQuickTests();
+};
+
+// ── Question Builder ──
+window.addQTQuestion = function() {
+  const wrap = document.getElementById('ctQuestionsWrap');
+  const idx = wrap.querySelectorAll('.qt-q-block').length;
+  const block = document.createElement('div');
+  block.className = 'qt-q-block';
+  block.style.cssText = 'background:var(--surface);border-radius:var(--r-md);padding:14px;margin-bottom:12px;border:1px solid var(--border);';
+  block.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-size:.78rem;font-weight:700;color:var(--text-3);">Q${idx+1}</span>
+      <button type="button" class="btn-danger btn-sm" onclick="this.closest('.qt-q-block').remove();renumberQTQs()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <input class="form-input qt-q-text" placeholder="Question text *" style="font-size:.84rem;">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <input class="form-input qt-q-a" placeholder="Option A *" style="font-size:.8rem;">
+      <input class="form-input qt-q-b" placeholder="Option B *" style="font-size:.8rem;">
+      <input class="form-input qt-q-c" placeholder="Option C" style="font-size:.8rem;">
+      <input class="form-input qt-q-d" placeholder="Option D" style="font-size:.8rem;">
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <label style="font-size:.78rem;font-weight:600;">Correct Answer:</label>
+      <select class="form-input qt-q-correct" style="width:auto;height:32px;font-size:.8rem;padding:0 10px;">
+        <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
+      </select>
+    </div>`;
+  wrap.appendChild(block);
+};
+
+window.renumberQTQs = function() {
+  document.querySelectorAll('#ctQuestionsWrap .qt-q-block').forEach((b,i) => {
+    const label = b.querySelector('span');
+    if (label) label.textContent = `Q${i+1}`;
+  });
+};
+
+window.editTest = async function(id) {
+  const snap = await getDocs(query(collection(db,'quickTests')));
+  const testDoc = snap.docs.find(d=>d.id===id);
+  if (!testDoc) return;
+  const t = testDoc.data();
+  document.getElementById('ctTestId').value = id;
+  document.getElementById('ctTitle').value = t.title||'';
+  document.getElementById('ctSubject').value = t.subject||'';
+  document.getElementById('ctDuration').value = t.durationMinutes||30;
+  document.getElementById('ctInstructions').value = t.instructions||'';
+  document.getElementById('ctModalTitle').textContent = 'Edit Test';
+  const wrap = document.getElementById('ctQuestionsWrap');
+  wrap.innerHTML = '';
+  (t.questions||[]).forEach(() => addQTQuestion());
+  const blocks = wrap.querySelectorAll('.qt-q-block');
+  (t.questions||[]).forEach((q,i) => {
+    if (!blocks[i]) return;
+    blocks[i].querySelector('.qt-q-text').value = q.text||'';
+    blocks[i].querySelector('.qt-q-a').value = q.options?.[0]||'';
+    blocks[i].querySelector('.qt-q-b').value = q.options?.[1]||'';
+    blocks[i].querySelector('.qt-q-c').value = q.options?.[2]||'';
+    blocks[i].querySelector('.qt-q-d').value = q.options?.[3]||'';
+    blocks[i].querySelector('.qt-q-correct').value = q.correct||'A';
+  });
+  openModal('createTestModal');
+};
+
+window.saveTest = async function(status) {
+  const title = document.getElementById('ctTitle').value.trim();
+  if (!title) { showToast('Test title is required','error'); return; }
+  const blocks = document.querySelectorAll('#ctQuestionsWrap .qt-q-block');
+  if (!blocks.length) { showToast('Add at least one question','error'); return; }
+  const questions = [];
+  let valid = true;
+  blocks.forEach((b,i) => {
+    const text = b.querySelector('.qt-q-text').value.trim();
+    const a = b.querySelector('.qt-q-a').value.trim();
+    const bOpt = b.querySelector('.qt-q-b').value.trim();
+    if (!text||!a||!bOpt) { showToast(`Q${i+1}: Question text and options A & B are required`,'error'); valid=false; return; }
+    questions.push({
+      id: `q_${i}`,
+      text,
+      options: [a, bOpt, b.querySelector('.qt-q-c').value.trim()||'', b.querySelector('.qt-q-d').value.trim()||''].filter((o,idx)=>idx<2||o),
+      correct: b.querySelector('.qt-q-correct').value
+    });
+  });
+  if (!valid) return;
+  const testId = document.getElementById('ctTestId').value;
+  const payload = {
+    title,
+    subject: document.getElementById('ctSubject').value||'General',
+    durationMinutes: parseInt(document.getElementById('ctDuration').value)||30,
+    instructions: document.getElementById('ctInstructions').value.trim(),
+    questions, status,
+    updatedAt: serverTimestamp()
+  };
+  if (testId) {
+    await updateDoc(doc(db,'quickTests',testId), payload);
+    showToast('Test updated','success');
+  } else {
+    payload.createdBy = currentUser.uid;
+    payload.createdAt = serverTimestamp();
+    await addDoc(collection(db,'quickTests'), payload);
+    showToast(status==='published'?'Test published!':'Draft saved','success');
+  }
+  closeModal('createTestModal');
+  document.getElementById('ctTestId').value='';
+  document.getElementById('ctTitle').value='';
+  document.getElementById('ctQuestionsWrap').innerHTML='';
+  document.getElementById('ctModalTitle').textContent='Create Quick Test';
+  loadQuickTests();
+};
+
 /* ── SIGN OUT ── */
 window.handleSignOut = async function() {
   try { await signOut(auth); window.location.href = 'auth.html'; }
@@ -2045,7 +2365,7 @@ function showView(name, btn) {
   document.getElementById('view-'+name).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  const titles = {overview:'Dashboard',analytics:'Analytics',students:'Students',courses:'Video Lessons',cbt:'CBT Manager',teachers:'Teachers',live:'Live Classes',broadcasts:'Broadcasts',schedule:'Schedule',revenue:'Revenue',settings:'Settings'};
+  const titles = {overview:'Dashboard',analytics:'Analytics',students:'Students',courses:'Video Lessons',cbt:'CBT Manager',quicktest:'Quick Tests',teachers:'Teachers',live:'Live Classes',broadcasts:'Broadcasts',schedule:'Schedule',revenue:'Revenue',settings:'Settings'};
   document.getElementById('topbarTitle').textContent = titles[name] || 'Dashboard';
   closeSidebar();
 }
