@@ -1931,53 +1931,79 @@ const lbDb   = getFirestore(lbApp);
 const AV_COLORS = ['#E67E22','#2E86AB','#6C3483','#27AE60','#C0392B','#2980B9','#8E44AD','#16A085','#D35400','#1ABC9C'];
 const MEDALS = ['🥇','🥈','🥉'];
 
+function renderLBData(all) {
+  const top10 = all.slice(0, 10);
+  const listEl = document.getElementById('lbTopList');
+  if (!listEl) return;
+  if (!top10.length) {
+    listEl.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,.3);font-size:.82rem;">No data yet — be the first!</div>';
+    return;
+  }
+  listEl.innerHTML = top10.map((s, i) => {
+    const rank      = i + 1;
+    const firstName = s.firstName || s.displayName?.split(' ')[0] || 'Student';
+    const lastInit  = (s.lastName || s.displayName?.split(' ')[1] || '')[0] || '';
+    const name      = firstName + (lastInit ? ' ' + lastInit + '.' : '');
+    const initials  = (firstName[0] || '?').toUpperCase() + (lastInit || '').toUpperCase();
+    const xp        = (s.xp || 0).toLocaleString();
+    const rankClass = rank <= 3 ? ` r${rank}` : '';
+    return `<div class="live-lb-row">
+      <div class="live-lb-rank${rankClass}">${rank <= 3 ? MEDALS[rank - 1] : rank}</div>
+      <div class="live-lb-av" style="background:${AV_COLORS[i % AV_COLORS.length]};">${initials}</div>
+      <div class="live-lb-name">
+        <div class="live-lb-name-text">${name}</div>
+        <div class="live-lb-sub">${s.state || 'Nigeria'} · ${s.targetExam || 'Student'}</div>
+      </div>
+      <div class="live-lb-xp">${xp} XP</div>
+    </div>`;
+  }).join('');
+
+  const totalXP = all.reduce((s, u) => s + (u.xp || 0), 0);
+  const avgXP   = all.length ? Math.round(totalXP / all.length) : 0;
+  const topXP   = all[0]?.xp || 0;
+  const states  = new Set(all.map(u => u.state).filter(Boolean)).size;
+  document.getElementById('lbStatStudents').textContent = all.length >= 100 ? all.length.toLocaleString() + '+' : all.length.toLocaleString();
+  document.getElementById('lbStatAvgXP').textContent    = avgXP >= 1000 ? (avgXP / 1000).toFixed(1) + 'k' : avgXP.toLocaleString();
+  document.getElementById('lbStatTopXP').textContent    = topXP >= 1000 ? (topXP / 1000).toFixed(1) + 'k' : topXP.toLocaleString();
+  document.getElementById('lbStatStates').textContent   = states || '—';
+}
+
 async function loadLandingLeaderboard() {
+  const listEl = document.getElementById('lbTopList');
+
+  // ── Path 1: anonymous Firebase auth → Firestore ──
   try {
-    // Sign in anonymously so Firestore rules (isSignedIn) are satisfied
-    await signInAnonymously(lbAuth).catch(()=>{});
-
-    const snap = await getDocs(query(collection(lbDb,'users'), orderBy('xp','desc'), limit(15)));
-    const all = snap.docs.map(d=>({id:d.id,...d.data()})).filter(u=>u.role!=='admin');
-    const top10 = all.slice(0,10);
-
-    // Render top list
-    const listEl = document.getElementById('lbTopList');
-    if (!listEl) return;
-    if (!top10.length) {
-      listEl.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,.3);font-size:.82rem;">No data yet — be the first!</div>';
-      return;
+    // If already signed in (e.g. repeated call), skip re-auth
+    if (!lbAuth.currentUser) {
+      await signInAnonymously(lbAuth); // throws if anonymous auth is disabled
     }
-    listEl.innerHTML = top10.map((s,i) => {
-      const rank = i+1;
-      const firstName = s.firstName || s.displayName?.split(' ')[0] || 'Student';
-      const lastInit  = (s.lastName || s.displayName?.split(' ')[1] || '')[0] || '';
-      const name = firstName + (lastInit ? ' ' + lastInit + '.' : '');
-      const initials = (firstName[0]||'?').toUpperCase() + (lastInit||'').toUpperCase();
-      const xp = (s.xp||0).toLocaleString();
-      const rankClass = rank<=3 ? ` r${rank}` : '';
-      return `<div class="live-lb-row">
-        <div class="live-lb-rank${rankClass}">${rank<=3 ? MEDALS[rank-1] : rank}</div>
-        <div class="live-lb-av" style="background:${AV_COLORS[i%AV_COLORS.length]};">${initials}</div>
-        <div class="live-lb-name">
-          <div class="live-lb-name-text">${name}</div>
-          <div class="live-lb-sub">${s.state||'Nigeria'} · ${s.targetExam||'Student'}</div>
-        </div>
-        <div class="live-lb-xp">${xp} XP</div>
-      </div>`;
-    }).join('');
+    const snap = await getDocs(query(collection(lbDb, 'users'), orderBy('xp', 'desc'), limit(15)));
+    const all  = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(u => u.role !== 'admin');
+    renderLBData(all);
+    return;
+  } catch (authErr) {
+    // Anonymous auth is disabled OR Firestore rejected — fall through to backend
+  }
 
-    // Update stats
-    const totalXP = all.reduce((s,u)=>s+(u.xp||0),0);
-    const avgXP   = all.length ? Math.round(totalXP/all.length) : 0;
-    const topXP   = all[0]?.xp||0;
-    const states  = new Set(all.map(u=>u.state).filter(Boolean)).size;
-    document.getElementById('lbStatStudents').textContent = all.length >= 100 ? all.length.toLocaleString()+'+' : all.length.toLocaleString();
-    document.getElementById('lbStatAvgXP').textContent    = avgXP >= 1000 ? (avgXP/1000).toFixed(1)+'k' : avgXP.toLocaleString();
-    document.getElementById('lbStatTopXP').textContent    = topXP >= 1000 ? (topXP/1000).toFixed(1)+'k' : topXP.toLocaleString();
-    document.getElementById('lbStatStates').textContent   = states || '—';
-  } catch(e) {
-    const el = document.getElementById('lbTopList');
-    if (el) el.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,.3);font-size:.82rem;">Could not load data</div>';
+  // ── Path 2: public backend leaderboard endpoint (no auth needed) ──
+  try {
+    const res  = await fetch('https://nltc-backend.onrender.com/api/gamification/leaderboard?limit=10');
+    if (!res.ok) throw new Error('backend-' + res.status);
+    const data = await res.json();
+    // Normalise: backend may return { leaderboard: [...] } or just [...]
+    const arr  = Array.isArray(data) ? data : (data.leaderboard || data.users || []);
+    renderLBData(arr);
+    return;
+  } catch (backendErr) {
+    // Backend also unavailable
+  }
+
+  // ── Both paths failed ──
+  if (listEl) {
+    listEl.innerHTML = `<div style="text-align:center;padding:24px 16px;">
+      <div style="color:rgba(255,255,255,.5);font-size:.82rem;margin-bottom:10px;">Sign in to see the live leaderboard</div>
+      <a href="auth.html" style="display:inline-block;padding:8px 22px;background:#F0A500;color:#000;font-weight:700;border-radius:8px;text-decoration:none;font-size:.85rem;">Log In</a>
+    </div>`;
   }
 }
 

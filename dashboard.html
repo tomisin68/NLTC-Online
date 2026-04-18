@@ -3190,17 +3190,13 @@ document.head.appendChild(style);
 import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 
-const _app2 = initializeApp({
-  apiKey:"AIzaSyA9vzT1TBpTdRJUfyYm51goS-5HfL3FcbU",
-  authDomain:"nltc-online.firebaseapp.com",
-  projectId:"nltc-online",
-  storageBucket:"nltc-online.firebasestorage.app",
-  messagingSenderId:"267993935158",
-  appId:"1:267993935158:web:723c13b2564b817fbc9797"
-}, 'qt-app');
-const _db  = getFirestore(_app2);
+// Reuse the default Firebase app already initialised by the main module above.
+// A separate named app ('qt-app') creates its own auth session that is never
+// signed in, which causes every Firestore request to be rejected.
+const _app2 = getApp();
+const _db   = getFirestore(_app2);
 const _auth = getAuth(_app2);
 
 // ── State ──
