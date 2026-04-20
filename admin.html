@@ -722,11 +722,22 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
           <label class="form-label">Department *</label>
           <select class="form-input" id="mock-dept">
             <option value="">— Select —</option>
+            <option>Science</option>
+            <option>Art</option>
+            <option>Commercial</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Exam Type *</label>
+          <select class="form-input" id="mock-examtype">
+            <option value="">— Select —</option>
             <option>JAMB / UTME</option>
             <option>WAEC SSCE</option>
             <option>NECO</option>
             <option>Post-UTME</option>
             <option>GCE O-Level</option>
+            <option>BECE</option>
+            <option>Common Entrance</option>
             <option>All Students</option>
           </select>
         </div>
@@ -2617,16 +2628,17 @@ window.loadMockExams = async function() {
 window.saveMockExam = async function() {
   const title    = document.getElementById('mock-title').value.trim();
   const dept     = document.getElementById('mock-dept').value;
+  const examType = document.getElementById('mock-examtype').value;
   const duration = parseInt(document.getElementById('mock-duration').value) || 120;
   const subjects = document.getElementById('mock-subjects').value.trim();
   const qcount   = parseInt(document.getElementById('mock-qcount').value) || 100;
   const instruct = document.getElementById('mock-instructions').value.trim();
   const date     = document.getElementById('mock-date').value;
-  if (!title || !dept) { showToast('Title and department are required','error'); return; }
+  if (!title || !dept || !examType) { showToast('Title, department and exam type are required','error'); return; }
   try {
     const editId = document.getElementById('mockEditId').value;
     const data = {
-      title, department:dept, duration, subjects, questionCount:qcount,
+      title, department:dept, examType, duration, subjects, questionCount:qcount,
       instructions:instruct, scheduledDate:date||null,
       status:'draft', scoresReleased:false, submissionsCount:0, updatedAt:serverTimestamp()
     };
@@ -2640,6 +2652,7 @@ window.saveMockExam = async function() {
     closeModal('createMockModal');
     ['mock-title','mock-subjects','mock-instructions','mock-date'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('mock-dept').value='';
+    document.getElementById('mock-examtype').value='';
     document.getElementById('mockEditId').value='';
     await loadMockExams();
   } catch(e) { showToast(`Error: ${e.message}`,'error'); }

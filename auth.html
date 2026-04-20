@@ -102,7 +102,16 @@
   /* ── Email / password login ── */
   window.__nltcLogin = async function(email, password) {
     const cred = await signInWithEmailAndPassword(auth, email, password);
-    const data = await saveUser(cred.user);
+    let data = {};
+    try {
+      data = await saveUser(cred.user);
+    } catch(e) {
+      console.warn('[NLTC] Profile sync failed, reading existing data:', e.code);
+      try {
+        const snap = await getDoc(doc(db, 'users', cred.user.uid));
+        if (snap.exists()) data = snap.data();
+      } catch(e2) {}
+    }
     return { user: cred.user, data };
   };
 
@@ -1161,6 +1170,8 @@ body {
                     <option>WAEC SSCE</option>
                     <option>NECO</option>
                     <option>GCE O-Level</option>
+                    <option>BECE</option>
+                    <option>Common Entrance</option>
                     <option>Multiple</option>
                   </select>
                   <i class="fas fa-chevron-down arr"></i>
@@ -1619,7 +1630,7 @@ async function doLogin(e) {
     const map = {
       'auth/user-not-found':       ['li-emailErr', 'No account found with this email'],
       'auth/wrong-password':       ['li-passErr',  'Incorrect password'],
-      'auth/invalid-credential':   ['li-passErr',  'Incorrect email or password'],
+      'auth/invalid-credential':   ['li-passErr',  'Incorrect email or password. If you signed up with Google, use "Continue with Google" or click "Forgot password?" to set a password.'],
       'auth/invalid-email':        ['li-emailErr', 'Invalid email address'],
       'auth/user-disabled':        [null,          'This account has been disabled. Contact support.'],
       'auth/too-many-requests':    [null,          'Too many failed attempts. Please wait and try again.'],

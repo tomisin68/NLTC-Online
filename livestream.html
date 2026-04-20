@@ -190,10 +190,12 @@ button, a { touch-action: manipulation; }
 }
 .ls-main-video video,
 .ls-main-video .agora-video-player,
-#mainVideoContainer > div {
+.ls-main-video .agora-video-player video,
+#mainVideoContainer > div,
+#mainVideoContainer video {
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover !important;
+  object-fit: contain !important;
 }
 #mainVideoContainer {
   width: 100%;
@@ -771,14 +773,64 @@ button, a { touch-action: manipulation; }
   :root { --panel-w: 260px; }
 }
 
+/* Mobile bottom tabs — chat/people/hands shortcut bar */
+.mobile-panel-bar {
+  display: none;
+  position: fixed;
+  bottom: var(--ctrl-h);
+  left: 0; right: 0;
+  height: 44px;
+  background: var(--bg-3);
+  border-top: 1px solid var(--border-2);
+  z-index: 101;
+  flex-shrink: 0;
+}
+.mobile-panel-bar-inner {
+  display: flex;
+  height: 100%;
+}
+.mob-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: .68rem;
+  font-weight: 700;
+  color: var(--text-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color .15s, background .15s;
+  position: relative;
+  letter-spacing: .02em;
+}
+.mob-tab-btn:hover, .mob-tab-btn.active { color: var(--gold); background: rgba(245,166,35,.06); }
+.mob-tab-btn .mob-badge {
+  position: absolute;
+  top: 4px; right: calc(50% - 22px);
+  min-width: 14px; height: 14px;
+  background: var(--red);
+  color: white;
+  font-size: .52rem; font-weight: 800;
+  border-radius: 100px;
+  padding: 0 3px;
+  display: none;
+  align-items: center; justify-content: center;
+}
+.mob-tab-btn .mob-badge.show { display: flex; }
+
 @media (max-width: 700px) {
-  .ls-panel { 
+  .mobile-panel-bar { display: flex; }
+  .ls-panel {
     position: fixed;
-    top: var(--header-h); bottom: 0; right: 0;
+    top: var(--header-h);
+    bottom: calc(var(--ctrl-h) + 44px);  /* above controls + mobile tab bar */
+    right: 0;
     z-index: 100;
     transform: translateX(100%);
     border-left: 1px solid var(--border-2);
-    width: min(300px, 85vw) !important;
+    width: min(320px, 92vw) !important;
   }
   .ls-panel.open {
     transform: translateX(0);
@@ -793,6 +845,8 @@ button, a { touch-action: manipulation; }
   .ls-participant-strip { min-height: 66px; }
   .ls-tile { width: 80px; height: 52px; }
   :root { --ctrl-h: 62px; }
+  /* Push stage content up so nothing hides behind tab bar + controls */
+  .ls-stage-wrap { padding-bottom: 44px; }
 }
 
 @media (max-width: 420px) {
@@ -1025,6 +1079,24 @@ button, a { touch-action: manipulation; }
       </div>
     </aside>
   </div><!-- /body -->
+
+  <!-- Mobile panel shortcut bar (chat/people/hands) — only visible on small screens -->
+  <div class="mobile-panel-bar" id="mobilePanelBar">
+    <div class="mobile-panel-bar-inner">
+      <button class="mob-tab-btn active" id="mobTabChat" onclick="mobileOpenTab('chat', this)">
+        💬 Chat
+        <span class="mob-badge" id="mobChatBadge"></span>
+      </button>
+      <button class="mob-tab-btn" id="mobTabPeople" onclick="mobileOpenTab('participants', this)">
+        👥 People
+        <span class="mob-badge" id="mobPeopleBadge"></span>
+      </button>
+      <button class="mob-tab-btn" id="mobTabHands" onclick="mobileOpenTab('hands', this)">
+        ✋ Hands
+        <span class="mob-badge" id="mobHandsBadge"></span>
+      </button>
+    </div>
+  </div>
 </div><!-- /wrap -->
 
 <!-- FIREBASE + AGORA LOGIC -->
@@ -1205,14 +1277,17 @@ async function bootSession(){
         showToast('The class has ended.', 'info');
         setTimeout(()=> location.href = isAdmin ? 'admin.html' : 'student.html', 2500);
       }
-      // Handle admin mute commands
-      if (data.muteAll && !isHost) {
-        if (localAudioTrack) {
-          localAudioTrack.setMuted(true);
-          micOn = false;
-          updateMicUI();
+      // Handle admin mute-all command (persistent state + timestamp guard)
+      if (!isHost) {
+        if (data.muteAll) {
+          if (localAudioTrack) {
+            localAudioTrack.setMuted(true);
+            micOn = false;
+            updateMicUI();
+          }
           showToast('You were muted by the host.', 'info');
         }
+        // When host un-mutes all, just restore UI — user's mic stays muted until they manually unmute
       }
       // Handle kick
       if (data.kickedUsers?.[currentUser.uid]) {
@@ -1250,6 +1325,8 @@ async function bootSession(){
             const badge = document.getElementById('chatBadge');
             badge.style.display = 'inline-flex';
             badge.textContent = chatUnread > 9 ? '9+' : chatUnread;
+            const mb = document.getElementById('mobChatBadge');
+            if (mb) { mb.textContent = chatUnread > 9 ? '9+' : chatUnread; mb.classList.add('show'); }
           }
         }
       });
@@ -1267,9 +1344,13 @@ async function bootSession(){
     setTimeout(hideLoading, 1000);
   }
 
-  // Track viewer count
+  // Track viewer count — increment on join, decrement reliably on any kind of leave
   if (sessionId && !isHost) {
     try { await updateDoc(doc(db,'liveSessions',sessionId),{viewerCount:increment(1)}); } catch(e){}
+    // Decrement when user closes/navigates away (pagehide is more reliable than beforeunload)
+    window.addEventListener('pagehide', ()=>{
+      try { updateDoc(doc(db,'liveSessions',sessionId),{viewerCount:increment(-1)}); } catch(e){}
+    });
   }
 
   startDurationTimer();
@@ -1329,6 +1410,20 @@ async function joinAgora(channelName){
       }
     });
 
+    agoraClient.on('user-joined', user => {
+      if (!remoteUsers[user.uid]) {
+        remoteUsers[user.uid] = { uid: user.uid, name: `User ${String(user.uid).slice(-4)}` };
+      }
+      updateParticipantsList();
+      updatePeopleCount();
+      // Host updates Firestore viewer count from Agora's real user list
+      if (isHost && sessionId) {
+        const cnt = agoraClient.remoteUsers.length;
+        updateDoc(doc(db,'liveSessions',sessionId),{ viewerCount: cnt }).catch(()=>{});
+        document.getElementById('viewerCountH').textContent = cnt;
+      }
+    });
+
     agoraClient.on('user-left', user => {
       delete remoteUsers[user.uid];
       removeTile(user.uid);
@@ -1336,10 +1431,19 @@ async function joinAgora(channelName){
         clearMainView();
         const next = Object.values(remoteUsers).find(u=>u.videoTrack);
         if (next) setMainView(next.uid);
+        else if (isHost && localVideoTrack) {
+          // Revert to host self-view when the spotlighted user leaves
+          setMainView('__self_host');
+        }
       }
       updateParticipantsList();
       updatePeopleCount();
-      showToast(`A participant left the session.`, 'info');
+      // Host keeps Firestore count accurate
+      if (isHost && sessionId) {
+        const cnt = agoraClient.remoteUsers.length;
+        updateDoc(doc(db,'liveSessions',sessionId),{ viewerCount: cnt }).catch(()=>{});
+        document.getElementById('viewerCountH').textContent = cnt;
+      }
     });
 
     agoraClient.on('token-privilege-will-expire', async() => {
@@ -1404,9 +1508,24 @@ async function joinAgora(channelName){
 /* ──────────────── VIDEO TILES ──────────────── */
 function setMainView(uid){
   mainViewUid = uid;
-  const user = remoteUsers[uid];
   const container = document.getElementById('mainVideoContainer');
   container.innerHTML = '';
+
+  // Special case: spotlighting self (host/admin)
+  if (uid === '__self_host' && localVideoTrack) {
+    const div = document.createElement('div');
+    div.style.cssText = 'width:100%;height:100%;';
+    container.appendChild(div);
+    localVideoTrack.play(div);
+    document.getElementById('noStream').style.display = 'none';
+    document.getElementById('mainLabel').style.display = 'flex';
+    document.getElementById('mainLabelText').textContent = 'You (Host)';
+    document.getElementById('hostBadge').style.display = 'block';
+    document.querySelectorAll('.ls-tile').forEach(t => t.classList.toggle('main-view', t.dataset.uid === '__self_host'));
+    return;
+  }
+
+  const user = remoteUsers[uid];
   if (user?.videoTrack) {
     const div = document.createElement('div');
     div.style.cssText = 'width:100%;height:100%;';
@@ -1415,8 +1534,8 @@ function setMainView(uid){
     document.getElementById('noStream').style.display = 'none';
     document.getElementById('mainLabel').style.display = 'flex';
     document.getElementById('mainLabelText').textContent = user.name || `User ${String(uid).slice(-4)}`;
+    document.getElementById('hostBadge').style.display = 'none';
   }
-  // Update tile highlights
   document.querySelectorAll('.ls-tile').forEach(t => {
     t.classList.toggle('main-view', t.dataset.uid === String(uid));
   });
@@ -1442,6 +1561,9 @@ function addOrUpdateTile(uid){
     if (isAdmin) {
       tile.innerHTML = `
         <div class="ls-tile-admin-controls">
+          <div class="ls-tile-ctrl spotlight-btn" onclick="event.stopPropagation();setMainView('${uid}')" title="Spotlight" style="background:rgba(245,166,35,.8);color:#0A1628;">
+            <i class="fas fa-star"></i>
+          </div>
           <div class="ls-tile-ctrl mute-btn" onclick="adminMuteUser(event,'${uid}')" title="Mute">
             <i class="fas fa-microphone-slash"></i>
           </div>
@@ -1471,6 +1593,25 @@ function addOrUpdateTile(uid){
   }
   if (mutedByAdmin[uid]) tile.classList.add('is-muted');
   if (uid === mainViewUid) tile.classList.add('main-view');
+}
+
+function addSelfTile(){
+  const strip = document.getElementById('participantStrip');
+  if (strip.querySelector('[data-uid="__self_host"]')) return;
+  const tile = document.createElement('div');
+  tile.className = 'ls-tile main-view';
+  tile.dataset.uid = '__self_host';
+  tile.title = 'Spotlight yourself';
+  tile.onclick = () => setMainView('__self_host');
+  tile.innerHTML = `
+    <div class="ls-tile-placeholder" style="background:var(--gold-glow);">🎤</div>
+    <div class="ls-tile-name" style="color:var(--gold);">You (Host)</div>`;
+  strip.insertBefore(tile, strip.firstChild.nextSibling); // after label
+  // Play local video in the tile
+  if (localVideoTrack) {
+    const ph = tile.querySelector('.ls-tile-placeholder');
+    if (ph) { ph.innerHTML=''; ph.style.cssText='width:100%;height:100%;'; localVideoTrack.play(ph); }
+  }
 }
 
 function removeTile(uid){
@@ -1515,18 +1656,12 @@ window.toggleCam = async function(){
       pipEl.style.display = 'block';
       document.getElementById('pipCamOff').style.display = 'none';
       localVideoTrack.play(pipEl);
-      // If host, show self in main view too
-      if (isHost && !mainViewUid) {
-        const mainEl = document.getElementById('mainVideoContainer');
-        mainEl.innerHTML = '';
-        const div = document.createElement('div');
-        div.style.cssText='width:100%;height:100%;';
-        mainEl.appendChild(div);
-        localVideoTrack.play(div);
-        document.getElementById('noStream').style.display='none';
-        document.getElementById('mainLabel').style.display='flex';
-        document.getElementById('mainLabelText').textContent='You (Host)';
+      // Host always defaults to spotlighting themselves when camera is first turned on
+      if (isHost && (!mainViewUid || mainViewUid === '__self_host')) {
+        setMainView('__self_host');
       }
+      // Add self-tile to participant strip so host can re-spotlight themselves
+      if (isHost) addSelfTile();
     } catch(e){ camOn = false; showToast('Camera access denied','error'); }
   } else {
     if (localVideoTrack) {
@@ -1542,9 +1677,8 @@ window.toggleCam = async function(){
 window.toggleScreenShare = async function(){
   if (!agoraClient) return;
   if (screenSharing) {
-    // Stop screen share
     if (screenTrack) {
-      await agoraClient.unpublish([screenTrack]);
+      await agoraClient.unpublish([screenTrack]).catch(()=>{});
       screenTrack.close();
       screenTrack = null;
     }
@@ -1552,6 +1686,12 @@ window.toggleScreenShare = async function(){
     document.getElementById('ctrlScreenShare').classList.remove('active');
     showToast('Screen sharing stopped.','info');
   } else {
+    // Screen capture requires a desktop browser
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    if (isMobile || !navigator.mediaDevices?.getDisplayMedia) {
+      showToast('Screen sharing is not supported on mobile devices. Please use a desktop browser.','error');
+      return;
+    }
     try {
       screenTrack = await AgoraRTC.createScreenVideoTrack({encoderConfig:'1080p_1'}, 'disable');
       await agoraClient.publish([screenTrack]);
@@ -1560,7 +1700,7 @@ window.toggleScreenShare = async function(){
       showToast('Screen sharing started.','success');
       screenTrack.on('track-ended', ()=>{ window.toggleScreenShare(); });
     } catch(e){
-      if (e.code !== 'PERMISSION_DENIED') showToast('Could not share screen.','error');
+      if (e.code !== 'PERMISSION_DENIED') showToast('Could not share screen: ' + (e.message||'Permission denied.'),'error');
     }
   }
 };
@@ -1654,21 +1794,43 @@ window.adminRemoveUser = async function(e, uid){
   showToast('Participant removed from session.','success');
 };
 
+let muteAllActive = false;
 window.muteAllParticipants = async function(){
   if (!isAdmin) return;
-  const confirmed = await showConfirm({
-    icon:'🔇', title:'Mute everyone?',
-    sub:'All participants will have their microphones disabled.',
-    okLabel:'Mute All'
-  });
-  if (!confirmed) return;
-  if (sessionId) {
-    await updateDoc(doc(db,'liveSessions',sessionId),{ muteAll: true }).catch(()=>{});
+  if (!muteAllActive) {
+    const confirmed = await showConfirm({
+      icon:'🔇', title:'Mute everyone?',
+      sub:'All participants will have their microphones disabled. You can unmute them again.',
+      okLabel:'Mute All'
+    });
+    if (!confirmed) return;
+    muteAllActive = true;
+    if (sessionId) {
+      await updateDoc(doc(db,'liveSessions',sessionId),{
+        muteAll: true,
+        muteAllAt: serverTimestamp()
+      }).catch(()=>{});
+    }
+    const btn = document.getElementById('ctrlMuteAll');
+    if (btn) {
+      btn.classList.add('active');
+      btn.querySelector('.ctrl-label').textContent = 'Unmute';
+      btn.title = 'Unmute everyone';
+    }
+    showToast('All participants muted.','success');
+  } else {
+    muteAllActive = false;
+    if (sessionId) {
+      await updateDoc(doc(db,'liveSessions',sessionId),{ muteAll: false }).catch(()=>{});
+    }
+    const btn = document.getElementById('ctrlMuteAll');
+    if (btn) {
+      btn.classList.remove('active');
+      btn.querySelector('.ctrl-label').textContent = 'Mute All';
+      btn.title = 'Mute everyone';
+    }
+    showToast('All participants can speak again.','info');
   }
-  showToast('All participants muted.','success');
-  setTimeout(async()=>{
-    if (sessionId) await updateDoc(doc(db,'liveSessions',sessionId),{ muteAll: false }).catch(()=>{});
-  }, 2000);
 };
 
 /* Dismiss raised hand (admin) */
@@ -1693,15 +1855,20 @@ function updateParticipantsList(){
   }
   list.innerHTML = users.map(u=>{
     const isMuted = mutedByAdmin[u.uid] || false;
+    const spotlightUid = u.isSelf ? '__self_host' : u.uid;
+    const spotlightBtn = `<button class="p-action-btn" onclick="setMainView('${spotlightUid}')" title="Spotlight" style="background:rgba(245,166,35,.15);color:var(--gold);">
+        <i class="fas fa-star p-mute-icon"></i>
+      </button>`;
     const adminControls = (isAdmin && !u.isSelf) ? `
       <div class="p-actions">
+        ${spotlightBtn}
         <button class="p-action-btn mute" onclick="adminMuteUser(event,'${u.uid}')" title="Mute">
           <i class="fas fa-microphone-slash p-mute-icon"></i>
         </button>
         <button class="p-action-btn remove" onclick="adminRemoveUser(event,'${u.uid}')" title="Remove">
           <i class="fas fa-times p-mute-icon"></i>
         </button>
-      </div>` : '';
+      </div>` : (u.isSelf ? `<div class="p-actions">${spotlightBtn}</div>` : '');
     return `<div class="participant-row">
       <div class="p-av" style="background:${avatarColor(u.uid)};">${avatarInitials(u.name)}</div>
       <div class="p-info">
@@ -1718,6 +1885,9 @@ function updatePeopleCount(){
   const badge = document.getElementById('peopleBadge');
   if (cnt > 0) { badge.style.display='inline-flex'; badge.textContent=cnt; }
   else badge.style.display='none';
+  // Sync mobile badge
+  const mb = document.getElementById('mobPeopleBadge');
+  if (mb) { if (cnt>0){ mb.textContent=cnt; mb.classList.add('show'); } else mb.classList.remove('show'); }
 }
 
 function renderRaisedHands(){
@@ -1732,6 +1902,9 @@ function renderRaisedHands(){
     badge.style.display='none';
     notif.classList.remove('show');
   }
+  // Sync mobile badge
+  const mhb = document.getElementById('mobHandsBadge');
+  if (mhb) { if (entries.length){ mhb.textContent=entries.length; mhb.classList.add('show'); } else mhb.classList.remove('show'); }
   if (!entries.length){
     list.innerHTML='<div style="padding:20px;text-align:center;font-size:.76rem;color:var(--text-3);">No raised hands yet</div>';
     return;
@@ -1873,12 +2046,37 @@ window.switchTab = function(tab, btn){
   btn.classList.add('active');
   document.querySelectorAll('.ls-pane').forEach(p=>p.classList.remove('active'));
   document.getElementById('pane-'+tab).classList.add('active');
-  // Reset unread
   if (tab === 'chat') {
     chatUnread = 0;
     const badge = document.getElementById('chatBadge');
     badge.style.display = 'none';
     badge.textContent = '0';
+    const mb = document.getElementById('mobChatBadge');
+    if (mb) { mb.classList.remove('show'); mb.textContent = ''; }
+  }
+};
+
+window.mobileOpenTab = function(tab, btn){
+  // Ensure panel is open
+  const panel = document.getElementById('sidePanel');
+  panel.classList.add('open');
+  panel.classList.remove('hidden');
+  panelOpen = true;
+  // Highlight mobile tab buttons
+  document.querySelectorAll('.mob-tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // Switch the desktop tab too
+  const desktopTabMap = { chat:'chat', participants:'participants', hands:'hands' };
+  const desktopTab = document.querySelector(`.ls-tab[onclick*="'${desktopTabMap[tab]}'"]`);
+  if (desktopTab) switchTab(tab, desktopTab);
+  else {
+    document.querySelectorAll('.ls-pane').forEach(p=>p.classList.remove('active'));
+    document.getElementById('pane-'+tab).classList.add('active');
+    if (tab === 'chat') {
+      chatUnread = 0;
+      const mb = document.getElementById('mobChatBadge');
+      if (mb) { mb.classList.remove('show'); mb.textContent = ''; }
+    }
   }
 };
 
@@ -1915,10 +2113,9 @@ async function leaveOrEnd(endSession){
   if (sessionId) {
     try {
       if (endSession) {
-        await updateDoc(doc(db,'liveSessions',sessionId),{ status:'ended', endedAt:serverTimestamp() });
-      } else {
-        await updateDoc(doc(db,'liveSessions',sessionId),{ viewerCount:increment(-1) });
+        await updateDoc(doc(db,'liveSessions',sessionId),{ status:'ended', endedAt:serverTimestamp(), viewerCount:0 });
       }
+      // Viewer count decrement handled by pagehide listener for non-hosts
     } catch(e){}
   }
   // Navigate back
