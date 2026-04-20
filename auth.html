@@ -1314,6 +1314,14 @@ async function loadCentersForSignup() {
   const sel = document.getElementById('su-center');
   sel.innerHTML = '<option value="">Loading…</option>';
   try {
+    // Wait up to 5s for the module to expose __nltcDb
+    let waited = 0;
+    while (!window.__nltcDb && waited < 5000) {
+      await new Promise(r => setTimeout(r, 100));
+      waited += 100;
+    }
+    if (!window.__nltcDb) throw new Error('Firebase not ready');
+
     const { getDocs: _getDocs, collection: _collection, query: _query, orderBy: _orderBy } =
       await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
     const snap = await _getDocs(_query(_collection(window.__nltcDb,'centers'), _orderBy('state','asc'), _orderBy('name','asc')));

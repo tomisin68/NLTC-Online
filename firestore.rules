@@ -310,7 +310,7 @@ service cloud.firestore {
     // ═══════════════════════════════════════════════════════════════
 
     match /centers/{centerId} {
-      allow read:           if isRealUser();   // any signed-in user can fetch centres for signup
+      allow read:           if true;           // public — needed on signup page before auth
       allow create, update: if isAdmin();
       allow delete:         if isAdmin();
     }
