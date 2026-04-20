@@ -822,8 +822,8 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-outline" onclick="closeModal('centerModal')">Cancel</button>
-      <button class="btn-gold" onclick="saveCenter()"><i class="fas fa-save"></i> Save Centre</button>
+      <button type="button" class="btn-outline" onclick="closeModal('centerModal')">Cancel</button>
+      <button type="button" class="btn-gold" id="saveCenterBtn" onclick="saveCenter()"><i class="fas fa-save"></i> Save Centre</button>
     </div>
   </div>
 </div>
@@ -2804,6 +2804,11 @@ window.saveCenter = async function() {
   if (!name)  { showToast('Centre name is required','error'); return; }
   if (!city)  { showToast('City is required','error'); return; }
   if (!state) { showToast('State is required','error'); return; }
+
+  const btn = document.getElementById('saveCenterBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+
   const payload = { name, city, state, address, phone, updatedAt: serverTimestamp() };
   try {
     if (_editingCenterId) {
@@ -2816,7 +2821,12 @@ window.saveCenter = async function() {
     }
     closeModal('centerModal');
     window.loadCenters();
-  } catch(e) { showToast('Error saving centre: '+e.message,'error'); }
+  } catch(e) {
+    showToast('Error saving centre: '+e.message,'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-save"></i> Save Centre';
+  }
 };
 
 window.deleteCenter = async function(id, name) {
