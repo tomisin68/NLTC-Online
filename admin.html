@@ -191,6 +191,7 @@ input,select,textarea{font-family:var(--font-body);}
 .badge-red{background:var(--error-bg);color:#B91C1C;}
 .badge-blue{background:#EFF6FF;color:#1D4ED8;}
 .badge-gray{background:var(--surface-2);color:var(--text-3);}
+.badge-teal{background:var(--teal-pale);color:#0E7A7E;}
 .badge-live{background:var(--error);color:white;animation:livePulse 2s infinite;}
 .badge-purple{background:#F4F3FF;color:#5925DC;}
 .plan-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:.68rem;font-weight:800;}
@@ -385,6 +386,7 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
     <button class="sb-link" onclick="showView('courses',this)"><i class="fas fa-play-circle"></i>Video Lessons</button>
     <button class="sb-link" onclick="showView('cbt',this)"><i class="fas fa-laptop-code"></i>CBT Manager</button>
     <button class="sb-link" onclick="showView('quicktest',this)"><i class="fas fa-bolt"></i>Quick Tests<span class="sb-badge" id="quicktestBadge" style="display:none;">0</span></button>
+    <button class="sb-link" onclick="showView('mockexams',this)"><i class="fas fa-file-alt"></i>Mock Exams<span class="sb-badge" id="mockexamBadge" style="display:none;background:var(--success);">0</span></button>
     <button class="sb-link" onclick="showView('teachers',this)"><i class="fas fa-chalkboard-teacher"></i>Teachers</button>
     <div class="sb-sec">Live & Comms</div>
     <button class="sb-link" onclick="showView('live',this)"><i class="fas fa-circle" style="color:var(--error);font-size:.45rem;"></i>Live Classes<div class="sb-live-dot" id="liveDot" style="display:none;"></div></button>
@@ -550,8 +552,8 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
       <button id="cbtDeleteSelectedBtn" class="btn-danger btn-sm" onclick="deleteSelectedQuestions()" style="display:none;"><i class="fas fa-trash"></i> Delete Selected</button>
     </div>
     <div class="card-body" style="padding:0;"><div class="table-wrap"><table>
-      <thead><tr><th style="width:36px;"><input type="checkbox" id="cbtSelectAll" onchange="toggleSelectAllQuestions(this.checked)" title="Select all"></th><th>Question Preview</th><th>Subject</th><th>Exam</th><th>Year</th><th>Status</th><th>Actions</th></tr></thead>
-      <tbody id="cbtBody"><tr><td colspan="7"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
+      <thead><tr><th style="width:36px;"><input type="checkbox" id="cbtSelectAll" onchange="toggleSelectAllQuestions(this.checked)" title="Select all"></th><th>Question Preview</th><th>Subject</th><th>Topic</th><th>Exam</th><th>Year</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="cbtBody"><tr><td colspan="8"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
     </table></div></div>
   </div>
 </div>
@@ -648,6 +650,108 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
       <button class="btn-outline" onclick="closeModal('createTestModal')">Cancel</button>
       <button class="btn-outline" onclick="saveTest('draft')"><i class="fas fa-save"></i> Save Draft</button>
       <button class="btn-gold" onclick="saveTest('published')"><i class="fas fa-globe"></i> Publish Test</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────── MOCK EXAMS ─────────── -->
+<div class="view" id="view-mockexams">
+  <div class="page-hdr-row">
+    <div class="page-hdr"><h2>📋 Mock Exams</h2><p>Create, activate and grade department mock examinations</p></div>
+    <button class="btn-gold" onclick="openModal('createMockModal')"><i class="fas fa-plus"></i> Create Mock Exam</button>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card s1"><div class="sc-icon blue"><i class="fas fa-file-alt"></i></div><div class="sc-num" id="mock-total">—</div><div class="sc-label">Total Exams</div></div>
+    <div class="stat-card s2"><div class="sc-icon green"><i class="fas fa-globe"></i></div><div class="sc-num" id="mock-active">—</div><div class="sc-label">Active Exams</div></div>
+    <div class="stat-card s3"><div class="sc-icon gold"><i class="fas fa-users"></i></div><div class="sc-num" id="mock-attempts">—</div><div class="sc-label">Submissions</div></div>
+    <div class="stat-card s4"><div class="sc-icon teal"><i class="fas fa-lock"></i></div><div class="sc-num" id="mock-pending">—</div><div class="sc-label">Scores Pending</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">📋 All Mock Exams</div><button class="btn-outline btn-sm" onclick="loadMockExams()"><i class="fas fa-sync"></i></button></div>
+    <div class="card-body" style="padding:0;"><div class="table-wrap"><table>
+      <thead><tr><th>Title</th><th>Department</th><th>Subjects</th><th>Questions</th><th>Duration</th><th>Status</th><th>Submissions</th><th>Actions</th></tr></thead>
+      <tbody id="mockExamsBody"><tr><td colspan="8"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
+    </table></div></div>
+  </div>
+
+  <!-- Submissions Panel (shown when viewing a specific mock exam) -->
+  <div id="mockSubmissionsPanel" style="display:none;">
+    <div class="page-hdr-row" style="margin-top:24px;">
+      <div class="page-hdr"><h3 id="mockSubTitle">Submissions</h3><p id="mockSubSub">Student submissions for this mock exam</p></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-gold" id="releaseScoresBtn" onclick="releaseMockScores()"><i class="fas fa-unlock"></i> Release Scores</button>
+        <button class="btn-outline btn-sm" onclick="closeMockSubmissions()"><i class="fas fa-arrow-left"></i> Back</button>
+      </div>
+    </div>
+    <div id="mockSubStatsGrid" class="stats-grid"></div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📊 Student Submissions</div>
+        <button class="btn-outline btn-sm" onclick="exportMockCSV()"><i class="fas fa-download"></i> Export CSV</button>
+      </div>
+      <div class="card-body" style="padding:0;"><div class="table-wrap"><table>
+        <thead><tr><th>Student</th><th>Score</th><th>Percentage</th><th>Time Spent</th><th>Submitted At</th><th>Score Visible?</th></tr></thead>
+        <tbody id="mockSubBody"></tbody>
+      </table></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Mock Exam Modal -->
+<div class="modal-overlay" id="createMockModal">
+  <div class="modal" style="max-width:620px;width:95vw;max-height:90vh;overflow-y:auto;">
+    <div class="modal-header">
+      <div class="modal-title">Create Mock Exam</div>
+      <button class="modal-close" onclick="closeModal('createMockModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="mockEditId">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group" style="grid-column:1/-1;margin:0;">
+          <label class="form-label">Exam Title *</label>
+          <input class="form-input" id="mock-title" placeholder="e.g. JAMB Mock Examination 2025">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Department *</label>
+          <select class="form-input" id="mock-dept">
+            <option value="">— Select —</option>
+            <option>JAMB / UTME</option>
+            <option>WAEC SSCE</option>
+            <option>NECO</option>
+            <option>Post-UTME</option>
+            <option>GCE O-Level</option>
+            <option>All Students</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Duration (minutes) *</label>
+          <input class="form-input" id="mock-duration" type="number" value="120" min="10" max="360">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Subjects (comma-separated)</label>
+          <input class="form-input" id="mock-subjects" placeholder="Mathematics, English, Physics">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">Number of Questions</label>
+          <input class="form-input" id="mock-qcount" type="number" value="100" min="10">
+        </div>
+        <div class="form-group" style="grid-column:1/-1;margin:0;">
+          <label class="form-label">Instructions for Students</label>
+          <textarea class="form-input" id="mock-instructions" rows="2" placeholder="Read all questions carefully…" style="resize:vertical;min-height:56px;"></textarea>
+        </div>
+        <div class="form-group" style="grid-column:1/-1;margin:0;">
+          <label class="form-label">Scheduled Date &amp; Time (Optional)</label>
+          <input class="form-input" id="mock-date" type="datetime-local">
+        </div>
+      </div>
+      <div style="background:var(--warning-bg);border:1px solid rgba(245,158,11,.25);border-radius:var(--r-sm);padding:11px 14px;margin-top:14px;font-size:.78rem;color:#92400E;display:flex;align-items:flex-start;gap:8px;">
+        <i class="fas fa-info-circle" style="margin-top:1px;flex-shrink:0;"></i>
+        <span>Students will <strong>not see their scores</strong> until you click <em>Release Scores</em> for this exam. After release, students can view their results from their dashboard.</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline btn-sm" onclick="closeModal('createMockModal')">Cancel</button>
+      <button class="btn-navy btn-sm" onclick="saveMockExam()"><i class="fas fa-save"></i> Save Exam</button>
     </div>
   </div>
 </div>
@@ -779,6 +883,17 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
         </div>
       </div>
     </div>
+  </div>
+  <!-- Lesson Fee Payments Table -->
+  <div class="card" style="margin-top:16px;">
+    <div class="card-header">
+      <div class="card-title">💳 Lesson Fee Payments</div>
+      <button class="btn-outline btn-sm" onclick="loadLessonFeePaymentsAdmin()"><i class="fas fa-sync"></i></button>
+    </div>
+    <div class="card-body" style="padding:0;"><div class="table-wrap"><table>
+      <thead><tr><th>Student</th><th>Month</th><th>Amount</th><th>Description</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody id="lessonFeeAdminBody"><tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
+    </table></div></div>
   </div>
 </div>
 
@@ -1083,6 +1198,10 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
         <div class="form-group"><label class="form-label">Exam Type</label><select class="form-input" id="q-exam"><option>JAMB / UTME</option><option>WAEC SSCE</option><option>NECO</option></select></div>
         <div class="form-group"><label class="form-label">Year</label><input type="number" class="form-input" id="q-year" value="2024"></div>
       </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Topic <span style="color:var(--text-3);font-weight:400;">(e.g. "Quadratic Equations")</span></label><input type="text" class="form-input" id="q-topic" placeholder="Optional — groups questions by subtopic"></div>
+        <div class="form-group"><label class="form-label">Difficulty</label><select class="form-input" id="q-difficulty"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select></div>
+      </div>
       <div class="form-group"><label class="form-label">Explanation (Optional)</label><textarea class="form-input" id="q-explanation" rows="2"></textarea></div>
     </div>
     <div class="modal-footer"><button class="btn-outline btn-sm" onclick="closeModal('addQuestionModal')">Cancel</button><button class="btn-navy btn-sm" onclick="saveQuestion()"><i class="fas fa-save"></i> Save Question</button></div>
@@ -1173,7 +1292,7 @@ onAuthStateChanged(auth, async (user) => {
   
   await Promise.all([
     loadStudents(), loadVideos(), loadBroadcasts(), loadLiveSessions(),
-    loadSchedule(), loadTeachers(), loadCbtQuestions(), loadQuickTests()
+    loadSchedule(), loadTeachers(), loadCbtQuestions(), loadQuickTests(), loadMockExams()
   ]);
   renderCharts();
   renderRecentActivity();
@@ -1574,11 +1693,12 @@ window.loadCbtQuestions = async function() {
     const tbody = document.getElementById('cbtBody');
     document.getElementById('cbtSelectAll').checked = false;
     updateCbtSelectUI();
-    if (!questions.length) { tbody.innerHTML='<tr><td colspan="7"><div class="empty-state">No questions</div></td></tr>'; return; }
+    if (!questions.length) { tbody.innerHTML='<tr><td colspan="8"><div class="empty-state">No questions</div></td></tr>'; return; }
     tbody.innerHTML = questions.map(q => `<tr>
       <td><input type="checkbox" class="cbt-row-chk" data-id="${q.id}" onchange="updateCbtSelectUI()"></td>
-      <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${q.question||'—'}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${q.question||'—'}</td>
       <td><span class="badge badge-blue">${q.subject||'—'}</span></td>
+      <td style="font-size:.78rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${q.topic?`<span class="badge badge-teal" title="${q.topic}">${q.topic}</span>`:'<span style="color:var(--text-3);">—</span>'}</td>
       <td style="font-size:.78rem;">${q.examType||'—'}</td><td>${q.year||'—'}</td>
       <td>${q.flagged?'<span class="badge badge-red">Flagged</span>':'<span class="badge badge-green">Approved</span>'}</td>
       <td><button class="btn-outline btn-sm" onclick="flagQuestion('${q.id}',${!q.flagged})">${q.flagged?'Unflag':'Flag'}</button><button class="btn-danger btn-sm" onclick="deleteQuestion('${q.id}')"><i class="fas fa-trash"></i></button></td>
@@ -1595,13 +1715,15 @@ window.saveQuestion = async function() {
       options: {A:document.getElementById('q-a').value.trim(), B:document.getElementById('q-b').value.trim(), C:document.getElementById('q-c').value.trim(), D:document.getElementById('q-d').value.trim()},
       correctAnswer: document.getElementById('q-answer').value,
       subject: document.getElementById('q-subject').value,
+      topic: document.getElementById('q-topic').value.trim() || '',
+      difficulty: document.getElementById('q-difficulty').value,
       examType: document.getElementById('q-exam').value,
       year: parseInt(document.getElementById('q-year').value)||2024,
       explanation: document.getElementById('q-explanation').value.trim(),
       flagged:false, createdAt:serverTimestamp()
     });
     showToast('Question saved!','success'); closeModal('addQuestionModal');
-    ['q-text','q-a','q-b','q-c','q-d','q-explanation'].forEach(id=>document.getElementById(id).value='');
+    ['q-text','q-a','q-b','q-c','q-d','q-topic','q-explanation'].forEach(id=>document.getElementById(id).value='');
     await loadCbtQuestions();
   } catch(e) { showToast(`Error: ${e.message}`,'error'); }
 };
@@ -2341,6 +2463,207 @@ window.saveTest = async function(status) {
   loadQuickTests();
 };
 
+/* ══════════════════════════════════════
+   LESSON FEE PAYMENTS (Admin View)
+══════════════════════════════════════ */
+window.loadLessonFeePaymentsAdmin = async function() {
+  const tbody = document.getElementById('lessonFeeAdminBody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr>';
+  try {
+    // Fetch all students and collate their lessonFeePayments sub-collections
+    const usersSnap = await getDocs(query(collection(db,'users'), limit(200)));
+    const rows = [];
+    await Promise.all(usersSnap.docs.map(async uDoc => {
+      const u = uDoc.data();
+      const pSnap = await getDocs(query(collection(db,'users',uDoc.id,'lessonFeePayments'), orderBy('createdAt','desc'), limit(10)));
+      pSnap.docs.forEach(p => rows.push({...p.data(), studentName:u.displayName||u.email, studentEmail:u.email}));
+    }));
+    rows.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+    if (!rows.length) { tbody.innerHTML='<tr><td colspan="6"><div class="empty-state">No lesson fee payments recorded</div></td></tr>'; return; }
+    const statusBadge = s => s==='success'?'<span class="badge badge-green">Paid</span>':s==='failed'?'<span class="badge badge-red">Failed</span>':'<span class="badge badge-gray">Pending</span>';
+    tbody.innerHTML = rows.map(p => {
+      const at = p.createdAt?.toDate ? p.createdAt.toDate().toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}) : '—';
+      return `<tr>
+        <td><div class="user-cell"><div class="user-av" style="background:var(--navy);font-size:.65rem;">${(p.studentName||'?').charAt(0).toUpperCase()}</div><div><div class="td-name">${p.studentName||'—'}</div><div class="td-email">${p.studentEmail||'—'}</div></div></div></td>
+        <td>${p.month||'—'}</td>
+        <td style="font-weight:700;">₦${(p.amount||0).toLocaleString()}</td>
+        <td style="font-size:.78rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.description||'—'}</td>
+        <td>${statusBadge(p.status)}</td>
+        <td style="font-size:.78rem;">${at}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) { console.error(e); tbody.innerHTML='<tr><td colspan="6"><div class="empty-state">Failed to load payments</div></td></tr>'; }
+};
+
+/* ══════════════════════════════════════
+   MOCK EXAMS
+══════════════════════════════════════ */
+let currentMockId = null;
+
+window.loadMockExams = async function() {
+  try {
+    const snap = await getDocs(query(collection(db,'mockExams'), orderBy('createdAt','desc')));
+    const exams = snap.docs.map(d => ({id:d.id,...d.data()}));
+    const total    = exams.length;
+    const active   = exams.filter(e => e.status === 'active').length;
+    const attempts = exams.reduce((s,e) => s + (e.submissionsCount||0), 0);
+    const pending  = exams.filter(e => e.status === 'active' && !e.scoresReleased).length;
+    document.getElementById('mock-total').textContent    = total;
+    document.getElementById('mock-active').textContent   = active;
+    document.getElementById('mock-attempts').textContent = attempts;
+    document.getElementById('mock-pending').textContent  = pending;
+    const badge = document.getElementById('mockexamBadge');
+    if (active > 0) { badge.textContent = active; badge.style.display = ''; }
+    else badge.style.display = 'none';
+    const tbody = document.getElementById('mockExamsBody');
+    if (!exams.length) { tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state">No mock exams created yet</div></td></tr>'; return; }
+    const statusBadge = e => {
+      if (e.status==='active')    return '<span class="badge badge-green">Active</span>';
+      if (e.status==='completed') return '<span class="badge badge-gray">Completed</span>';
+      return '<span class="badge badge-gray">Draft</span>';
+    };
+    tbody.innerHTML = exams.map(e => `<tr>
+      <td style="font-weight:600;">${e.title||'—'}</td>
+      <td>${e.department||'—'}</td>
+      <td style="font-size:.78rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.subjects||'—'}</td>
+      <td>${e.questionCount||'—'}</td>
+      <td>${e.duration||'—'} min</td>
+      <td>${statusBadge(e)}${e.scoresReleased?'<span class="badge badge-teal" style="margin-left:4px;">Scores Released</span>':''}</td>
+      <td>${e.submissionsCount||0}</td>
+      <td style="display:flex;gap:4px;flex-wrap:wrap;">
+        ${e.status!=='active'?`<button class="btn-navy btn-sm" onclick="activateMock('${e.id}')"><i class="fas fa-play"></i> Activate</button>`:''}
+        ${e.status==='active'?`<button class="btn-outline btn-sm" onclick="deactivateMock('${e.id}')"><i class="fas fa-pause"></i> Deactivate</button>`:''}
+        <button class="btn-outline btn-sm" onclick="viewMockSubmissions('${e.id}','${(e.title||'').replace(/'/g,"\\'")}')"><i class="fas fa-eye"></i> Submissions</button>
+        ${!e.scoresReleased && (e.submissionsCount||0)>0?`<button class="btn-gold btn-sm" onclick="releaseMockScoresDirect('${e.id}')"><i class="fas fa-unlock"></i> Release</button>`:''}
+        <button class="btn-danger btn-sm" onclick="deleteMockExam('${e.id}')"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>`).join('');
+  } catch(e) { console.error(e); }
+};
+
+window.saveMockExam = async function() {
+  const title    = document.getElementById('mock-title').value.trim();
+  const dept     = document.getElementById('mock-dept').value;
+  const duration = parseInt(document.getElementById('mock-duration').value) || 120;
+  const subjects = document.getElementById('mock-subjects').value.trim();
+  const qcount   = parseInt(document.getElementById('mock-qcount').value) || 100;
+  const instruct = document.getElementById('mock-instructions').value.trim();
+  const date     = document.getElementById('mock-date').value;
+  if (!title || !dept) { showToast('Title and department are required','error'); return; }
+  try {
+    const editId = document.getElementById('mockEditId').value;
+    const data = {
+      title, department:dept, duration, subjects, questionCount:qcount,
+      instructions:instruct, scheduledDate:date||null,
+      status:'draft', scoresReleased:false, submissionsCount:0, updatedAt:serverTimestamp()
+    };
+    if (editId) {
+      await updateDoc(doc(db,'mockExams',editId), data);
+    } else {
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db,'mockExams'), data);
+    }
+    showToast('Mock exam saved!','success');
+    closeModal('createMockModal');
+    ['mock-title','mock-subjects','mock-instructions','mock-date'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('mock-dept').value='';
+    document.getElementById('mockEditId').value='';
+    await loadMockExams();
+  } catch(e) { showToast(`Error: ${e.message}`,'error'); }
+};
+
+window.activateMock = async function(id) {
+  await updateDoc(doc(db,'mockExams',id), {status:'active', activatedAt:serverTimestamp()});
+  showToast('Mock exam activated! Students can now see it.','success');
+  await loadMockExams();
+};
+
+window.deactivateMock = async function(id) {
+  await updateDoc(doc(db,'mockExams',id), {status:'draft'});
+  showToast('Mock exam deactivated.','info');
+  await loadMockExams();
+};
+
+window.deleteMockExam = async function(id) {
+  if (!confirm('Delete this mock exam? Submissions will also be deleted.')) return;
+  const subSnap = await getDocs(collection(db,'mockExams',id,'submissions'));
+  const batch   = writeBatch(db);
+  subSnap.docs.forEach(d => batch.delete(d.ref));
+  batch.delete(doc(db,'mockExams',id));
+  await batch.commit();
+  showToast('Deleted','error');
+  await loadMockExams();
+};
+
+window.viewMockSubmissions = async function(id, title) {
+  currentMockId = id;
+  document.getElementById('mockSubTitle').textContent = title;
+  document.getElementById('mockSubSub').textContent   = 'Student submissions · scores hidden until released';
+  document.getElementById('mockSubmissionsPanel').style.display = 'block';
+  document.getElementById('mockSubBody').innerHTML = '<tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr>';
+  document.querySelector('#mockSubStatsGrid').innerHTML = '';
+  const examDoc = await getDoc(doc(db,'mockExams',id));
+  const exam    = examDoc.data() || {};
+  const releaseBtn = document.getElementById('releaseScoresBtn');
+  releaseBtn.style.display = exam.scoresReleased ? 'none' : '';
+  try {
+    const snap = await getDocs(collection(db,'mockExams',id,'submissions'));
+    const subs = snap.docs.map(d => ({id:d.id,...d.data()}));
+    const highest = subs.length ? Math.max(...subs.map(s=>s.percentage||0)) : 0;
+    const avg     = subs.length ? Math.round(subs.reduce((a,s)=>a+(s.percentage||0),0)/subs.length) : 0;
+    document.getElementById('mockSubStatsGrid').innerHTML = `
+      <div class="stat-card s1"><div class="sc-icon blue"><i class="fas fa-users"></i></div><div class="sc-num">${subs.length}</div><div class="sc-label">Submissions</div></div>
+      <div class="stat-card s2"><div class="sc-icon green"><i class="fas fa-award"></i></div><div class="sc-num">${highest}%</div><div class="sc-label">Highest Score</div></div>
+      <div class="stat-card s3"><div class="sc-icon gold"><i class="fas fa-chart-bar"></i></div><div class="sc-num">${avg}%</div><div class="sc-label">Average</div></div>
+      <div class="stat-card s4"><div class="sc-icon teal"><i class="fas fa-lock${exam.scoresReleased?'-open':''} "></i></div><div class="sc-num">${exam.scoresReleased?'Yes':'No'}</div><div class="sc-label">Scores Visible</div></div>`;
+    if (!subs.length) { document.getElementById('mockSubBody').innerHTML = '<tr><td colspan="6"><div class="empty-state">No submissions yet</div></td></tr>'; return; }
+    document.getElementById('mockSubBody').innerHTML = subs.map(s => {
+      const pct = s.percentage || 0;
+      const col = pct>=70?'var(--success)':pct>=50?'var(--warning)':'var(--error)';
+      const at  = s.submittedAt?.toDate ? s.submittedAt.toDate().toLocaleString('en-NG') : '—';
+      const secs = s.timeTaken || 0;
+      const dur  = `${Math.floor(secs/60)}m ${secs%60}s`;
+      return `<tr>
+        <td><div class="user-cell"><div class="user-av" style="background:var(--navy);font-size:.65rem;">${(s.studentName||'?').charAt(0).toUpperCase()}</div><div><div class="td-name">${s.studentName||'—'}</div><div class="td-email">${s.studentEmail||'—'}</div></div></div></td>
+        <td style="font-weight:700;color:${col};">${s.score||0} / ${s.total||0}</td>
+        <td><span style="font-weight:700;color:${col};">${pct}%</span></td>
+        <td>${dur}</td>
+        <td>${at}</td>
+        <td>${exam.scoresReleased?'<span class="badge badge-green">Visible</span>':'<span class="badge badge-gray">Hidden</span>'}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) { console.error(e); }
+};
+
+window.closeMockSubmissions = function() {
+  document.getElementById('mockSubmissionsPanel').style.display = 'none';
+  currentMockId = null;
+};
+
+window.releaseMockScores = window.releaseMockScoresDirect = async function(id) {
+  const examId = id || currentMockId;
+  if (!examId) return;
+  if (!confirm('Release scores? Students will immediately see their results.')) return;
+  await updateDoc(doc(db,'mockExams',examId), {scoresReleased:true, scoresReleasedAt:serverTimestamp()});
+  showToast('Scores released! Students can now view their results.','success');
+  await loadMockExams();
+  if (currentMockId === examId) viewMockSubmissions(examId, document.getElementById('mockSubTitle').textContent);
+};
+
+window.exportMockCSV = async function() {
+  if (!currentMockId) return;
+  const snap = await getDocs(collection(db,'mockExams',currentMockId,'submissions'));
+  const rows = [['Student','Email','Score','Total','Percentage','Time (secs)','Submitted At']];
+  snap.docs.forEach(d => {
+    const s = d.data();
+    rows.push([s.studentName||'',s.studentEmail||'',s.score||0,s.total||0,s.percentage||0,s.timeTaken||0,s.submittedAt?.toDate?s.submittedAt.toDate().toLocaleString('en-NG'):'']);
+  });
+  const csv = rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download = 'mock_exam_results.csv'; a.click();
+};
+
 /* ── SIGN OUT ── */
 window.handleSignOut = async function() {
   try { await signOut(auth); window.location.href = 'auth.html'; }
@@ -2365,8 +2688,9 @@ function showView(name, btn) {
   document.getElementById('view-'+name).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  const titles = {overview:'Dashboard',analytics:'Analytics',students:'Students',courses:'Video Lessons',cbt:'CBT Manager',quicktest:'Quick Tests',teachers:'Teachers',live:'Live Classes',broadcasts:'Broadcasts',schedule:'Schedule',revenue:'Revenue',settings:'Settings'};
+  const titles = {overview:'Dashboard',analytics:'Analytics',students:'Students',courses:'Video Lessons',cbt:'CBT Manager',quicktest:'Quick Tests',mockexams:'Mock Exams',teachers:'Teachers',live:'Live Classes',broadcasts:'Broadcasts',schedule:'Schedule',revenue:'Revenue',settings:'Settings'};
   document.getElementById('topbarTitle').textContent = titles[name] || 'Dashboard';
+  if (name==='revenue') loadLessonFeePaymentsAdmin();
   closeSidebar();
 }
 window.showView = showView;

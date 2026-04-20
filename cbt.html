@@ -12,6 +12,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<!-- Firebase (used for Topic Practice mode — loads Firestore questions) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey:"AIzaSyA9vzT1TBpTdRJUfyYm51goS-5HfL3FcbU",
+    authDomain:"nltc-online.firebaseapp.com",
+    projectId:"nltc-online",
+    storageBucket:"nltc-online.firebasestorage.app",
+    messagingSenderId:"267993935158",
+    appId:"1:267993935158:web:723c13b2564b817fbc9797"
+  });
+  window._nltcDb = firebase.firestore();
+</script>
 <style>
 :root {
   --navy:#0B1D3A; --navy-2:#142952; --navy-3:#1D3A6F;
@@ -72,6 +86,16 @@ img{max-width:100%;height:auto;}
 .subj-btn.sel-2{background:#7A5AF8;}
 .subj-btn.sel-3{background:#F04438;}
 .subj-btn.sel-single{background:var(--navy);}
+/* Topic practice */
+.topic-card{display:flex;align-items:center;gap:10px;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r-md);cursor:pointer;transition:all .15s;font-size:.83rem;font-weight:600;color:var(--text-1);background:white;}
+.topic-card:hover{border-color:var(--navy);background:var(--surface);}
+.topic-card.selected{border-color:var(--gold);background:var(--gold-pale);color:var(--navy);}
+.topic-card .topic-count{margin-left:auto;font-size:.7rem;font-weight:700;color:var(--text-3);background:var(--surface-2);padding:2px 8px;border-radius:100px;}
+.topic-subject-select{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-size:.85rem;font-weight:600;color:var(--text-1);background:white;margin-bottom:14px;outline:none;cursor:pointer;}
+.topic-subject-select:focus{border-color:var(--navy);}
+.topics-loading{text-align:center;font-size:.8rem;color:var(--text-3);padding:14px 0;}
+.topics-empty{text-align:center;font-size:.8rem;color:var(--text-3);padding:18px 0;background:var(--surface);border-radius:var(--r-md);}
+.topics-grid{display:flex;flex-direction:column;gap:7px;max-height:280px;overflow-y:auto;}
 .subj-check{margin-left:auto;font-size:.73rem;}
 .start-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold-2));color:var(--navy);border-radius:var(--r-md);font-family:var(--font-head);font-size:.95rem;font-weight:800;cursor:pointer;transition:all .2s;border:none;display:flex;align-items:center;justify-content:center;gap:8px;}
 .start-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(240,165,0,.4);}
@@ -422,6 +446,11 @@ img{max-width:100%;height:auto;}
           <div class="mode-name">Post-UTME</div>
           <div class="mode-desc">1 subject · 30 min</div>
         </div>
+        <div class="mode-card" id="mode-topic" onclick="selectMode('topic')" style="grid-column:1/-1;">
+          <div class="mode-icon">🗂️</div>
+          <div class="mode-name">Topic Practice</div>
+          <div class="mode-desc">Practice by topic · Questions from our question bank</div>
+        </div>
       </div>
 
       <div id="custom-controls-wrap" style="display:none;">
@@ -463,6 +492,27 @@ img{max-width:100%;height:auto;}
       <div id="single-subject-section" style="display:none;">
         <div class="section-label">Select Subject</div>
         <div class="subject-select-grid" id="single-subjects-grid"></div>
+      </div>
+
+      <!-- TOPIC PRACTICE SECTION -->
+      <div id="topic-section" style="display:none;">
+        <div class="section-label">Choose Subject &amp; Topic</div>
+        <select class="topic-subject-select" id="topic-subject-select" onchange="loadTopicsForSubject(this.value)">
+          <option value="">— Select a subject —</option>
+          <option value="Mathematics">Mathematics</option>
+          <option value="English Language">English Language</option>
+          <option value="Physics">Physics</option>
+          <option value="Chemistry">Chemistry</option>
+          <option value="Biology">Biology</option>
+          <option value="Economics">Economics</option>
+          <option value="Government">Government</option>
+          <option value="Geography">Geography</option>
+          <option value="Accounting">Accounting</option>
+          <option value="Literature">Literature</option>
+          <option value="History">History</option>
+          <option value="Commerce">Commerce</option>
+        </select>
+        <div id="topics-container"></div>
       </div>
 
       <div id="selected-info" style="font-size:.76rem;color:var(--text-3);margin-bottom:14px;min-height:18px;"></div>
@@ -707,6 +757,9 @@ let state = {
   customExamType: 'utme',
   jambQueue: [],
   timeOverride: null,
+  topicSubject: null,
+  selectedTopic: null,
+  topicQuestions: [],
 };
 
 /* ════════════════════════════════════════
@@ -767,10 +820,12 @@ function selectMode(mode) {
   state.mode = mode;
   document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
   document.getElementById('mode-' + mode).classList.add('selected');
-  const isJamb = mode === 'jamb';
-  document.getElementById('jamb-subject-section').style.display   = isJamb ? 'block' : 'none';
-  document.getElementById('single-subject-section').style.display = !isJamb ? 'block' : 'none';
-  document.getElementById('custom-controls-wrap').style.display   = !isJamb ? 'block' : 'none';
+  const isJamb  = mode === 'jamb';
+  const isTopic = mode === 'topic';
+  document.getElementById('jamb-subject-section').style.display   = isJamb          ? 'block' : 'none';
+  document.getElementById('single-subject-section').style.display = (!isJamb && !isTopic) ? 'block' : 'none';
+  document.getElementById('custom-controls-wrap').style.display   = (!isJamb && !isTopic) ? 'block' : 'none';
+  document.getElementById('topic-section').style.display          = isTopic          ? 'block' : 'none';
   if (!isJamb) {
     state.selectedJambSubs = [];
     document.querySelectorAll('[id^="jsubj-"]').forEach(b => {
@@ -778,11 +833,18 @@ function selectMode(mode) {
       const chk = b.querySelector('.subj-check'); if (chk) chk.style.display = 'none';
     });
   }
-  resetSingleSelection();
-  const qEl = document.getElementById('custom-q-count');
-  if (mode === 'waec')     qEl.value = '50';
-  else if (mode === 'postutme') qEl.value = '30';
-  else                     qEl.value = '20';
+  if (isTopic) {
+    state.topicSubject = null;
+    state.selectedTopic = null;
+    document.getElementById('topics-container').innerHTML = '';
+    document.getElementById('topic-subject-select').value = '';
+  } else {
+    resetSingleSelection();
+    const qEl = document.getElementById('custom-q-count');
+    if (mode === 'waec')          qEl.value = '50';
+    else if (mode === 'postutme') qEl.value = '30';
+    else                          qEl.value = '20';
+  }
   updateStartBtn();
 }
 
@@ -853,6 +915,13 @@ function updateStartBtn() {
       ? `✓ English + ${state.selectedJambSubs.map(k => SUBJECTS_CONFIG[k].name).join(', ')}`
       : `Select ${rem} more subject${rem !== 1 ? 's' : ''}`;
     info.style.color = ready ? 'var(--success)' : 'var(--text-3)';
+  } else if (state.mode === 'topic') {
+    const ready = !!(state.topicSubject && state.selectedTopic);
+    btn.disabled = !ready;
+    info.textContent = ready
+      ? `✓ ${state.topicSubject} · Topic: ${state.selectedTopic} · ${state.topicQuestions.length} questions`
+      : state.topicSubject ? 'Select a topic above' : 'Select subject then topic';
+    info.style.color = ready ? 'var(--success)' : 'var(--text-3)';
   } else {
     const qCount   = document.getElementById('custom-q-count')?.value || 20;
     const examType = document.getElementById('custom-exam-type')?.value || 'utme';
@@ -864,6 +933,70 @@ function updateStartBtn() {
       : 'Select a subject above';
     info.style.color = state.singleSubject ? 'var(--success)' : 'var(--text-3)';
   }
+}
+
+/* ════════════════════════════════════════
+   TOPIC PRACTICE — FIRESTORE
+════════════════════════════════════════ */
+async function loadTopicsForSubject(subject) {
+  state.topicSubject  = subject || null;
+  state.selectedTopic = null;
+  state.topicQuestions = [];
+  updateStartBtn();
+  const container = document.getElementById('topics-container');
+  if (!subject) { container.innerHTML = ''; return; }
+  container.innerHTML = '<div class="topics-loading"><i class="fas fa-spinner fa-spin"></i> Loading topics…</div>';
+  try {
+    const db = window._nltcDb;
+    const snap = await db.collection('questions').where('subject','==',subject).get();
+    const docs = snap.docs.map(d => d.data());
+    const topicMap = {};
+    docs.forEach(q => {
+      const t = (q.topic || '').trim();
+      if (t) { topicMap[t] = (topicMap[t] || 0) + 1; }
+    });
+    const topics = Object.entries(topicMap).sort((a,b) => b[1] - a[1]);
+    if (!topics.length) {
+      container.innerHTML = '<div class="topics-empty"><i class="fas fa-folder-open" style="font-size:1.5rem;opacity:.3;display:block;margin:0 auto 8px;"></i>No topics found for this subject yet.<br><span style="font-size:.72rem;">Topics are added by your admin. Check back later.</span></div>';
+      return;
+    }
+    container.innerHTML = `<div class="section-label" style="margin-bottom:8px;">Select a Topic</div><div class="topics-grid">${
+      topics.map(([topic, count]) => `
+        <div class="topic-card" onclick="selectTopic('${topic.replace(/'/g,"\\'")}','${subject}')" id="topic-card-${topic.replace(/\s+/g,'_')}">
+          <i class="fas fa-bookmark" style="color:var(--gold);font-size:.85rem;"></i>
+          <span>${topic}</span>
+          <span class="topic-count">${count} Q</span>
+        </div>`).join('')
+    }</div>`;
+  } catch(e) {
+    container.innerHTML = '<div class="topics-empty">Failed to load topics. Check your connection.</div>';
+    console.error('[Topic Load]', e);
+  }
+}
+
+function selectTopic(topic, subject) {
+  state.selectedTopic = topic;
+  document.querySelectorAll('.topic-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById('topic-card-' + topic.replace(/\s+/g,'_'));
+  if (card) card.classList.add('selected');
+  // Pre-load questions for this topic
+  const db = window._nltcDb;
+  db.collection('questions').where('subject','==',subject).where('topic','==',topic).get().then(snap => {
+    state.topicQuestions = snap.docs.map(d => {
+      const q = d.data();
+      return {
+        _text: q.question || '',
+        _opts: q.options || {},
+        _answer: (q.correctAnswer || '').toUpperCase(),
+        _explanation: q.explanation || '',
+        _image: null,
+        _year: q.year || null,
+        topic: q.topic,
+        subject: q.subject,
+      };
+    }).filter(q => q._text);
+    updateStartBtn();
+  }).catch(e => console.error('[Topic Q Load]', e));
 }
 
 /* ════════════════════════════════════════
@@ -1015,8 +1148,23 @@ async function fetchSubjectQuestions(subjectKey, count, examType, onProgress) {
 async function startExam() {
   state.customQCount   = parseInt(document.getElementById('custom-q-count')?.value || 20);
   state.customExamType = document.getElementById('custom-exam-type')?.value || 'utme';
-  if (state.mode === 'jamb') await startJambExam();
-  else await startSingleSubjectExam();
+  if (state.mode === 'jamb')        await startJambExam();
+  else if (state.mode === 'topic')  await startTopicExam();
+  else                              await startSingleSubjectExam();
+}
+
+async function startTopicExam() {
+  if (!state.topicQuestions.length) { alert('No questions loaded for this topic.'); return; }
+  const qs = [...state.topicQuestions].sort(() => Math.random() - 0.5);
+  state.subjects      = [{ key: state.topicSubject, name: state.topicSubject, questions: qs.map(q => ({...q})) }];
+  state.currentSubIdx = 0;
+  state.currentQIdx   = 0;
+  state.submitted     = false;
+  state.startTime     = Date.now();
+  state.timeLeft      = state.timeOverride || qs.length * 90; // 90s per question, no strict limit
+  showScreen('exam-screen');
+  renderQuestion();
+  startTimer();
 }
 
 /* ════════════════════════════════════════

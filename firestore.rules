@@ -279,6 +279,33 @@ service cloud.firestore {
     }
 
     // ═══════════════════════════════════════════════════════════════
+    //  MOCK EXAMS  /mockExams/{examId}
+    // ═══════════════════════════════════════════════════════════════
+
+    match /mockExams/{examId} {
+      // Students see active exams only; admins see all
+      allow read: if isRealUser() &&
+                     (resource.data.get('status', '') == 'active' || isAdmin());
+      allow create, update: if isAdmin();
+      allow delete:         if isAdmin();
+    }
+
+    // ── Mock exam submissions — student writes own once; admin reads all ──
+    match /mockExams/{examId}/submissions/{uid} {
+      allow read:           if isAdmin() || isOwner(uid);
+      allow create:         if isOwner(uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // ── Lesson fee payments — student writes own; admin reads all ──
+    match /users/{uid}/lessonFeePayments/{paymentId} {
+      allow read:   if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid);
+      allow update: if isAdmin(); // backend marks status=success
+      allow delete: if isAdmin();
+    }
+
+    // ═══════════════════════════════════════════════════════════════
     //  QUICK TESTS  /quickTests/{testId}
     // ═══════════════════════════════════════════════════════════════
 
@@ -322,10 +349,10 @@ service cloud.firestore {
     // ── Profile self-update (safe fields only) ──
     function validProfileUpdate() {
       let allowed = [
-        'displayName', 'photoURL', 'phone',    'state',
-        'targetExam',  'bio',      'lastLogin', 'updatedAt',
-        'fcmToken',    'firstName','lastName',  'notifPrefs',
-        'email',       'uid'
+        'displayName', 'photoURL', 'phone',       'state',
+        'targetExam',  'bio',      'lastLogin',    'updatedAt',
+        'fcmToken',    'firstName','lastName',     'notifPrefs',
+        'email',       'uid',      'studentMode'
       ];
       return request.resource.data
                .diff(resource.data)

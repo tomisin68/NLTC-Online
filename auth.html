@@ -11,12 +11,11 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <!-- ═══════════════════════════════════════════════════════════════
-     FIREBASE — using signInWithRedirect (not signInWithPopup)
-     Reason: firebaseapp.com is unreachable on Nigerian ISPs (MTN,
-     Airtel, Glo etc.) when used as a popup intermediary.
-     signInWithRedirect goes straight to accounts.google.com which
-     is always reachable. getRedirectResult() picks up credentials
-     on page return.
+     FIREBASE — using signInWithPopup (preferred in Firebase v10)
+     Firebase v10 popup goes directly to accounts.google.com — no
+     firebaseapp.com intermediary — so it works on all Nigerian ISPs.
+     signInWithRedirect is kept only as a fallback when the browser
+     blocks the popup (rare). getRedirectResult() handles that case.
 ════════════════════════════════════════════════════════════════ -->
 <script type="module">
   import {
@@ -27,6 +26,7 @@
     getAuth,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
+    signInWithPopup,
     signInWithRedirect,
     getRedirectResult,
     GoogleAuthProvider,
@@ -104,10 +104,33 @@
     return { user: cred.user, data };
   };
 
-  /* ── Initiate Google redirect (no popup) ── */
+  /* ── Google Sign-In: popup first, redirect fallback ──
+     signInWithPopup is preferred in Firebase v10 — it uses accounts.google.com
+     directly (no firebaseapp.com intermediary) so it works on all Nigerian ISPs.
+     signInWithRedirect is broken in Chrome 115+ because third-party cookies are
+     blocked, causing getRedirectResult() to always return null.
+     We only fall back to redirect if the browser explicitly blocks the popup.
+  ── */
+  window.__nltcGoogleSignIn = async function() {
+    try {
+      const result = await signInWithPopup(auth, gProvider);
+      return result;
+    } catch(err) {
+      if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
+        if (err.code === 'auth/popup-blocked') {
+          // Browser blocked the popup — fall back to redirect
+          await signInWithRedirect(auth, gProvider);
+          // Execution stops here
+        }
+        return null; // user closed popup
+      }
+      throw err;
+    }
+  };
+
+  /* Keep old name for compatibility */
   window.__nltcGoogleRedirect = async function() {
     await signInWithRedirect(auth, gProvider);
-    // execution stops here — browser navigates away
   };
 
   /* ── Password reset ── */
@@ -168,6 +191,8 @@
       const target = storedRole === 'admin' ? 'admin.html' : 'dashboard.html';
       const fname  = result.user.displayName?.split(' ')[0] || 'User';
 
+      _redirectHandled = true;
+
       /* Show success overlay then redirect */
       if (typeof window.__nltcShowSuccess === 'function') {
         window.__nltcShowSuccess(
@@ -215,12 +240,19 @@
     handleRedirectResult();
   }
 
-  /* ── Auth state — auto redirect if already logged in ── */
+  /* ── Auth state — auto redirect when user is signed in ──
+     This is the most reliable safety net. If the success overlay is
+     already visible we skip (the redirect is already queued). We also
+     skip while the page is still loading to avoid a flash redirect
+     before handleRedirectResult has run.
+  ── */
+  let _redirectHandled = false;
   onAuthStateChanged(auth, async (user) => {
     if (!user) return;
-    /* Don't auto-redirect if success overlay is already showing */
     if (document.getElementById('successOv')?.classList.contains('show')) return;
-    /* Uncomment the lines below to enable auto-redirect on revisit:
+    if (_redirectHandled) return;
+    // Only auto-redirect if we're NOT in the middle of the redirect-result flow
+    // (that flow shows the success overlay and sets _redirectHandled)
     try {
       const snap = await getDoc(doc(db, 'users', user.uid));
       if (snap.exists()) {
@@ -228,7 +260,6 @@
         window.location.href = role === 'admin' ? 'admin.html' : 'dashboard.html';
       }
     } catch(e) { console.warn('onAuthStateChanged error', e); }
-    */
   });
 </script>
 
@@ -408,7 +439,7 @@ body {
 /* ── RIGHT PANEL ── */
 .right {
   background:var(--white);
-  display:flex; align-items:center; justify-content:center;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
   padding:40px 32px;
   position:relative; overflow:hidden;
 }
@@ -427,6 +458,33 @@ body {
   pointer-events:none;
 }
 .card { width:100%; max-width:440px; position:relative; z-index:1; }
+
+/* ── STUDENT MODE SELECTOR ── */
+.smode-btn {
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  padding:12px 10px; background:var(--surface);
+  border:2px solid var(--border); border-radius:var(--r-md);
+  cursor:pointer; transition:all .18s; font-family:'DM Sans',sans-serif;
+  color:var(--text-2);
+}
+.smode-btn.active {
+  border-color:var(--navy); background:var(--navy);
+  color:white; box-shadow:0 4px 14px rgba(11,29,58,0.18);
+}
+.smode-btn:not(.active):hover { border-color:var(--navy-light); background:var(--surface-2); }
+
+/* ── BACK TO HOME BUTTON ── */
+.back-home-btn {
+  display:inline-flex; align-items:center; gap:7px;
+  padding:8px 14px 8px 10px;
+  background:var(--surface); border:1.5px solid var(--border);
+  border-radius:100px; font-size:.78rem; font-weight:600;
+  color:var(--text-2); text-decoration:none;
+  transition:all .2s; cursor:pointer; margin-bottom:22px;
+  position:relative; z-index:2;
+}
+.back-home-btn:hover { background:var(--navy); color:white; border-color:var(--navy); }
+.back-home-btn i { font-size:.72rem; }
 
 /* ── ROLE SELECTOR ── */
 .role-selector { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:24px; }
@@ -865,6 +923,9 @@ body {
 
   <!-- ── RIGHT PANEL ── -->
   <div class="right">
+    <a href="index.html" class="back-home-btn">
+      <i class="fas fa-arrow-left"></i> Back to Homepage
+    </a>
     <div class="card">
 
       <!-- Mobile logo -->
@@ -1037,6 +1098,25 @@ body {
 
           <!-- Student-only fields -->
           <div id="studentFields">
+
+            <!-- Student Mode: Online or Physical Centre -->
+            <div class="fg" style="margin-bottom:16px;">
+              <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-2);margin-bottom:8px;">I am enrolling as *</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" id="studentModeSelector">
+                <button type="button" class="smode-btn active" id="smode-online" onclick="setStudentMode('online')">
+                  <i class="fas fa-wifi" style="font-size:1.1rem;margin-bottom:4px;"></i>
+                  <span style="font-weight:700;font-size:.83rem;">Online Student</span>
+                  <span style="font-size:.7rem;opacity:.7;margin-top:2px;">Learn from anywhere</span>
+                </button>
+                <button type="button" class="smode-btn" id="smode-physical" onclick="setStudentMode('physical')">
+                  <i class="fas fa-school" style="font-size:1.1rem;margin-bottom:4px;"></i>
+                  <span style="font-weight:700;font-size:.83rem;">Centre Student</span>
+                  <span style="font-size:.7rem;opacity:.7;margin-top:2px;">Physical centre</span>
+                </button>
+              </div>
+              <input type="hidden" id="su-studentMode" value="online">
+            </div>
+
             <div class="frow">
               <div class="fg">
                 <label>Target Exam *</label>
@@ -1188,6 +1268,15 @@ function setRole(role) {
 }
 
 /* ═══════════════════════════════════════════════════════
+   STUDENT MODE (online / physical)
+═══════════════════════════════════════════════════════ */
+function setStudentMode(mode) {
+  document.getElementById('su-studentMode').value = mode;
+  document.getElementById('smode-online').classList.toggle('active',   mode === 'online');
+  document.getElementById('smode-physical').classList.toggle('active', mode === 'physical');
+}
+
+/* ═══════════════════════════════════════════════════════
    TAB MANAGEMENT
 ═══════════════════════════════════════════════════════ */
 function switchTab(t) {
@@ -1327,43 +1416,78 @@ function getRedirectTarget(role) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   GOOGLE SIGN-IN  (signInWithRedirect — no popup)
-   We save the intended role to sessionStorage before
-   redirecting so we can check it on return.
+   GOOGLE SIGN-IN (popup with redirect fallback)
+   signInWithPopup is used first — Firebase v10 opens accounts.google.com
+   directly so there's no firebaseapp.com dependency (works on all Nigerian ISPs).
+   If the browser blocks the popup, signInWithRedirect is used as fallback.
 ═══════════════════════════════════════════════════════ */
 async function doGoogle() {
-  /* Save current role selection across the redirect */
   sessionStorage.setItem('nltc_intended_role', currentRole);
-
-  /* Show loading state on both Google buttons */
   setGBtnLoading('gLoginBtn',  true);
   setGBtnLoading('gSignupBtn', true);
 
   try {
-    await window.__nltcGoogleRedirect();
-    /* Browser navigates away — nothing below runs */
+    const result = await window.__nltcGoogleSignIn();
+
+    if (!result) {
+      /* User closed the popup or redirect was triggered */
+      setGBtnLoading('gLoginBtn',  false);
+      setGBtnLoading('gSignupBtn', false);
+      return;
+    }
+
+    /* ── Popup succeeded: process result immediately ── */
+    const isNew  = result._tokenResponse?.isNewUser;
+    const extras = isNew ? {
+      role:       'student',
+      plan:       'free',
+      firstName:  result.user.displayName?.split(' ')[0]           || '',
+      lastName:   result.user.displayName?.split(' ').slice(1).join(' ') || '',
+      targetExam: '',
+      state:      '',
+    } : {};
+
+    const data        = await window.__nltcSaveUser(result.user, extras);
+    const storedRole  = data?.role || 'student';
+    const intendedRole = sessionStorage.getItem('nltc_intended_role') || 'student';
+    sessionStorage.removeItem('nltc_intended_role');
+
+    if (intendedRole === 'admin' && storedRole !== 'admin') {
+      setGBtnLoading('gLoginBtn',  false);
+      setGBtnLoading('gSignupBtn', false);
+      toast('This account does not have admin privileges.', 'error');
+      return;
+    }
+
+    const target = storedRole === 'admin' ? 'admin.html' : 'dashboard.html';
+    const fname  = result.user.displayName?.split(' ')[0] || 'User';
+
+    showSuccess(
+      isNew ? 'Account Created! 🚀' : 'Welcome Back! 👋',
+      isNew
+        ? `Hi ${fname}! Your NLTC account is ready. Let's go!`
+        : `Good to see you again, ${fname}! Taking you to your dashboard.`,
+      storedRole === 'admin' ? 'Go to Admin Panel' : 'Go to Dashboard',
+      target
+    );
+
   } catch(err) {
-    /* Only reached if redirect itself throws (very rare) */
     setGBtnLoading('gLoginBtn',  false);
     setGBtnLoading('gSignupBtn', false);
     sessionStorage.removeItem('nltc_intended_role');
 
-    const ignored = [
-      'auth/popup-closed-by-user',
-      'auth/cancelled-popup-request',
-      'auth/user-cancelled',
-      'auth/redirect-cancelled-by-user'
-    ];
+    const ignored = ['auth/popup-closed-by-user','auth/cancelled-popup-request','auth/user-cancelled','auth/redirect-cancelled-by-user'];
     if (ignored.includes(err.code)) return;
 
-    console.error('[NLTC Google Redirect Error]', err.code, err.message, err);
+    console.error('[NLTC Google Error]', err.code, err.message, err);
 
     const msgMap = {
-      'auth/network-request-failed': 'Network error. Please check your connection and try again.',
+      'auth/network-request-failed': 'Network error. Check your connection and try again.',
       'auth/operation-not-allowed':  'Google Sign-In is not enabled. Contact the administrator.',
-      'auth/unauthorized-domain':    'This domain is not authorised. Contact the administrator.',
+      'auth/unauthorized-domain':    'This domain is not authorised for Google Sign-In.',
+      'auth/account-exists-with-different-credential': 'An account with this email already exists using a different sign-in method.',
     };
-    toast(msgMap[err.code] || `Sign-in failed (${err.code || 'unknown'}). Please try again.`, 'error');
+    toast(msgMap[err.code] || `Google sign-in failed (${err.code || 'unknown'}). Please try again.`, 'error');
   }
 }
 
@@ -1471,8 +1595,9 @@ async function doSignup(e) {
     };
 
     if (assignedRole === 'student') {
-      extras.targetExam = document.getElementById('su-exam').value;
-      extras.state      = document.getElementById('su-state').value || '';
+      extras.targetExam   = document.getElementById('su-exam').value;
+      extras.state        = document.getElementById('su-state').value || '';
+      extras.studentMode  = document.getElementById('su-studentMode').value || 'online';
     }
 
     const { user: signedUpUser } = await window.__nltcSignup(email, pass, extras);
@@ -1485,12 +1610,13 @@ async function doSignup(e) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
           body: JSON.stringify({
-            firstName:  extras.firstName,
-            lastName:   extras.lastName,
-            phone:      extras.phone  || '',
-            state:      extras.state  || '',
-            targetExam: extras.targetExam || '',
-            plan:       'free',
+            firstName:   extras.firstName,
+            lastName:    extras.lastName,
+            phone:       extras.phone  || '',
+            state:       extras.state  || '',
+            targetExam:  extras.targetExam || '',
+            studentMode: extras.studentMode || 'online',
+            plan:        'free',
           }),
         });
       } catch(e) { /* silent — account was created successfully */ }

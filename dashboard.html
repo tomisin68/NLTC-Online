@@ -817,6 +817,7 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
     <button class="sb-link" onclick="showView('quicktest',this)"><i class="fas fa-bolt"></i>Quick Tests<span class="sb-badge" id="qtBadge" style="display:none;">0</span></button>
     <div class="sb-sec">Live &amp; Community</div>
     <button class="sb-link" onclick="showView('live',this)" id="navLive"><i class="fas fa-circle" style="font-size:.45rem;color:var(--error);"></i>Live Classes<div class="sb-live-dot" id="liveDot" style="display:none;"></div></button>
+    <button class="sb-link" onclick="showView('mockexams',this)"><i class="fas fa-file-alt"></i>Mock Exams<span class="sb-badge" id="mockExamBadge" style="display:none;background:var(--error);">0</span></button>
     <button class="sb-link" onclick="showView('leaderboard',this)"><i class="fas fa-trophy"></i>Leaderboard</button>
     <button class="sb-link" onclick="showView('announcements',this)"><i class="fas fa-bullhorn"></i>Announcements<span class="sb-badge" id="anncBadge" style="display:none;">0</span></button>
     <div class="sb-sec">More</div>
@@ -1341,6 +1342,14 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
   <div id="liveSessionsList"><div class="loading"><div class="spinner"></div></div></div>
 </div>
 
+<!-- ─────────── MOCK EXAMS ─────────── -->
+<div class="view" id="view-mockexams">
+  <div class="page-hdr"><h2>📋 Mock Exams</h2><p>Official mock examinations set by your admin</p></div>
+  <div id="mockExamsList"><div class="loading"><div class="spinner"></div></div></div>
+  <!-- Mock exam taking UI (shown when student starts an exam) -->
+  <div id="mockExamTaker" style="display:none;"></div>
+</div>
+
 <!-- ─────────── LEADERBOARD ─────────── -->
 <div class="view" id="view-leaderboard">
   <div class="page-hdr"><h2>🏆 National Leaderboard</h2><p>Top students across all subjects and states</p></div>
@@ -1427,6 +1436,44 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
         </div>
       </div>
     </div>
+    <!-- LESSON FEE PAYMENT -->
+    <div class="settings-section">
+      <div class="settings-section-hdr">💳 Pay Lesson Fee</div>
+      <div class="settings-section-body">
+        <p style="font-size:.82rem;color:var(--text-3);margin-bottom:16px;">Pay your monthly lesson fee and download a receipt instantly.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div>
+            <label style="font-size:.74rem;font-weight:600;color:var(--text-2);display:block;margin-bottom:4px;">Amount (₦) *</label>
+            <input type="number" id="lessonFeeAmt" class="sett-input" placeholder="e.g. 15000" min="100" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.86rem;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:.74rem;font-weight:600;color:var(--text-2);display:block;margin-bottom:4px;">Month *</label>
+            <select id="lessonFeeMonth" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.86rem;outline:none;background:white;cursor:pointer;">
+              <option value="">— Select month —</option>
+              <option>January</option><option>February</option><option>March</option><option>April</option>
+              <option>May</option><option>June</option><option>July</option><option>August</option>
+              <option>September</option><option>October</option><option>November</option><option>December</option>
+            </select>
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="font-size:.74rem;font-weight:600;color:var(--text-2);display:block;margin-bottom:4px;">Description (Optional)</label>
+            <input type="text" id="lessonFeeDesc" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.86rem;outline:none;" placeholder="e.g. JAMB / UTME lesson fee">
+          </div>
+        </div>
+        <button class="btn-gold" id="lessonFeeBtn" onclick="initiateLessonFeePayment()" style="width:100%;justify-content:center;">
+          <i class="fas fa-credit-card"></i> Pay with Paystack
+        </button>
+        <div id="lessonFeeErr" style="display:none;color:var(--error);font-size:.78rem;margin-top:8px;"></div>
+        <div style="text-align:center;font-size:.72rem;color:var(--text-3);margin-top:8px;">🔒 Secured by Paystack · A receipt will be generated after payment</div>
+
+        <!-- Payment History -->
+        <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px;">
+          <div style="font-weight:700;font-size:.82rem;color:var(--navy);margin-bottom:10px;"><i class="fas fa-history"></i> Payment History</div>
+          <div id="lessonFeeHistory"><div class="loading" style="padding:0;"><div class="spinner" style="width:20px;height:20px;border-width:2px;"></div></div></div>
+        </div>
+      </div>
+    </div>
+
     <div class="settings-section">
       <div class="settings-section-hdr">🔐 Account</div>
       <div class="settings-section-body">
@@ -1533,7 +1580,7 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
 import { initializeApp }     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {
-  getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc,
+  getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, setDoc,
   query, orderBy, limit, where, serverTimestamp, onSnapshot, increment
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getMessaging, getToken, onMessage, deleteToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
@@ -3064,6 +3111,130 @@ window.initiatePayment=async function(){
   }
 };
 
+/* ════════════════════════════════════════
+   LESSON FEE PAYMENT
+════════════════════════════════════════ */
+window.initiateLessonFeePayment = async function() {
+  const amt    = parseInt(document.getElementById('lessonFeeAmt').value)||0;
+  const month  = document.getElementById('lessonFeeMonth').value;
+  const desc   = document.getElementById('lessonFeeDesc').value.trim();
+  const errEl  = document.getElementById('lessonFeeErr');
+  const btn    = document.getElementById('lessonFeeBtn');
+  errEl.style.display='none';
+  if (amt < 100)  { errEl.textContent='Enter a valid amount (min ₦100)'; errEl.style.display='block'; return; }
+  if (!month)     { errEl.textContent='Please select a month'; errEl.style.display='block'; return; }
+  btn.disabled=true; btn.innerHTML='<div class="spinner" style="width:15px;height:15px;border-width:2px;display:inline-block;"></div> Processing…';
+  try {
+    const user = auth.currentUser;
+    const data = await backendFetch('POST','/paystack/initialize',{
+      amount: amt,
+      email:  user.email,
+      meta:   { paymentType:'lesson_fee', month, description:desc||`Lesson fee — ${month}`, studentName:userData?.displayName||user.displayName||'', studentId:user.uid },
+      callbackUrl:`https://nltc-backend.onrender.com/payment/callback?type=lesson_fee&month=${encodeURIComponent(month)}&uid=${user.uid}`
+    });
+    // Store pending record in Firestore so we can show history even before webhook
+    await addDoc(collection(db,'users',user.uid,'lessonFeePayments'), {
+      amount:amt, month, description:desc||`Lesson fee — ${month}`,
+      status:'pending', reference:data.reference||'',
+      createdAt:serverTimestamp()
+    });
+    window.location.href = data.authorizationUrl;
+  } catch(e) {
+    errEl.textContent = e.message||'Payment failed. Please try again.';
+    errEl.style.display='block';
+    btn.disabled=false; btn.innerHTML='<i class="fas fa-credit-card"></i> Pay with Paystack';
+  }
+};
+
+async function loadLessonFeeHistory() {
+  const wrap = document.getElementById('lessonFeeHistory');
+  if (!wrap || !auth.currentUser) return;
+  try {
+    const snap = await getDocs(query(collection(db,'users',auth.currentUser.uid,'lessonFeePayments'), orderBy('createdAt','desc'), limit(10)));
+    if (!snap.size) { wrap.innerHTML='<div style="font-size:.78rem;color:var(--text-3);">No payment records yet.</div>'; return; }
+    wrap.innerHTML = snap.docs.map(d => {
+      const p = d.data();
+      const at = p.createdAt?.toDate ? p.createdAt.toDate().toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}) : '—';
+      const statusColor = p.status==='success'?'var(--success)':p.status==='failed'?'var(--error)':'var(--warning)';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);gap:8px;">
+        <div>
+          <div style="font-size:.82rem;font-weight:600;color:var(--navy);">${p.description||p.month||'Lesson Fee'}</div>
+          <div style="font-size:.72rem;color:var(--text-3);">${at}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-weight:700;font-size:.88rem;color:var(--navy);">₦${(p.amount||0).toLocaleString()}</div>
+          <div style="font-size:.68rem;font-weight:700;color:${statusColor};text-transform:uppercase;">${p.status||'pending'}</div>
+          ${p.status==='success'?`<button onclick="downloadReceipt('${d.id}')" style="font-size:.68rem;background:none;border:none;color:var(--gold);cursor:pointer;font-weight:700;padding:0;"><i class="fas fa-download"></i> Receipt</button>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { console.error(e); }
+}
+
+window.downloadReceipt = async function(paymentId) {
+  const user = auth.currentUser;
+  if (!user) return;
+  const snap = await getDoc(doc(db,'users',user.uid,'lessonFeePayments',paymentId));
+  if (!snap.exists()) { showToast('Payment record not found','error'); return; }
+  const p = snap.data();
+  const at = p.createdAt?.toDate ? p.createdAt.toDate().toLocaleString('en-NG',{dateStyle:'long',timeStyle:'short'}) : new Date().toLocaleString('en-NG');
+  const name = userData?.displayName || user.displayName || user.email;
+  const receiptHtml = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>NLTC Payment Receipt</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:Arial,sans-serif;background:#F5F5F5;display:flex;justify-content:center;padding:40px 20px;}
+  .receipt{background:white;max-width:520px;width:100%;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.1);}
+  .receipt-header{background:#0A1628;color:white;padding:28px 32px;text-align:center;}
+  .receipt-header img{height:40px;margin-bottom:10px;}
+  .receipt-header h1{font-size:1.2rem;font-weight:700;letter-spacing:-.01em;}
+  .receipt-header p{font-size:.78rem;opacity:.6;margin-top:4px;}
+  .receipt-body{padding:28px 32px;}
+  .badge{display:inline-block;background:#D1FAE5;color:#065F46;padding:5px 14px;border-radius:100px;font-size:.75rem;font-weight:700;margin-bottom:18px;}
+  .row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #EEE;font-size:.88rem;}
+  .row:last-child{border-bottom:none;}
+  .row .lbl{color:#666;flex-shrink:0;margin-right:12px;}
+  .row .val{font-weight:600;color:#111;text-align:right;}
+  .amount-row{padding:14px 0;background:#FFF8E7;border-radius:8px;margin:14px 0;display:flex;justify-content:space-between;align-items:center;padding:12px 16px;}
+  .amount-row .lbl{font-weight:600;color:#666;}
+  .amount-row .val{font-size:1.4rem;font-weight:900;color:#0A1628;}
+  .receipt-footer{background:#F5F7FB;padding:16px 32px;text-align:center;font-size:.72rem;color:#999;}
+  @media print{body{padding:0;background:white;}.receipt{border-radius:0;box-shadow:none;max-width:100%;}}
+</style></head>
+<body>
+<div class="receipt">
+  <div class="receipt-header">
+    <div style="font-size:1.8rem;margin-bottom:6px;">🎓</div>
+    <h1>NLTC — Next Level Tutorial Centre</h1>
+    <p>Official Payment Receipt</p>
+  </div>
+  <div class="receipt-body">
+    <div class="badge">✓ Payment ${p.status==='success'?'Confirmed':'Recorded'}</div>
+    <div class="row"><span class="lbl">Receipt No.</span><span class="val">${paymentId.toUpperCase().slice(-8)}</span></div>
+    <div class="row"><span class="lbl">Student Name</span><span class="val">${name}</span></div>
+    <div class="row"><span class="lbl">Email</span><span class="val">${user.email}</span></div>
+    <div class="row"><span class="lbl">Description</span><span class="val">${p.description||'Lesson Fee'}</span></div>
+    <div class="row"><span class="lbl">Month</span><span class="val">${p.month||'—'}</span></div>
+    <div class="row"><span class="lbl">Date</span><span class="val">${at}</span></div>
+    <div class="row"><span class="lbl">Payment Method</span><span class="val">Paystack</span></div>
+    <div class="amount-row"><span class="lbl">Amount Paid</span><span class="val">₦${(p.amount||0).toLocaleString('en-NG')}</span></div>
+  </div>
+  <div class="receipt-footer">
+    This is an official receipt from NLTC. Keep this for your records.<br>
+    For enquiries: nltcglobalservices@gmail.com
+  </div>
+</div>
+<div style="text-align:center;margin-top:20px;">
+  <button onclick="window.print()" style="padding:10px 24px;background:#0A1628;color:white;border:none;border-radius:8px;cursor:pointer;font-size:.88rem;font-weight:600;"><i class="fas fa-print"></i> Print / Save as PDF</button>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</body></html>`;
+  const blob = new Blob([receiptHtml], {type:'text/html'});
+  const url  = URL.createObjectURL(blob);
+  window.open(url,'_blank');
+};
+
 /* ── SIGN OUT ── */
 window.handleSignOut=async function(){
   await leaveLiveClass().catch(()=>{});
@@ -3235,12 +3406,14 @@ function showView(name,btn){
       if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes(`'${name}'`))b.classList.add('active');
     });
   }
-  const titles={home:'Dashboard',lessons:'Video Lessons',cbt:'CBT Practice',officialquiz:'NLTC Official Quiz',quicktest:'Quick Tests',live:'Live Classes',leaderboard:'Leaderboard',announcements:'Announcements',schedule:'Schedule',settings:'Settings'};
+  const titles={home:'Dashboard',lessons:'Video Lessons',cbt:'CBT Practice',officialquiz:'NLTC Official Quiz',quicktest:'Quick Tests',mockexams:'Mock Exams',live:'Live Classes',leaderboard:'Leaderboard',announcements:'Announcements',schedule:'Schedule',settings:'Settings'};
   document.getElementById('topbarTitle').textContent=titles[name]||'Dashboard';
   closeSidebar();
   window.scrollTo({top:0,behavior:'smooth'});
   if(name==='officialquiz' && typeof loadOfficialQuizBank==='function') loadOfficialQuizBank();
   if(name==='quicktest') loadQuickTestList();
+  if(name==='mockexams') loadMockExamsList();
+  if(name==='settings') loadLessonFeeHistory();
 }
 window.showView=showView;
 
@@ -3285,7 +3458,7 @@ document.head.appendChild(style);
      QUICK TEST — STUDENT MODULE (with anti-cheat)
 ══════════════════════════════════════════════ -->
 <script type="module">
-import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, serverTimestamp }
+import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, setDoc, query, where, orderBy, limit, serverTimestamp, increment }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -3629,6 +3802,221 @@ window.submitQT = async function(reason='manual') {
   document.getElementById('qtResultModal').classList.add('show');
 
   qtCurrent = null;
+};
+
+/* ════════════════════════════════════════════════════
+   MOCK EXAMS — Student View
+════════════════════════════════════════════════════ */
+let mockExamState = { current:null, answers:{}, startTime:null, timerInterval:null, questions:[], submitted:false };
+
+window.loadMockExamsList = async function() {
+  const wrap = document.getElementById('mockExamsList');
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const snap = await getDocs(query(collection(_db,'mockExams'), where('status','==','active')));
+    const exams = snap.docs.map(d => ({id:d.id,...d.data()}));
+    // Check badge count
+    const badge = document.getElementById('mockExamBadge');
+    if (badge) { if (exams.length){ badge.textContent=exams.length; badge.style.display=''; } else badge.style.display='none'; }
+    if (!exams.length) {
+      wrap.innerHTML = `<div style="text-align:center;padding:48px 20px;color:var(--text-3);">
+        <i class="fas fa-file-alt" style="font-size:2.5rem;opacity:.25;display:block;margin:0 auto 16px;"></i>
+        <div style="font-weight:700;font-size:1rem;margin-bottom:6px;">No Active Mock Exams</div>
+        <p style="font-size:.84rem;">Your admin will announce when a mock exam is available.</p>
+      </div>`; return;
+    }
+    // Check which exams the student has already submitted
+    const uid = _auth.currentUser?.uid;
+    const submittedIds = new Set();
+    if (uid) {
+      await Promise.all(exams.map(async e => {
+        const s = await getDoc(doc(_db,'mockExams',e.id,'submissions',uid));
+        if (s.exists()) submittedIds.add(e.id);
+      }));
+    }
+    wrap.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">${
+      exams.map(e => {
+        const done = submittedIds.has(e.id);
+        const dateStr = e.scheduledDate ? new Date(e.scheduledDate).toLocaleString('en-NG',{dateStyle:'medium',timeStyle:'short'}) : '';
+        return `<div class="card" style="padding:20px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <div style="width:40px;height:40px;border-radius:10px;background:var(--navy);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:1.1rem;flex-shrink:0;"><i class="fas fa-file-alt"></i></div>
+            <div>
+              <div style="font-weight:700;font-size:.95rem;color:var(--navy);">${e.title||'Mock Exam'}</div>
+              <div style="font-size:.75rem;color:var(--text-3);">${e.department||'All Students'}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:12px;font-size:.78rem;color:var(--text-2);">
+            <span><i class="fas fa-clock"></i> ${e.duration||120} mins</span>
+            <span><i class="fas fa-list"></i> ${e.questionCount||'—'} questions</span>
+          </div>
+          ${e.subjects?`<div style="font-size:.75rem;color:var(--text-3);margin-bottom:10px;"><b>Subjects:</b> ${e.subjects}</div>`:''}
+          ${dateStr?`<div style="font-size:.75rem;color:var(--text-3);margin-bottom:10px;"><i class="fas fa-calendar"></i> ${dateStr}</div>`:''}
+          ${done
+            ? (e.scoresReleased
+                ? `<button class="btn-navy" style="width:100%;" onclick="viewMockResult('${e.id}')"><i class="fas fa-chart-bar"></i> View My Result</button>`
+                : `<div style="background:var(--warning-bg);border-radius:8px;padding:10px;font-size:.78rem;color:#92400E;text-align:center;"><i class="fas fa-lock"></i> Submitted — results pending admin release</div>`)
+            : `<button class="btn-gold" style="width:100%;" onclick="startMockExam('${e.id}')"><i class="fas fa-play"></i> Start Exam</button>`
+          }
+        </div>`;
+      }).join('')
+    }</div>`;
+  } catch(e) { wrap.innerHTML='<div class="empty-state">Failed to load mock exams.</div>'; console.error(e); }
+};
+
+window.startMockExam = async function(examId) {
+  const examDoc = await getDoc(doc(_db,'mockExams',examId));
+  if (!examDoc.exists()) { showToast('Exam not found','error'); return; }
+  const exam = {id:examId,...examDoc.data()};
+  // Build a set of questions by fetching from Firestore (questions collection matching subjects)
+  const subjectList = (exam.subjects||'').split(',').map(s=>s.trim()).filter(Boolean);
+  let questions = [];
+  try {
+    for (const subj of subjectList) {
+      const snap = await getDocs(query(collection(_db,'questions'), where('subject','==',subj), limit(Math.ceil((exam.questionCount||100)/subjectList.length))));
+      snap.docs.forEach(d => questions.push({id:d.id,...d.data()}));
+    }
+    if (!questions.length) {
+      // fallback: fetch any questions
+      const snap = await getDocs(query(collection(_db,'questions'), limit(exam.questionCount||100)));
+      questions = snap.docs.map(d=>({id:d.id,...d.data()}));
+    }
+    questions = questions.sort(()=>Math.random()-0.5).slice(0, exam.questionCount||100);
+  } catch(e) { showToast('Failed to load questions','error'); return; }
+  if (!questions.length) { showToast('No questions available for this exam','error'); return; }
+  mockExamState = { current:exam, answers:{}, startTime:Date.now(), timerInterval:null, questions, submitted:false, qIdx:0 };
+  document.getElementById('mockExamsList').style.display = 'none';
+  renderMockExamTaker();
+};
+
+function renderMockExamTaker() {
+  const { current:exam, questions, qIdx, answers } = mockExamState;
+  const taker = document.getElementById('mockExamTaker');
+  taker.style.display = 'block';
+  const q = questions[qIdx];
+  const opts = q.options || {};
+  const totalSecs = (exam.duration||120)*60;
+  const elapsed = Math.floor((Date.now()-mockExamState.startTime)/1000);
+  const remaining = Math.max(0, totalSecs - elapsed);
+  const mins = Math.floor(remaining/60), secs = remaining%60;
+  if (!mockExamState.timerInterval) {
+    mockExamState.timerInterval = setInterval(() => {
+      const el = Math.floor((Date.now()-mockExamState.startTime)/1000);
+      const rem = Math.max(0, totalSecs - el);
+      const tm = document.getElementById('mockTimer');
+      if (tm) tm.textContent = `${String(Math.floor(rem/60)).padStart(2,'0')}:${String(rem%60).padStart(2,'0')}`;
+      if (rem <= 0 && !mockExamState.submitted) submitMockExam('time_expired');
+    }, 1000);
+  }
+  taker.innerHTML = `
+    <div style="max-width:720px;margin:0 auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+        <div style="font-weight:800;font-size:1rem;color:var(--navy);">${exam.title}</div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div id="mockTimer" style="font-size:1.1rem;font-weight:800;color:var(--error);font-variant-numeric:tabular-nums;">${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}</div>
+          <div style="font-size:.8rem;color:var(--text-3);">${qIdx+1} / ${questions.length}</div>
+        </div>
+      </div>
+      <div class="card" style="padding:20px;margin-bottom:14px;">
+        <div style="font-size:.72rem;font-weight:700;color:var(--text-3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;">Question ${qIdx+1}</div>
+        <div style="font-size:.95rem;font-weight:500;color:var(--text-1);line-height:1.65;margin-bottom:18px;">${q.question||q.text||''}</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${['A','B','C','D'].filter(l=>opts[l]||opts[l.toLowerCase()]).map(l=>`
+            <button onclick="selectMockAnswer('${l}')" id="mock-opt-${l}" style="text-align:left;padding:12px 16px;border:1.5px solid ${answers[qIdx]===l?'var(--navy)':'var(--border)'};border-radius:10px;background:${answers[qIdx]===l?'var(--navy)':'white'};color:${answers[qIdx]===l?'white':'var(--text-1)'};font-size:.88rem;cursor:pointer;transition:all .15s;">
+              <b>${l}.</b> ${opts[l]||opts[l.toLowerCase()]||''}
+            </button>`).join('')}
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;gap:8px;">
+        <button onclick="mockNavQ(-1)" class="btn-outline" ${qIdx===0?'disabled':''} style="padding:10px 18px;"><i class="fas fa-arrow-left"></i> Prev</button>
+        ${qIdx < questions.length-1
+          ? `<button onclick="mockNavQ(1)" class="btn-navy" style="padding:10px 18px;">Next <i class="fas fa-arrow-right"></i></button>`
+          : `<button onclick="submitMockExam('manual')" class="btn-gold" style="padding:10px 20px;"><i class="fas fa-paper-plane"></i> Submit Exam</button>`}
+      </div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:16px;">
+        ${questions.map((_,i)=>`<button onclick="mockNavQ(${i},true)" style="width:30px;height:30px;border-radius:6px;border:1.5px solid ${answers[i]!==undefined?'var(--navy)':'var(--border)'};background:${i===qIdx?'var(--navy)':answers[i]!==undefined?'var(--navy-2)':'white'};color:${i===qIdx||answers[i]!==undefined?'white':'var(--text-3)'};font-size:.72rem;cursor:pointer;">${i+1}</button>`).join('')}
+      </div>
+    </div>`;
+}
+
+window.selectMockAnswer = function(letter) {
+  mockExamState.answers[mockExamState.qIdx] = letter;
+  renderMockExamTaker();
+};
+
+window.mockNavQ = function(delta, absolute) {
+  if (absolute) { mockExamState.qIdx = delta; }
+  else { mockExamState.qIdx = Math.max(0, Math.min(mockExamState.questions.length-1, mockExamState.qIdx + delta)); }
+  renderMockExamTaker();
+};
+
+window.submitMockExam = async function(reason='manual') {
+  if (mockExamState.submitted) return;
+  if (reason === 'manual') {
+    const answered = Object.keys(mockExamState.answers).length;
+    if (answered < mockExamState.questions.length) {
+      if (!confirm(`You have only answered ${answered} of ${mockExamState.questions.length} questions. Submit anyway?`)) return;
+    }
+  }
+  clearInterval(mockExamState.timerInterval);
+  mockExamState.submitted = true;
+  const { current:exam, questions, answers, startTime } = mockExamState;
+  const timeTaken = Math.floor((Date.now()-startTime)/1000);
+  // Score (kept server-side hidden, but we record locally for admin)
+  let correct = 0;
+  questions.forEach((q,i) => { if ((q.correctAnswer||'').toUpperCase() === (answers[i]||'')) correct++; });
+  const percentage = Math.round(correct/questions.length*100);
+  const user = _auth.currentUser;
+  if (user) {
+    try {
+      await setDoc(doc(_db,'mockExams',exam.id,'submissions',user.uid), {
+        studentId: user.uid, studentName: user.displayName||user.email,
+        studentEmail: user.email, score:correct, total:questions.length,
+        percentage, timeTaken, answers, submittedAt:serverTimestamp(), submittedReason:reason
+      });
+      await updateDoc(doc(_db,'mockExams',exam.id), { submissionsCount: increment(1) });
+    } catch(e) { console.error('[Mock Submit]', e); }
+  }
+  document.getElementById('mockExamTaker').innerHTML = `
+    <div style="text-align:center;max-width:480px;margin:48px auto;padding:32px 20px;background:white;border-radius:var(--r-lg);box-shadow:var(--shadow-md);">
+      <div style="font-size:3rem;margin-bottom:16px;">✅</div>
+      <h2 style="font-family:var(--font-head);color:var(--navy);margin-bottom:8px;">Exam Submitted!</h2>
+      <p style="color:var(--text-3);font-size:.88rem;line-height:1.6;margin-bottom:20px;">Your exam has been submitted successfully. Your results will be available once your admin releases the scores.</p>
+      <div style="background:var(--gold-pale);border:1px solid var(--gold);border-radius:10px;padding:14px;margin-bottom:20px;font-size:.82rem;color:#92400E;">
+        <i class="fas fa-lock"></i> Scores are held by your admin and will be released after the exam session.
+      </div>
+      <button class="btn-navy" onclick="document.getElementById('mockExamsList').style.display='';document.getElementById('mockExamTaker').style.display='none';loadMockExamsList();">
+        <i class="fas fa-arrow-left"></i> Back to Mock Exams
+      </button>
+    </div>`;
+};
+
+window.viewMockResult = async function(examId) {
+  const uid = _auth.currentUser?.uid;
+  if (!uid) return;
+  const subDoc = await getDoc(doc(_db,'mockExams',examId,'submissions',uid));
+  if (!subDoc.exists()) { showToast('No submission found','error'); return; }
+  const s = subDoc.data();
+  const pct = s.percentage||0;
+  const emoji = pct>=80?'🏆':pct>=60?'👏':pct>=40?'😐':'😢';
+  const label = pct>=80?'Excellent!':pct>=60?'Good Job!':pct>=40?'Keep Practicing':'More Study Needed';
+  showToast(`Your score: ${pct}% — ${label}`,'success');
+  document.getElementById('mockExamTaker').style.display = 'block';
+  document.getElementById('mockExamsList').style.display = 'none';
+  document.getElementById('mockExamTaker').innerHTML = `
+    <div style="text-align:center;max-width:480px;margin:48px auto;padding:32px 20px;background:white;border-radius:var(--r-lg);box-shadow:var(--shadow-md);">
+      <div style="font-size:3.5rem;margin-bottom:12px;">${emoji}</div>
+      <h2 style="font-family:var(--font-head);color:var(--navy);margin-bottom:4px;">${label}</h2>
+      <div style="font-size:2.5rem;font-weight:900;color:${pct>=60?'var(--success)':'var(--error)'};margin:12px 0;">${pct}%</div>
+      <div style="color:var(--text-3);font-size:.88rem;margin-bottom:20px;">${s.score} correct out of ${s.total} questions</div>
+      <div style="display:flex;justify-content:center;gap:12px;font-size:.8rem;color:var(--text-2);margin-bottom:24px;">
+        <span><i class="fas fa-clock"></i> ${Math.floor((s.timeTaken||0)/60)}m ${(s.timeTaken||0)%60}s</span>
+      </div>
+      <button class="btn-navy" onclick="document.getElementById('mockExamsList').style.display='';document.getElementById('mockExamTaker').style.display='none';loadMockExamsList();">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+    </div>`;
 };
 </script>
 </body>
