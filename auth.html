@@ -26,7 +26,7 @@
 <script type="module">
   import {
     initializeApp
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 
   import {
     getAuth,
@@ -39,7 +39,7 @@
     sendPasswordResetEmail,
     onAuthStateChanged,
     updateProfile
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
   import {
     getFirestore,
@@ -51,7 +51,7 @@
     query,
     orderBy,
     serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
   /* ── Firebase config ── */
   const firebaseConfig = {
@@ -118,8 +118,15 @@
   /* ── Email / password signup ── */
   window.__nltcSignup = async function(email, password, extras) {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(cred.user, { displayName: extras.displayName });
-    const data = await saveUser(cred.user, extras);
+    try { await updateProfile(cred.user, { displayName: extras.displayName }); } catch(e) {}
+    let data = {};
+    try {
+      data = await saveUser(cred.user, extras);
+    } catch(e) {
+      console.warn('[NLTC] Signup profile save failed:', e.code);
+      // Account WAS created — return what we have
+      data = { ...extras, uid: cred.user.uid, email: cred.user.email };
+    }
     return { user: cred.user, data };
   };
 
@@ -1628,13 +1635,14 @@ async function doLogin(e) {
     );
   } catch(err) {
     const map = {
-      'auth/user-not-found':       ['li-emailErr', 'No account found with this email'],
-      'auth/wrong-password':       ['li-passErr',  'Incorrect password'],
-      'auth/invalid-credential':   ['li-passErr',  'Incorrect email or password. If you signed up with Google, use "Continue with Google" or click "Forgot password?" to set a password.'],
-      'auth/invalid-email':        ['li-emailErr', 'Invalid email address'],
-      'auth/user-disabled':        [null,          'This account has been disabled. Contact support.'],
-      'auth/too-many-requests':    [null,          'Too many failed attempts. Please wait and try again.'],
-      'auth/network-request-failed': [null,        'Network error. Check your connection and try again.'],
+      'auth/user-not-found':         ['li-emailErr', 'No account found with this email address.'],
+      'auth/wrong-password':         ['li-passErr',  'Incorrect password. Please try again or reset your password.'],
+      'auth/invalid-credential':     ['li-passErr',  'Incorrect email or password. If you registered with Google, please use "Continue with Google" instead. Otherwise, click "Forgot password?" to reset.'],
+      'auth/invalid-email':          ['li-emailErr', 'Please enter a valid email address.'],
+      'auth/user-disabled':          [null,          'This account has been disabled. Please contact support.'],
+      'auth/too-many-requests':      [null,          'Too many failed attempts. Please wait a few minutes and try again.'],
+      'auth/network-request-failed': [null,          'Network error. Please check your internet connection and try again.'],
+      'auth/operation-not-allowed':  [null,          'Email/password sign-in is not enabled. Please use "Continue with Google" or contact support.'],
     };
     const m = map[err.code];
     if (m && m[0]) showErr(m[0], m[1]);
@@ -1746,10 +1754,11 @@ async function doSignup(e) {
     );
   } catch(err) {
     const map = {
-      'auth/email-already-in-use': ['su-emailErr','An account already exists with this email'],
-      'auth/invalid-email':        ['su-emailErr','Invalid email address'],
-      'auth/weak-password':        ['su-passErr', 'Password too weak — use at least 8 characters'],
-      'auth/network-request-failed': [null,       'Network error. Check your connection and try again.'],
+      'auth/email-already-in-use':  ['su-emailErr', 'An account already exists with this email. Please sign in instead.'],
+      'auth/invalid-email':         ['su-emailErr', 'Please enter a valid email address.'],
+      'auth/weak-password':         ['su-passErr',  'Password too weak — use at least 8 characters with letters and numbers.'],
+      'auth/network-request-failed':[null,          'Network error. Please check your connection and try again.'],
+      'auth/operation-not-allowed': [null,          'Account creation is currently disabled. Please contact support.'],
     };
     const m = map[err.code];
     if (m && m[0]) showErr(m[0], m[1]);

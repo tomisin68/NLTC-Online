@@ -773,97 +773,192 @@ button, a { touch-action: manipulation; }
   :root { --panel-w: 260px; }
 }
 
-/* Mobile bottom tabs — chat/people/hands shortcut bar */
+/* ── Mobile tab bar (Chat / People / Hands) ── */
 .mobile-panel-bar {
   display: none;
-  position: fixed;
-  bottom: var(--ctrl-h);
-  left: 0; right: 0;
-  height: 44px;
-  background: var(--bg-3);
-  border-top: 1px solid var(--border-2);
-  z-index: 101;
   flex-shrink: 0;
+  height: 48px;
+  background: var(--bg-2);
+  border-top: 1px solid var(--border-2);
 }
-.mobile-panel-bar-inner {
-  display: flex;
-  height: 100%;
-}
+.mobile-panel-bar-inner { display: flex; height: 100%; }
 .mob-tab-btn {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   gap: 5px;
-  font-size: .68rem;
-  font-weight: 700;
+  font-size: .7rem; font-weight: 700;
   color: var(--text-3);
-  background: none;
-  border: none;
-  cursor: pointer;
+  background: none; border: none;
+  cursor: pointer; touch-action: manipulation;
   transition: color .15s, background .15s;
   position: relative;
-  letter-spacing: .02em;
 }
-.mob-tab-btn:hover, .mob-tab-btn.active { color: var(--gold); background: rgba(245,166,35,.06); }
+.mob-tab-btn.active { color: var(--gold); background: rgba(245,166,35,.06); }
 .mob-tab-btn .mob-badge {
-  position: absolute;
-  top: 4px; right: calc(50% - 22px);
-  min-width: 14px; height: 14px;
-  background: var(--red);
-  color: white;
+  position: absolute; top: 5px; right: calc(50% - 24px);
+  min-width: 15px; height: 15px;
+  background: var(--red); color: white;
   font-size: .52rem; font-weight: 800;
-  border-radius: 100px;
-  padding: 0 3px;
-  display: none;
-  align-items: center; justify-content: center;
+  border-radius: 100px; padding: 0 3px;
+  display: none; align-items: center; justify-content: center;
 }
 .mob-tab-btn .mob-badge.show { display: flex; }
 
+/* ══════════════════════════════════════════════════
+   MOBILE LAYOUT  ≤ 700 px
+   Strategy (Google Meet / Zoom model):
+   • ls-wrap is a flex column filling 100dvh
+   • ls-body fills remaining height (flex: 1)
+   • ls-stage-wrap fills ls-body (flex: 1, position: relative)
+   • ls-main-video fills the ENTIRE stage (position: absolute, inset: 0)
+   • ls-participant-strip overlays the video bottom (absolute)
+   • ls-controls overlays the very bottom (absolute, translucent)
+   • ls-panel is a full-height overlay from the right
+   • mobile-panel-bar is a flex row at the bottom of ls-wrap
+══════════════════════════════════════════════════ */
 @media (max-width: 700px) {
+  :root { --ctrl-h: 60px; --header-h: 52px; }
+
+  /* Show mobile tab bar as a normal flex child of ls-wrap */
   .mobile-panel-bar { display: flex; }
+
+  /* Stage takes full body width — panel is fixed overlay, not flex sibling */
+  .ls-body { overflow: hidden; }
+  .ls-stage-wrap { width: 100% !important; flex: 1 !important; }
+
+  /* Stage is the position context for all overlays */
+  .ls-stage-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 0;
+    min-height: 0;
+  }
+
+  /* Video fills the ENTIRE stage — maximum screen real estate */
+  .ls-main-video {
+    position: absolute !important;
+    inset: 0 !important;
+    height: auto !important;
+    min-height: unset !important;
+  }
+
+  /* PiP stays in top-right area */
+  .ls-pip {
+    width: 88px; height: 58px;
+    bottom: calc(var(--ctrl-h) + 68px);
+    right: 10px;
+  }
+
+  /* Participant strip overlays the video — translucent, above controls */
+  .ls-participant-strip {
+    position: absolute;
+    left: 0; right: 0;
+    bottom: var(--ctrl-h);
+    z-index: 20;
+    background: rgba(5, 8, 16, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255,255,255,0.07);
+    min-height: 64px;
+    max-height: 80px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .ls-participant-strip::-webkit-scrollbar { display: none; }
+  .ls-tile { width: 76px; height: 50px; }
+
+  /* Controls overlay at the very bottom of the stage */
+  .ls-controls {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: var(--ctrl-h);
+    z-index: 21;
+    background: rgba(7, 11, 18, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    gap: 4px;
+    padding: 0 6px;
+    justify-content: space-evenly;
+  }
+  .ctrl-label { display: none; }
+  .ctrl-btn { min-width: 40px; padding: 7px 8px; }
+  .ctrl-sep { display: none; }
+
+  /* Panel: full-height overlay from the right, covering the entire body */
   .ls-panel {
-    position: fixed;
-    top: var(--header-h);
-    bottom: calc(var(--ctrl-h) + 44px);  /* above controls + mobile tab bar */
-    right: 0;
-    z-index: 100;
-    transform: translateX(100%);
-    border-left: 1px solid var(--border-2);
-    width: min(320px, 92vw) !important;
+    position: fixed !important;
+    top: var(--header-h) !important;
+    bottom: 48px !important;   /* sits above the mobile tab bar */
+    right: 0 !important;
+    width: min(340px, 94vw) !important;
+    z-index: 200 !important;
+    transform: translateX(100%) !important;
+    transition: transform .28s cubic-bezier(0.4,0,0.2,1) !important;
+    border-left: 1px solid var(--border-2) !important;
+    border-top: 1px solid var(--border-2) !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
   .ls-panel.open {
-    transform: translateX(0);
-    box-shadow: -10px 0 40px rgba(0,0,0,.5);
+    transform: translateX(0) !important;
+    box-shadow: -8px 0 32px rgba(0,0,0,0.65) !important;
   }
-  .ls-panel.hidden { transform: translateX(100%); }
-  .ls-session-meta { display: none; }
-  .ls-stat-chip { display: none; }
-  .ctrl-label { display: none; }
-  .ctrl-btn { min-width: 44px; padding: 8px 10px; }
-  .ls-pip { width: 90px; height: 60px; }
-  .ls-participant-strip { min-height: 66px; }
-  .ls-tile { width: 80px; height: 52px; }
-  :root { --ctrl-h: 62px; }
-  /* Push stage content up so nothing hides behind tab bar + controls */
-  .ls-stage-wrap { padding-bottom: 44px; }
+  .ls-panel.hidden { transform: translateX(100%) !important; }
+
+  /* Panel content area — flex-based height (more reliable than absolute on mobile) */
+  .ls-panel .ls-panel-content {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  /* Panes use full flex height on mobile */
+  .ls-panel .ls-pane {
+    position: static !important;
+    inset: auto !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    display: none !important;
+    flex-direction: column !important;
+  }
+  .ls-panel .ls-pane.active {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  /* Chat messages list fills its pane */
+  .ls-panel .ls-pane .chat-msgs,
+  .ls-panel .ls-pane .participants-list,
+  .ls-panel .ls-pane .raised-hands-section {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide desktop-only elements */
+  .ls-session-meta { display: none !important; }
+  .ls-stat-chip { display: none !important; }
 }
 
 @media (max-width: 420px) {
-  .ls-tile { width: 70px; height: 46px; }
-  .ls-pip { width: 80px; height: 54px; bottom: 54px; }
-  :root { --ctrl-h: 58px; }
-  .ctrl-btn { min-width: 38px; padding: 7px 8px; }
-  .ls-controls { gap: 5px; }
-  .ctrl-sep { display: none; }
+  :root { --ctrl-h: 56px; }
+  .ls-tile { width: 66px; height: 44px; }
+  .ls-pip { width: 78px; height: 52px; }
+  .ctrl-btn { min-width: 36px; padding: 6px 7px; }
 }
 
-/* Screen orientation helper */
+/* Landscape mobile — maximize video, hide strip, shrink header */
 @media (max-height: 500px) and (orientation: landscape) {
-  :root { --header-h: 44px; --ctrl-h: 52px; }
-  .ls-participant-strip { display: none; }
-  .ls-session-title { font-size: .8rem; }
-  .ls-panel { top: var(--header-h); }
+  :root { --header-h: 42px; --ctrl-h: 48px; }
+  .ls-participant-strip { display: none !important; }
+  .ls-session-title { font-size: .78rem; }
+  .ls-panel { top: var(--header-h) !important; bottom: 0 !important; }
+  .mobile-panel-bar { display: none !important; }
 }
 
 /* ═══════════════════════════ UTILITIES ═══════════════════════════ */
@@ -1101,13 +1196,13 @@ button, a { touch-action: manipulation; }
 
 <!-- FIREBASE + AGORA LOGIC -->
 <script type="module">
-import { initializeApp }     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { initializeApp }     from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, addDoc, updateDoc, deleteDoc,
   collection, query, orderBy, limit, onSnapshot,
   serverTimestamp, increment
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 /* ──────────────── CONFIG ──────────────── */
 const FIREBASE_CONFIG = {
@@ -1277,21 +1372,21 @@ async function bootSession(){
         showToast('The class has ended.', 'info');
         setTimeout(()=> location.href = isAdmin ? 'admin.html' : 'student.html', 2500);
       }
-      // Handle admin mute-all command (persistent state + timestamp guard)
-      if (!isHost) {
-        if (data.muteAll) {
-          if (localAudioTrack) {
-            localAudioTrack.setMuted(true);
-            micOn = false;
-            updateMicUI();
-          }
-          showToast('You were muted by the host.', 'info');
-        }
-        // When host un-mutes all, just restore UI — user's mic stays muted until they manually unmute
+      // Handle admin mute-all command
+      if (!isHost && data.muteAll) {
+        if (localAudioTrack) { localAudioTrack.setMuted(true); micOn = false; updateMicUI(); }
+        showToast('You were muted by the host.', 'info');
       }
-      // Handle kick
+      // Handle individual mute by admin
+      if (!isHost && data.mutedUsers?.[currentUser.uid]) {
+        if (localAudioTrack) { localAudioTrack.setMuted(true); micOn = false; updateMicUI(); }
+        showToast('You were muted by the host.', 'info');
+        // Clear the flag so re-entry doesn't re-mute
+        updateDoc(doc(db,'liveSessions',sessionId),{[`mutedUsers.${currentUser.uid}`]: false}).catch(()=>{});
+      }
+      // Handle individual remove (kick)
       if (data.kickedUsers?.[currentUser.uid]) {
-        showToast('You were removed from this session.', 'error');
+        showToast('You were removed from this session by the host.', 'error');
         setTimeout(()=> leaveOrEnd(false), 1500);
       }
       // Handle pinned message
@@ -1686,10 +1781,10 @@ window.toggleScreenShare = async function(){
     document.getElementById('ctrlScreenShare').classList.remove('active');
     showToast('Screen sharing stopped.','info');
   } else {
-    // Screen capture requires a desktop browser
-    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-    if (isMobile || !navigator.mediaDevices?.getDisplayMedia) {
-      showToast('Screen sharing is not supported on mobile devices. Please use a desktop browser.','error');
+    // iOS Safari does not support getDisplayMedia at all
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) && !/CriOS/.test(navigator.userAgent);
+    if (isIOS || !navigator.mediaDevices?.getDisplayMedia) {
+      showToast('Screen sharing is not supported on this device or browser. Use Chrome on Android or a desktop browser.','error');
       return;
     }
     try {
@@ -1764,12 +1859,13 @@ window.adminMuteUser = async function(e, uid){
   });
   if (!confirmed) return;
   mutedByAdmin[uid] = true;
-  // Write mute command to Firestore — student portal reads this
   if (sessionId) {
-    await updateDoc(doc(db,'liveSessions',sessionId),{
-      [`mutedUsers.${uid}`]: true,
-      [`muteCommand_${uid}`]: serverTimestamp(),
-    }).catch(()=>{});
+    try {
+      await updateDoc(doc(db,'liveSessions',sessionId),{
+        [`mutedUsers.${uid}`]: true,
+        [`muteCommand_${uid}`]: serverTimestamp(),
+      });
+    } catch(e) { showToast('Could not mute: ' + (e.message||e.code),'error'); return; }
   }
   const tile = document.getElementById('participantStrip').querySelector(`[data-uid="${uid}"]`);
   if (tile) tile.classList.add('is-muted');
@@ -1787,9 +1883,9 @@ window.adminRemoveUser = async function(e, uid){
   });
   if (!confirmed) return;
   if (sessionId) {
-    await updateDoc(doc(db,'liveSessions',sessionId),{
-      [`kickedUsers.${uid}`]: true,
-    }).catch(()=>{});
+    try {
+      await updateDoc(doc(db,'liveSessions',sessionId),{ [`kickedUsers.${uid}`]: true });
+    } catch(e) { showToast('Could not remove participant: ' + (e.message||e.code),'error'); return; }
   }
   showToast('Participant removed from session.','success');
 };
