@@ -306,6 +306,16 @@ service cloud.firestore {
     }
 
     // ═══════════════════════════════════════════════════════════════
+    //  PHYSICAL CENTRES  /centers/{centerId}
+    // ═══════════════════════════════════════════════════════════════
+
+    match /centers/{centerId} {
+      allow read:           if isRealUser();   // any signed-in user can fetch centres for signup
+      allow create, update: if isAdmin();
+      allow delete:         if isAdmin();
+    }
+
+    // ═══════════════════════════════════════════════════════════════
     //  QUICK TESTS  /quickTests/{testId}
     // ═══════════════════════════════════════════════════════════════
 
@@ -352,7 +362,7 @@ service cloud.firestore {
         'displayName', 'photoURL', 'phone',       'state',
         'targetExam',  'bio',      'lastLogin',    'updatedAt',
         'fcmToken',    'firstName','lastName',     'notifPrefs',
-        'email',       'uid',      'studentMode'
+        'email',       'uid',      'studentMode',  'centerId',  'centerName'
       ];
       return request.resource.data
                .diff(resource.data)

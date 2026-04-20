@@ -1127,6 +1127,19 @@ body {
               <input type="hidden" id="su-studentMode" value="online">
             </div>
 
+            <!-- Centre selector — shown only when physical mode is selected -->
+            <div class="fg" id="centerSelectWrap" style="display:none;margin-bottom:16px;">
+              <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-2);margin-bottom:6px;">Select Your Centre *</label>
+              <div class="iw">
+                <i class="fas fa-school icon"></i>
+                <select id="su-center" style="flex:1;background:transparent;border:none;outline:none;font-size:.9rem;color:var(--text-1);padding:0 4px;cursor:pointer;">
+                  <option value="">Loading centres…</option>
+                </select>
+              </div>
+              <input type="hidden" id="su-centerId">
+              <input type="hidden" id="su-centerName">
+            </div>
+
             <div class="frow">
               <div class="fg">
                 <label>Target Exam *</label>
@@ -1284,6 +1297,48 @@ function setStudentMode(mode) {
   document.getElementById('su-studentMode').value = mode;
   document.getElementById('smode-online').classList.toggle('active',   mode === 'online');
   document.getElementById('smode-physical').classList.toggle('active', mode === 'physical');
+  const wrap = document.getElementById('centerSelectWrap');
+  if (mode === 'physical') {
+    wrap.style.display = '';
+    loadCentersForSignup();
+  } else {
+    wrap.style.display = 'none';
+    document.getElementById('su-centerId').value   = '';
+    document.getElementById('su-centerName').value = '';
+  }
+}
+
+let _centersLoaded = false;
+async function loadCentersForSignup() {
+  if (_centersLoaded) return;
+  const sel = document.getElementById('su-center');
+  sel.innerHTML = '<option value="">Loading…</option>';
+  try {
+    const { getDocs: _getDocs, collection: _collection, query: _query, orderBy: _orderBy } =
+      await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const snap = await _getDocs(_query(_collection(db,'centers'), _orderBy('state','asc'), _orderBy('name','asc')));
+    if (snap.empty) {
+      sel.innerHTML = '<option value="">No centres available yet</option>';
+      return;
+    }
+    sel.innerHTML = '<option value="">— Choose a centre —</option>';
+    snap.docs.forEach(d => {
+      const c = d.data();
+      const opt = document.createElement('option');
+      opt.value       = d.id;
+      opt.textContent = `${c.name} (${c.city}, ${c.state})`;
+      opt.dataset.name = c.name;
+      sel.appendChild(opt);
+    });
+    sel.onchange = () => {
+      const opt = sel.selectedOptions[0];
+      document.getElementById('su-centerId').value   = opt?.value || '';
+      document.getElementById('su-centerName').value = opt?.dataset.name || '';
+    };
+    _centersLoaded = true;
+  } catch(e) {
+    sel.innerHTML = '<option value="">Failed to load centres</option>';
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1611,6 +1666,17 @@ async function doSignup(e) {
       extras.targetExam   = document.getElementById('su-exam').value;
       extras.state        = document.getElementById('su-state').value || '';
       extras.studentMode  = document.getElementById('su-studentMode').value || 'online';
+      if (extras.studentMode === 'physical') {
+        const centerId   = document.getElementById('su-centerId').value;
+        const centerName = document.getElementById('su-centerName').value;
+        if (!centerId) {
+          showErr('su-emailErr', 'Please select a physical centre');
+          setBtnLoading('suBtnId','suSpin','suIco','suTxt', false, 'Create Account');
+          return;
+        }
+        extras.centerId   = centerId;
+        extras.centerName = centerName;
+      }
     }
 
     const { user: signedUpUser } = await window.__nltcSignup(email, pass, extras);

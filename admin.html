@@ -393,6 +393,7 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
     <button class="sb-link" onclick="showView('cbt',this)"><i class="fas fa-laptop-code"></i>CBT Manager</button>
     <button class="sb-link" onclick="showView('quicktest',this)"><i class="fas fa-bolt"></i>Quick Tests<span class="sb-badge" id="quicktestBadge" style="display:none;">0</span></button>
     <button class="sb-link" onclick="showView('mockexams',this)"><i class="fas fa-file-alt"></i>Mock Exams<span class="sb-badge" id="mockexamBadge" style="display:none;background:var(--success);">0</span></button>
+    <button class="sb-link" onclick="showView('centers',this)"><i class="fas fa-school"></i>Physical Centres</button>
     <button class="sb-link" onclick="showView('teachers',this)"><i class="fas fa-chalkboard-teacher"></i>Teachers</button>
     <div class="sb-sec">Live & Comms</div>
     <button class="sb-link" onclick="showView('live',this)"><i class="fas fa-circle" style="color:var(--error);font-size:.45rem;"></i>Live Classes<div class="sb-live-dot" id="liveDot" style="display:none;"></div></button>
@@ -758,6 +759,71 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
     <div class="modal-footer">
       <button class="btn-outline btn-sm" onclick="closeModal('createMockModal')">Cancel</button>
       <button class="btn-navy btn-sm" onclick="saveMockExam()"><i class="fas fa-save"></i> Save Exam</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────── PHYSICAL CENTRES ─────────── -->
+<div class="view" id="view-centers">
+  <div class="page-hdr-row">
+    <div class="page-hdr"><h2>🏫 Physical Centres</h2><p>Manage NLTC physical learning centres across Nigeria</p></div>
+    <button class="btn-gold" onclick="openCenterModal()"><i class="fas fa-plus"></i> Add Centre</button>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">All Centres</div><button class="btn-outline btn-sm" onclick="loadCenters()"><i class="fas fa-sync"></i></button></div>
+    <div class="card-body" style="padding:0;"><div class="table-wrap"><table>
+      <thead><tr><th>Centre Name</th><th>City</th><th>State</th><th>Address</th><th>Students</th><th>Actions</th></tr></thead>
+      <tbody id="centersBody"><tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
+    </table></div></div>
+  </div>
+</div>
+
+<!-- Centre modal -->
+<div class="modal-overlay" id="centerModal">
+  <div class="modal" style="max-width:520px;width:95vw;">
+    <div class="modal-header">
+      <div class="modal-title" id="centerModalTitle">Add Physical Centre</div>
+      <button class="modal-close" onclick="closeModal('centerModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cm-id">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group" style="grid-column:1/-1;margin:0;">
+          <label class="form-label">Centre Name *</label>
+          <input class="form-input" id="cm-name" placeholder="e.g. NLTC Ikeja Centre" maxlength="80">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">City *</label>
+          <input class="form-input" id="cm-city" placeholder="e.g. Ikeja" maxlength="60">
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label class="form-label">State *</label>
+          <select class="form-input" id="cm-state">
+            <option value="">Select state…</option>
+            <option>Abia</option><option>Adamawa</option><option>Akwa Ibom</option><option>Anambra</option>
+            <option>Bauchi</option><option>Bayelsa</option><option>Benue</option><option>Borno</option>
+            <option>Cross River</option><option>Delta</option><option>Ebonyi</option><option>Edo</option>
+            <option>Ekiti</option><option>Enugu</option><option>FCT Abuja</option><option>Gombe</option>
+            <option>Imo</option><option>Jigawa</option><option>Kaduna</option><option>Kano</option>
+            <option>Katsina</option><option>Kebbi</option><option>Kogi</option><option>Kwara</option>
+            <option>Lagos</option><option>Nasarawa</option><option>Niger</option><option>Ogun</option>
+            <option>Ondo</option><option>Osun</option><option>Oyo</option><option>Plateau</option>
+            <option>Rivers</option><option>Sokoto</option><option>Taraba</option><option>Yobe</option><option>Zamfara</option>
+          </select>
+        </div>
+        <div class="form-group" style="grid-column:1/-1;margin:0;">
+          <label class="form-label">Full Address</label>
+          <textarea class="form-input" id="cm-address" rows="2" placeholder="Street, area, landmark…" style="resize:vertical;min-height:56px;"></textarea>
+        </div>
+        <div class="form-group" style="grid-column:1/-1;margin:0;">
+          <label class="form-label">Phone / Contact</label>
+          <input class="form-input" id="cm-phone" placeholder="e.g. 0801 234 5678" maxlength="20">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('centerModal')">Cancel</button>
+      <button class="btn-gold" onclick="saveCenter()"><i class="fas fa-save"></i> Save Centre</button>
     </div>
   </div>
 </div>
@@ -2694,12 +2760,109 @@ function showView(name, btn) {
   document.getElementById('view-'+name).classList.add('active');
   document.querySelectorAll('.sb-link').forEach(b=>b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  const titles = {overview:'Dashboard',analytics:'Analytics',students:'Students',courses:'Video Lessons',cbt:'CBT Manager',quicktest:'Quick Tests',mockexams:'Mock Exams',teachers:'Teachers',live:'Live Classes',broadcasts:'Broadcasts',schedule:'Schedule',revenue:'Revenue',settings:'Settings'};
+  const titles = {overview:'Dashboard',analytics:'Analytics',students:'Students',courses:'Video Lessons',cbt:'CBT Manager',quicktest:'Quick Tests',mockexams:'Mock Exams',centers:'Physical Centres',teachers:'Teachers',live:'Live Classes',broadcasts:'Broadcasts',schedule:'Schedule',revenue:'Revenue',settings:'Settings'};
   document.getElementById('topbarTitle').textContent = titles[name] || 'Dashboard';
   if (name==='revenue') loadLessonFeePaymentsAdmin();
+  if (name==='centers') loadCenters();
   closeSidebar();
 }
 window.showView = showView;
+
+/* ══════════════════════════════════════════════
+   PHYSICAL CENTRES
+══════════════════════════════════════════════ */
+let _editingCenterId = null;
+
+async function loadCenters() {
+  const tbody = document.getElementById('centersBody');
+  tbody.innerHTML = '<tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr>';
+  try {
+    const snap = await getDocs(query(collection(db,'centers'), orderBy('createdAt','desc')));
+    // Count students per center
+    const studentSnap = await getDocs(query(collection(db,'users'), where('role','==','student'), where('studentMode','==','physical')));
+    const counts = {};
+    studentSnap.forEach(d => {
+      const cid = d.data().centerId;
+      if (cid) counts[cid] = (counts[cid]||0) + 1;
+    });
+    if (snap.empty) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:24px;">No centres yet. Add one to get started.</td></tr>'; return; }
+    tbody.innerHTML = snap.docs.map(d => {
+      const c = d.data();
+      return `<tr>
+        <td><strong>${c.name||'—'}</strong></td>
+        <td>${c.city||'—'}</td>
+        <td>${c.state||'—'}</td>
+        <td style="max-width:200px;white-space:normal;font-size:.8rem;">${c.address||'—'}</td>
+        <td><span class="badge-teal">${counts[d.id]||0} students</span></td>
+        <td>
+          <button class="btn-outline btn-sm" onclick="openCenterModal('${d.id}')"><i class="fas fa-edit"></i></button>
+          <button class="btn-sm" style="background:var(--error);color:#fff;border:none;border-radius:6px;cursor:pointer;padding:4px 10px;" onclick="deleteCenter('${d.id}','${(c.name||'').replace(/'/g,"\\'")}')"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) { tbody.innerHTML = `<tr><td colspan="6" style="color:var(--error);text-align:center;padding:16px;">Error: ${e.message}</td></tr>`; }
+}
+
+async function openCenterModal(id) {
+  _editingCenterId = id || null;
+  document.getElementById('centerModalTitle').textContent = id ? 'Edit Centre' : 'Add Physical Centre';
+  document.getElementById('cm-id').value      = id || '';
+  document.getElementById('cm-name').value    = '';
+  document.getElementById('cm-city').value    = '';
+  document.getElementById('cm-state').value   = '';
+  document.getElementById('cm-address').value = '';
+  document.getElementById('cm-phone').value   = '';
+  if (id) {
+    try {
+      const snap = await getDoc(doc(db,'centers',id));
+      if (snap.exists()) {
+        const c = snap.data();
+        document.getElementById('cm-name').value    = c.name    || '';
+        document.getElementById('cm-city').value    = c.city    || '';
+        document.getElementById('cm-state').value   = c.state   || '';
+        document.getElementById('cm-address').value = c.address || '';
+        document.getElementById('cm-phone').value   = c.phone   || '';
+      }
+    } catch(e) { showToast('Failed to load centre data','error'); return; }
+  }
+  openModal('centerModal');
+}
+window.openCenterModal = openCenterModal;
+
+async function saveCenter() {
+  const name    = document.getElementById('cm-name').value.trim();
+  const city    = document.getElementById('cm-city').value.trim();
+  const state   = document.getElementById('cm-state').value;
+  const address = document.getElementById('cm-address').value.trim();
+  const phone   = document.getElementById('cm-phone').value.trim();
+  if (!name) { showToast('Centre name is required','error'); return; }
+  if (!city)  { showToast('City is required','error'); return; }
+  if (!state) { showToast('State is required','error'); return; }
+  const payload = { name, city, state, address, phone, updatedAt: serverTimestamp() };
+  try {
+    if (_editingCenterId) {
+      await updateDoc(doc(db,'centers',_editingCenterId), payload);
+      showToast('Centre updated','success');
+    } else {
+      payload.createdAt = serverTimestamp();
+      await addDoc(collection(db,'centers'), payload);
+      showToast('Centre added','success');
+    }
+    closeModal('centerModal');
+    loadCenters();
+  } catch(e) { showToast('Error saving centre: '+e.message,'error'); }
+}
+window.saveCenter = saveCenter;
+
+async function deleteCenter(id, name) {
+  if (!confirm(`Delete "${name}"? Students assigned to this centre will lose their centre assignment.`)) return;
+  try {
+    await deleteDoc(doc(db,'centers',id));
+    showToast('Centre deleted','success');
+    loadCenters();
+  } catch(e) { showToast('Error: '+e.message,'error'); }
+}
+window.deleteCenter = deleteCenter;
 
 function showSetPanel(name, btn) {
   document.querySelectorAll('.set-panel').forEach(p=>p.classList.remove('active'));
