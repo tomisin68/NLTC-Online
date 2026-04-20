@@ -8,6 +8,12 @@
 <meta http-equiv="Expires" content="0">
 <title>NLTC CBT — Exam Practice</title>
 <link rel="icon" type="image/png" href="NLTC.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0B1D3A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NLTC">
+<link rel="apple-touch-icon" href="NLTC.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -2262,5 +2268,6 @@ renderPastSessions();
   }
 })();
 </script>
+<script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});</script>
 </body>
 </html>

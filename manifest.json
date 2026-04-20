@@ -1,0 +1,40 @@
+{
+  "name": "NLTC Online — Exam Prep",
+  "short_name": "NLTC",
+  "description": "Nigeria's #1 exam preparation platform",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0B1D3A",
+  "background_color": "#0B1D3A",
+  "icons": [
+    {
+      "src": "NLTC.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "NLTC.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education"],
+  "lang": "en-NG",
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Practice CBT",
+      "url": "/cbt.html",
+      "description": "Start a CBT practice session"
+    },
+    {
+      "name": "Dashboard",
+      "url": "/dashboard.html",
+      "description": "Go to your student dashboard"
+    }
+  ]
+}

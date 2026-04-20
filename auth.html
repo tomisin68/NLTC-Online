@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NLTC — Sign In</title>
 <link rel="icon" type="image/png" href="NLTC.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0B1D3A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NLTC">
+<link rel="apple-touch-icon" href="NLTC.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
@@ -247,10 +253,14 @@
      before handleRedirectResult has run.
   ── */
   let _redirectHandled = false;
+  let _userInitiatedAuth = false;
+  window.__nltcMarkInitiated = () => { _userInitiatedAuth = true; };
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) return;
     if (document.getElementById('successOv')?.classList.contains('show')) return;
     if (_redirectHandled) return;
+    if (!_userInitiatedAuth) return;  // don't auto-redirect passive sessions
     // Only auto-redirect if we're NOT in the middle of the redirect-result flow
     // (that flow shows the success overlay and sets _redirectHandled)
     try {
@@ -1422,6 +1432,7 @@ function getRedirectTarget(role) {
    If the browser blocks the popup, signInWithRedirect is used as fallback.
 ═══════════════════════════════════════════════════════ */
 async function doGoogle() {
+  window.__nltcMarkInitiated?.();
   sessionStorage.setItem('nltc_intended_role', currentRole);
   setGBtnLoading('gLoginBtn',  true);
   setGBtnLoading('gSignupBtn', true);
@@ -1495,6 +1506,7 @@ async function doGoogle() {
    EMAIL / PASSWORD LOGIN
 ═══════════════════════════════════════════════════════ */
 async function doLogin(e) {
+  window.__nltcMarkInitiated?.();
   e.preventDefault();
   clearErrs();
 
@@ -1550,6 +1562,7 @@ async function doLogin(e) {
    EMAIL / PASSWORD SIGNUP
 ═══════════════════════════════════════════════════════ */
 async function doSignup(e) {
+  window.__nltcMarkInitiated?.();
   e.preventDefault();
   clearErrs();
 
@@ -1758,5 +1771,6 @@ document.addEventListener('DOMContentLoaded', () => {
   tick();
 })();
 </script>
+<script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});</script>
 </body>
 </html>
