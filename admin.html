@@ -2736,6 +2736,98 @@ window.exportMockCSV = async function() {
   a.download = 'mock_exam_results.csv'; a.click();
 };
 
+/* ══════════════════════════════════════════════
+   PHYSICAL CENTRES
+══════════════════════════════════════════════ */
+let _editingCenterId = null;
+
+window.loadCenters = async function loadCenters() {
+  const tbody = document.getElementById('centersBody');
+  tbody.innerHTML = '<tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr>';
+  try {
+    const snap = await getDocs(query(collection(db,'centers'), orderBy('createdAt','desc')));
+    const studentSnap = await getDocs(query(collection(db,'users'), where('role','==','student'), where('studentMode','==','physical')));
+    const counts = {};
+    studentSnap.forEach(d => {
+      const cid = d.data().centerId;
+      if (cid) counts[cid] = (counts[cid]||0) + 1;
+    });
+    if (snap.empty) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:24px;">No centres yet. Click "Add Centre" to get started.</td></tr>'; return; }
+    tbody.innerHTML = snap.docs.map(d => {
+      const c = d.data();
+      return `<tr>
+        <td><strong>${c.name||'—'}</strong></td>
+        <td>${c.city||'—'}</td>
+        <td>${c.state||'—'}</td>
+        <td style="max-width:200px;white-space:normal;font-size:.8rem;">${c.address||'—'}</td>
+        <td><span class="badge-teal">${counts[d.id]||0} students</span></td>
+        <td>
+          <button class="btn-outline btn-sm" onclick="openCenterModal('${d.id}')"><i class="fas fa-edit"></i></button>
+          <button class="btn-sm" style="background:var(--error);color:#fff;border:none;border-radius:6px;cursor:pointer;padding:4px 10px;" onclick="deleteCenter('${d.id}','${(c.name||'').replace(/'/g,"\\'")}')"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) { tbody.innerHTML = `<tr><td colspan="6" style="color:var(--error);text-align:center;padding:16px;">Error: ${e.message}</td></tr>`; }
+};
+
+window.openCenterModal = async function(id) {
+  _editingCenterId = id || null;
+  document.getElementById('centerModalTitle').textContent = id ? 'Edit Centre' : 'Add Physical Centre';
+  document.getElementById('cm-id').value      = id || '';
+  document.getElementById('cm-name').value    = '';
+  document.getElementById('cm-city').value    = '';
+  document.getElementById('cm-state').value   = '';
+  document.getElementById('cm-address').value = '';
+  document.getElementById('cm-phone').value   = '';
+  if (id) {
+    try {
+      const snap = await getDoc(doc(db,'centers',id));
+      if (snap.exists()) {
+        const c = snap.data();
+        document.getElementById('cm-name').value    = c.name    || '';
+        document.getElementById('cm-city').value    = c.city    || '';
+        document.getElementById('cm-state').value   = c.state   || '';
+        document.getElementById('cm-address').value = c.address || '';
+        document.getElementById('cm-phone').value   = c.phone   || '';
+      }
+    } catch(e) { showToast('Failed to load centre data','error'); return; }
+  }
+  openModal('centerModal');
+};
+
+window.saveCenter = async function() {
+  const name    = document.getElementById('cm-name').value.trim();
+  const city    = document.getElementById('cm-city').value.trim();
+  const state   = document.getElementById('cm-state').value;
+  const address = document.getElementById('cm-address').value.trim();
+  const phone   = document.getElementById('cm-phone').value.trim();
+  if (!name)  { showToast('Centre name is required','error'); return; }
+  if (!city)  { showToast('City is required','error'); return; }
+  if (!state) { showToast('State is required','error'); return; }
+  const payload = { name, city, state, address, phone, updatedAt: serverTimestamp() };
+  try {
+    if (_editingCenterId) {
+      await updateDoc(doc(db,'centers',_editingCenterId), payload);
+      showToast('Centre updated','success');
+    } else {
+      payload.createdAt = serverTimestamp();
+      await addDoc(collection(db,'centers'), payload);
+      showToast('Centre added','success');
+    }
+    closeModal('centerModal');
+    window.loadCenters();
+  } catch(e) { showToast('Error saving centre: '+e.message,'error'); }
+};
+
+window.deleteCenter = async function(id, name) {
+  if (!confirm(`Delete "${name}"? Students assigned to this centre will lose their centre assignment.`)) return;
+  try {
+    await deleteDoc(doc(db,'centers',id));
+    showToast('Centre deleted','success');
+    window.loadCenters();
+  } catch(e) { showToast('Error: '+e.message,'error'); }
+};
+
 /* ── SIGN OUT ── */
 window.handleSignOut = async function() {
   try { await signOut(auth); window.location.href = 'auth.html'; }
@@ -2767,102 +2859,6 @@ function showView(name, btn) {
   closeSidebar();
 }
 window.showView = showView;
-
-/* ══════════════════════════════════════════════
-   PHYSICAL CENTRES
-══════════════════════════════════════════════ */
-let _editingCenterId = null;
-
-async function loadCenters() {
-  const tbody = document.getElementById('centersBody');
-  tbody.innerHTML = '<tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr>';
-  try {
-    const snap = await getDocs(query(collection(db,'centers'), orderBy('createdAt','desc')));
-    // Count students per center
-    const studentSnap = await getDocs(query(collection(db,'users'), where('role','==','student'), where('studentMode','==','physical')));
-    const counts = {};
-    studentSnap.forEach(d => {
-      const cid = d.data().centerId;
-      if (cid) counts[cid] = (counts[cid]||0) + 1;
-    });
-    if (snap.empty) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:24px;">No centres yet. Add one to get started.</td></tr>'; return; }
-    tbody.innerHTML = snap.docs.map(d => {
-      const c = d.data();
-      return `<tr>
-        <td><strong>${c.name||'—'}</strong></td>
-        <td>${c.city||'—'}</td>
-        <td>${c.state||'—'}</td>
-        <td style="max-width:200px;white-space:normal;font-size:.8rem;">${c.address||'—'}</td>
-        <td><span class="badge-teal">${counts[d.id]||0} students</span></td>
-        <td>
-          <button class="btn-outline btn-sm" onclick="openCenterModal('${d.id}')"><i class="fas fa-edit"></i></button>
-          <button class="btn-sm" style="background:var(--error);color:#fff;border:none;border-radius:6px;cursor:pointer;padding:4px 10px;" onclick="deleteCenter('${d.id}','${(c.name||'').replace(/'/g,"\\'")}')"><i class="fas fa-trash"></i></button>
-        </td>
-      </tr>`;
-    }).join('');
-  } catch(e) { tbody.innerHTML = `<tr><td colspan="6" style="color:var(--error);text-align:center;padding:16px;">Error: ${e.message}</td></tr>`; }
-}
-
-async function openCenterModal(id) {
-  _editingCenterId = id || null;
-  document.getElementById('centerModalTitle').textContent = id ? 'Edit Centre' : 'Add Physical Centre';
-  document.getElementById('cm-id').value      = id || '';
-  document.getElementById('cm-name').value    = '';
-  document.getElementById('cm-city').value    = '';
-  document.getElementById('cm-state').value   = '';
-  document.getElementById('cm-address').value = '';
-  document.getElementById('cm-phone').value   = '';
-  if (id) {
-    try {
-      const snap = await getDoc(doc(db,'centers',id));
-      if (snap.exists()) {
-        const c = snap.data();
-        document.getElementById('cm-name').value    = c.name    || '';
-        document.getElementById('cm-city').value    = c.city    || '';
-        document.getElementById('cm-state').value   = c.state   || '';
-        document.getElementById('cm-address').value = c.address || '';
-        document.getElementById('cm-phone').value   = c.phone   || '';
-      }
-    } catch(e) { showToast('Failed to load centre data','error'); return; }
-  }
-  openModal('centerModal');
-}
-window.openCenterModal = openCenterModal;
-
-async function saveCenter() {
-  const name    = document.getElementById('cm-name').value.trim();
-  const city    = document.getElementById('cm-city').value.trim();
-  const state   = document.getElementById('cm-state').value;
-  const address = document.getElementById('cm-address').value.trim();
-  const phone   = document.getElementById('cm-phone').value.trim();
-  if (!name) { showToast('Centre name is required','error'); return; }
-  if (!city)  { showToast('City is required','error'); return; }
-  if (!state) { showToast('State is required','error'); return; }
-  const payload = { name, city, state, address, phone, updatedAt: serverTimestamp() };
-  try {
-    if (_editingCenterId) {
-      await updateDoc(doc(db,'centers',_editingCenterId), payload);
-      showToast('Centre updated','success');
-    } else {
-      payload.createdAt = serverTimestamp();
-      await addDoc(collection(db,'centers'), payload);
-      showToast('Centre added','success');
-    }
-    closeModal('centerModal');
-    loadCenters();
-  } catch(e) { showToast('Error saving centre: '+e.message,'error'); }
-}
-window.saveCenter = saveCenter;
-
-async function deleteCenter(id, name) {
-  if (!confirm(`Delete "${name}"? Students assigned to this centre will lose their centre assignment.`)) return;
-  try {
-    await deleteDoc(doc(db,'centers',id));
-    showToast('Centre deleted','success');
-    loadCenters();
-  } catch(e) { showToast('Error: '+e.message,'error'); }
-}
-window.deleteCenter = deleteCenter;
 
 function showSetPanel(name, btn) {
   document.querySelectorAll('.set-panel').forEach(p=>p.classList.remove('active'));
