@@ -36,6 +36,9 @@
     signInWithRedirect,
     getRedirectResult,
     GoogleAuthProvider,
+    EmailAuthProvider,
+    fetchSignInMethodsForEmail,
+    linkWithCredential,
     sendPasswordResetEmail,
     onAuthStateChanged,
     updateProfile
@@ -74,13 +77,21 @@
   window.__nltcDb        = db;
   window.__nltcGProvider = gProvider;
 
+  function normalizeEmail(email = '') {
+    return String(email).trim().toLowerCase();
+  }
+
+  function hasPasswordProvider(user) {
+    return !!user?.providerData?.some(p => p?.providerId === 'password');
+  }
+
   /* ── Save / merge user doc in Firestore ── */
   async function saveUser(user, extras = {}) {
     const ref  = doc(db, 'users', user.uid);
     const snap = await getDoc(ref);
     const payload = {
       uid:         user.uid,
-      email:       user.email,
+      email:       normalizeEmail(user.email),
       displayName: user.displayName || extras.displayName || '',
       photoURL:    user.photoURL || '',
       lastLogin:   serverTimestamp(),
@@ -101,7 +112,8 @@
 
   /* ── Email / password login ── */
   window.__nltcLogin = async function(email, password) {
-    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const normalizedEmail = normalizeEmail(email);
+    const cred = await signInWithEmailAndPassword(auth, normalizedEmail, password);
     let data = {};
     try {
       data = await saveUser(cred.user);
@@ -117,17 +129,31 @@
 
   /* ── Email / password signup ── */
   window.__nltcSignup = async function(email, password, extras) {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    const normalizedEmail = normalizeEmail(email);
+    const cred = await createUserWithEmailAndPassword(auth, normalizedEmail, password);
     try { await updateProfile(cred.user, { displayName: extras.displayName }); } catch(e) {}
     let data = {};
     try {
-      data = await saveUser(cred.user, extras);
+      data = await saveUser(cred.user, { ...extras, email: normalizedEmail });
     } catch(e) {
       console.warn('[NLTC] Signup profile save failed:', e.code);
       // Account WAS created — return what we have
-      data = { ...extras, uid: cred.user.uid, email: cred.user.email };
+      data = { ...extras, uid: cred.user.uid, email: normalizedEmail };
     }
-    return { user: cred.user, data };
+  return { user: cred.user, data };
+  };
+
+  window.__nltcGetSignInMethods = async function(email) {
+    return fetchSignInMethodsForEmail(auth, normalizeEmail(email));
+  };
+
+  window.__nltcLinkPassword = async function(password) {
+    const user = auth.currentUser;
+    if (!user?.email) throw new Error('No authenticated user is available for password setup.');
+    if (hasPasswordProvider(user)) return user;
+    const credential = EmailAuthProvider.credential(normalizeEmail(user.email), password);
+    await linkWithCredential(user, credential);
+    return user;
   };
 
   /* ── Google Sign-In: popup first, redirect fallback ──
@@ -161,7 +187,7 @@
 
   /* ── Password reset ── */
   window.__nltcReset = async function(email) {
-    await sendPasswordResetEmail(auth, email);
+    await sendPasswordResetEmail(auth, normalizeEmail(email));
   };
 
   /* ══════════════════════════════════════════════════════════════
@@ -216,6 +242,11 @@
 
       const target = storedRole === 'admin' ? 'admin.html' : 'dashboard.html';
       const fname  = result.user.displayName?.split(' ')[0] || 'User';
+
+      if (loader) loader.classList.remove('show');
+      if (typeof window.__nltcEnsurePasswordAccess === 'function') {
+        await window.__nltcEnsurePasswordAccess(result.user);
+      }
 
       _redirectHandled = true;
 
@@ -294,8 +325,15 @@
 
   /* ── Centres loader — called by signup form (non-module script can't use db directly) ── */
   window.__nltcLoadCenters = async function() {
-    const snap = await getDocs(query(collection(db, 'centers'), orderBy('state','asc'), orderBy('name','asc')));
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const snap = await getDocs(collection(db, 'centers'));
+    return snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(c => c?.name)
+      .sort((a, b) => {
+        const stateCmp = String(a.state || '').localeCompare(String(b.state || ''), undefined, { sensitivity: 'base' });
+        if (stateCmp !== 0) return stateCmp;
+        return String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base' });
+      });
   };
 </script>
 
@@ -921,6 +959,39 @@ body {
   </div>
 </div>
 
+<div class="modal-bg" id="linkPwdBg">
+  <div class="modal-card">
+    <div style="width:46px;height:46px;border-radius:12px;background:var(--gold-pale);display:flex;align-items:center;justify-content:center;font-size:1.15rem;color:var(--gold);margin-bottom:14px;">
+      <i class="fas fa-link"></i>
+    </div>
+    <h3 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:var(--navy);margin-bottom:6px;">Enable Email Login</h3>
+    <p style="font-size:0.83rem;color:var(--text-3);line-height:1.65;margin-bottom:20px;">Add a password to this Google account so the same email works with both Google sign-in and normal email/password login.</p>
+    <div class="fg">
+      <label>New Password</label>
+      <div class="iw">
+        <i class="fas fa-lock icon"></i>
+        <input type="password" id="linkPwd" placeholder="Min. 8 characters" autocomplete="new-password">
+        <button type="button" class="eye" onclick="toggleEye('linkPwd',this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+      </div>
+      <div class="fe" id="linkPwdErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
+    </div>
+    <div class="fg">
+      <label>Confirm Password</label>
+      <div class="iw">
+        <i class="fas fa-lock icon"></i>
+        <input type="password" id="linkPwdConfirm" placeholder="Repeat your password" autocomplete="new-password">
+        <button type="button" class="eye" onclick="toggleEye('linkPwdConfirm',this)" tabindex="-1"><i class="fas fa-eye"></i></button>
+      </div>
+      <div class="fe" id="linkPwdConfirmErr"><i class="fas fa-exclamation-circle"></i><span></span></div>
+    </div>
+    <button class="sbtn" id="linkPwdBtn" onclick="submitLinkedPassword()">
+      <div class="spin" id="linkPwdSpin"></div>
+      <i class="fas fa-shield-alt" id="linkPwdIco"></i>
+      <span id="linkPwdTxt">Save Password & Continue</span>
+    </button>
+  </div>
+</div>
+
 <!-- MAIN PAGE -->
 <div class="page">
 
@@ -1366,12 +1437,17 @@ async function loadCentersForSignup() {
       opt.value        = c.id;
       opt.textContent  = `${c.name} (${c.city}, ${c.state})`;
       opt.dataset.name = c.name;
+      opt.dataset.state = c.state || '';
+      opt.dataset.city  = c.city || '';
       sel.appendChild(opt);
     });
     sel.onchange = () => {
       const opt = sel.selectedOptions[0];
       document.getElementById('su-centerId').value   = opt?.value || '';
       document.getElementById('su-centerName').value = opt?.dataset.name || '';
+      if (opt?.dataset.state) {
+        document.getElementById('su-state').value = opt.dataset.state;
+      }
     };
     _centersLoaded = true;
   } catch(e) {
@@ -1489,6 +1565,73 @@ function setGBtnLoading(btnId, loading) {
   btn.classList.toggle('loading', loading);
 }
 
+let _passwordLinkResolver = null;
+
+function openPasswordLinkModal() {
+  hideErr('linkPwdErr');
+  hideErr('linkPwdConfirmErr');
+  document.getElementById('linkPwd').value = '';
+  document.getElementById('linkPwdConfirm').value = '';
+  document.getElementById('linkPwdBg').classList.add('open');
+}
+
+function closePasswordLinkModal() {
+  document.getElementById('linkPwdBg').classList.remove('open');
+}
+
+async function submitLinkedPassword() {
+  hideErr('linkPwdErr');
+  hideErr('linkPwdConfirmErr');
+
+  const password = document.getElementById('linkPwd').value;
+  const confirm  = document.getElementById('linkPwdConfirm').value;
+  let ok = true;
+
+  if (password.length < 8) {
+    showErr('linkPwdErr', 'Use at least 8 characters.');
+    ok = false;
+  }
+  if (confirm !== password) {
+    showErr('linkPwdConfirmErr', 'Passwords do not match.');
+    ok = false;
+  }
+  if (!ok) return;
+
+  setBtnLoading('linkPwdBtn', 'linkPwdSpin', 'linkPwdIco', 'linkPwdTxt', true, 'Saving password...');
+  try {
+    await window.__nltcLinkPassword(password);
+    closePasswordLinkModal();
+    const resolve = _passwordLinkResolver;
+    _passwordLinkResolver = null;
+    resolve?.();
+  } catch (err) {
+    console.error('[NLTC Link Password Error]', err.code, err.message, err);
+    if (err.code === 'auth/provider-already-linked') {
+      closePasswordLinkModal();
+      const resolve = _passwordLinkResolver;
+      _passwordLinkResolver = null;
+      resolve?.();
+      return;
+    }
+    const msgMap = {
+      'auth/requires-recent-login':   'Please sign in with Google again, then set your password.',
+      'auth/weak-password':           'Choose a stronger password with at least 8 characters.',
+      'auth/email-already-in-use':    'This email already has email/password access on another account.'
+    };
+    showErr('linkPwdErr', msgMap[err.code] || 'Could not save your password right now. Please try again.');
+  } finally {
+    setBtnLoading('linkPwdBtn', 'linkPwdSpin', 'linkPwdIco', 'linkPwdTxt', false, 'Save Password & Continue');
+  }
+}
+
+window.__nltcEnsurePasswordAccess = async function(user) {
+  if (!user || user.providerData?.some(p => p?.providerId === 'password')) return;
+  await new Promise(resolve => {
+    _passwordLinkResolver = resolve;
+    openPasswordLinkModal();
+  });
+};
+
 /* ═══════════════════════════════════════════════════════
    SUCCESS OVERLAY
 ═══════════════════════════════════════════════════════ */
@@ -1567,6 +1710,10 @@ async function doGoogle() {
     const target = storedRole === 'admin' ? 'admin.html' : 'dashboard.html';
     const fname  = result.user.displayName?.split(' ')[0] || 'User';
 
+    if (typeof window.__nltcEnsurePasswordAccess === 'function') {
+      await window.__nltcEnsurePasswordAccess(result.user);
+    }
+
     showSuccess(
       isNew ? 'Account Created! 🚀' : 'Welcome Back! 👋',
       isNew
@@ -1586,6 +1733,16 @@ async function doGoogle() {
 
     console.error('[NLTC Google Error]', err.code, err.message, err);
 
+    if (err.code === 'auth/account-exists-with-different-credential' && err.customData?.email) {
+      try {
+        const methods = await window.__nltcGetSignInMethods?.(err.customData.email) || [];
+        if (methods.includes('password')) {
+          toast('This email already has password login. Sign in with email/password first, then continue with Google if needed.', 'error');
+          return;
+        }
+      } catch(_) {}
+    }
+
     const msgMap = {
       'auth/network-request-failed': 'Network error. Check your connection and try again.',
       'auth/operation-not-allowed':  'Google Sign-In is not enabled. Contact the administrator.',
@@ -1604,7 +1761,7 @@ async function doLogin(e) {
   e.preventDefault();
   clearErrs();
 
-  const email = document.getElementById('li-email').value.trim();
+  const email = document.getElementById('li-email').value.trim().toLowerCase();
   const pass  = document.getElementById('li-pass').value;
   let ok = true;
 
@@ -1634,10 +1791,15 @@ async function doLogin(e) {
       target
     );
   } catch(err) {
+    let signInMethods = [];
+    if (email) {
+      try { signInMethods = await window.__nltcGetSignInMethods?.(email) || []; } catch(_) {}
+    }
+    const googleOnly = signInMethods.includes('google.com') && !signInMethods.includes('password');
     const map = {
       'auth/user-not-found':         ['li-emailErr', 'No account found with this email address.'],
       'auth/wrong-password':         ['li-passErr',  'Incorrect password. Please try again or reset your password.'],
-      'auth/invalid-credential':     ['li-passErr',  'Incorrect email or password. If you registered with Google, please use "Continue with Google" instead. Otherwise, click "Forgot password?" to reset.'],
+      'auth/invalid-credential':     ['li-passErr',  googleOnly ? 'This email currently uses Google sign-in only. Sign in with Google once and add a password when prompted.' : 'Incorrect email or password. Please try again or reset your password.'],
       'auth/invalid-email':          ['li-emailErr', 'Please enter a valid email address.'],
       'auth/user-disabled':          [null,          'This account has been disabled. Please contact support.'],
       'auth/too-many-requests':      [null,          'Too many failed attempts. Please wait a few minutes and try again.'],
@@ -1663,7 +1825,7 @@ async function doSignup(e) {
 
   const first = document.getElementById('su-first').value.trim();
   const last  = document.getElementById('su-last').value.trim();
-  const email = document.getElementById('su-email').value.trim();
+  const email = document.getElementById('su-email').value.trim().toLowerCase();
   const phone = document.getElementById('su-phone').value.trim();
   const pass  = document.getElementById('su-pass').value;
   const terms = document.getElementById('su-terms').checked;
@@ -1777,7 +1939,7 @@ function closeForgot()  { document.getElementById('forgotBg').classList.remove('
 
 async function handleReset() {
   hideErr('resetEmailErr');
-  const email = document.getElementById('resetEmail').value.trim();
+  const email = document.getElementById('resetEmail').value.trim().toLowerCase();
   if (!email) { showErr('resetEmailErr','Please enter your email'); return; }
 
   setBtnLoading('resetBtn','resetSpin','resetIco','resetTxt', true, 'Sending…');

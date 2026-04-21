@@ -2651,7 +2651,6 @@ window.joinLiveClass=async function(sessionId,title,channel){
     });
 
     await agoraClient.join(tokenData.appId||AGORA_APP_ID,channel,tokenData.token,tokenData.uid);
-    try{await updateDoc(doc(db,'liveSessions',sessionId),{viewerCount:increment(1)});}catch(e){}
     showToast('Connected to live class!','success');
 
     // Try to publish mic (audience mode — won't have permissions unless teacher allows)
@@ -2872,7 +2871,6 @@ window.leaveLiveClass=async function(){
   if(lvChatUnsub){lvChatUnsub();lvChatUnsub=null;}
   if(lvViewerUnsub){lvViewerUnsub();lvViewerUnsub=null;}
   if(currentLiveSessionId){
-    try{await updateDoc(doc(db,'liveSessions',currentLiveSessionId),{viewerCount:increment(-1)});}catch(e){}
     currentLiveSessionId=null;
   }
   lvRemoteUsers={};lvMainViewUid=null;lvMicOn=false;lvCamOn=false;lvMinimized=false;
@@ -4027,5 +4025,4 @@ window.viewMockResult = async function(examId) {
 </script>
 <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});</script>
 </body>
-</html>
 </html>

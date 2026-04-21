@@ -43,6 +43,8 @@
   --ctrl-h: 72px;
   --header-h: 56px;
   --panel-w: 300px;
+  --strip-h: 80px;
+  --mobile-panel-h: 48px;
   --transition: 0.18s cubic-bezier(0.4,0,0.2,1);
 }
 
@@ -190,18 +192,26 @@ button, a { touch-action: manipulation; }
 }
 .ls-main-video video,
 .ls-main-video .agora-video-player,
+.ls-main-video .agora_video_player,
 .ls-main-video .agora-video-player video,
+.ls-main-video .agora_video_player video,
 #mainVideoContainer > div,
+#mainVideoContainer > div > div,
 #mainVideoContainer video {
   width: 100% !important;
   height: 100% !important;
   object-fit: contain !important;
+  object-position: center center !important;
 }
 #mainVideoContainer {
   width: 100%;
   height: 100%;
   position: absolute;
   inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 /* No-video placeholder */
@@ -305,7 +315,7 @@ button, a { touch-action: manipulation; }
   padding: 8px 12px;
   overflow-x: auto;
   flex-shrink: 0;
-  min-height: 80px;
+  min-height: var(--strip-h);
   scrollbar-width: none;
 }
 .ls-participant-strip::-webkit-scrollbar { display: none; }
@@ -568,6 +578,7 @@ button, a { touch-action: manipulation; }
   flex-shrink: 0;
   background: var(--bg-2);
 }
+.chat-input-wrap.hidden { display: none; }
 .chat-input {
   flex: 1;
   background: var(--surface);
@@ -777,7 +788,7 @@ button, a { touch-action: manipulation; }
 .mobile-panel-bar {
   display: none;
   flex-shrink: 0;
-  height: 48px;
+  height: var(--mobile-panel-h);
   background: var(--bg-2);
   border-top: 1px solid var(--border-2);
 }
@@ -817,7 +828,7 @@ button, a { touch-action: manipulation; }
    • mobile-panel-bar is a flex row at the bottom of ls-wrap
 ══════════════════════════════════════════════════ */
 @media (max-width: 700px) {
-  :root { --ctrl-h: 60px; --header-h: 52px; }
+  :root { --ctrl-h: 60px; --header-h: 52px; --strip-h: 72px; }
 
   /* Show mobile tab bar as a normal flex child of ls-wrap */
   .mobile-panel-bar { display: flex; }
@@ -831,14 +842,14 @@ button, a { touch-action: manipulation; }
     flex: 1;
     position: relative;
     overflow: hidden;
-    padding-bottom: 0;
+    padding-bottom: calc(var(--ctrl-h) + var(--strip-h));
     min-height: 0;
   }
 
-  /* Video fills the ENTIRE stage — maximum screen real estate */
+  /* Keep the full video visible above the strip and controls */
   .ls-main-video {
     position: absolute !important;
-    inset: 0 !important;
+    inset: 0 0 calc(var(--ctrl-h) + var(--strip-h)) 0 !important;
     height: auto !important;
     min-height: unset !important;
   }
@@ -846,7 +857,7 @@ button, a { touch-action: manipulation; }
   /* PiP stays in top-right area */
   .ls-pip {
     width: 88px; height: 58px;
-    bottom: calc(var(--ctrl-h) + 68px);
+    bottom: calc(var(--ctrl-h) + var(--strip-h) + 10px);
     right: 10px;
   }
 
@@ -860,8 +871,8 @@ button, a { touch-action: manipulation; }
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-top: 1px solid rgba(255,255,255,0.07);
-    min-height: 64px;
-    max-height: 80px;
+    min-height: var(--strip-h);
+    max-height: var(--strip-h);
     overflow-x: auto;
     scrollbar-width: none;
   }
@@ -886,26 +897,27 @@ button, a { touch-action: manipulation; }
   .ctrl-btn { min-width: 40px; padding: 7px 8px; }
   .ctrl-sep { display: none; }
 
-  /* Panel: full-height overlay from the right, covering the entire body */
+  /* Panel: full-width sheet so chat/people/hands are readable on phones */
   .ls-panel {
     position: fixed !important;
     top: var(--header-h) !important;
-    bottom: 48px !important;   /* sits above the mobile tab bar */
+    bottom: var(--mobile-panel-h) !important;
+    left: 0 !important;
     right: 0 !important;
-    width: min(340px, 94vw) !important;
+    width: auto !important;
     z-index: 200 !important;
-    transform: translateX(100%) !important;
+    transform: translateY(100%) !important;
     transition: transform .28s cubic-bezier(0.4,0,0.2,1) !important;
-    border-left: 1px solid var(--border-2) !important;
+    border-left: none !important;
     border-top: 1px solid var(--border-2) !important;
     display: flex !important;
     flex-direction: column !important;
   }
   .ls-panel.open {
-    transform: translateX(0) !important;
-    box-shadow: -8px 0 32px rgba(0,0,0,0.65) !important;
+    transform: translateY(0) !important;
+    box-shadow: 0 -12px 36px rgba(0,0,0,0.65) !important;
   }
-  .ls-panel.hidden { transform: translateX(100%) !important; }
+  .ls-panel.hidden { transform: translateY(100%) !important; }
 
   /* Panel content area — flex-based height (more reliable than absolute on mobile) */
   .ls-panel .ls-panel-content {
@@ -938,15 +950,29 @@ button, a { touch-action: manipulation; }
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    min-height: 0;
+  }
+  .ls-panel .chat-input-wrap {
+    position: sticky;
+    bottom: 0;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, rgba(12,18,32,.92), rgba(12,18,32,1));
+  }
+  .ls-panel .ls-panel-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--bg-2);
   }
 
   /* Hide desktop-only elements */
   .ls-session-meta { display: none !important; }
   .ls-stat-chip { display: none !important; }
+  #panelToggleBtn { display: none !important; }
 }
 
 @media (max-width: 420px) {
-  :root { --ctrl-h: 56px; }
+  :root { --ctrl-h: 56px; --strip-h: 68px; }
   .ls-tile { width: 66px; height: 44px; }
   .ls-pip { width: 78px; height: 52px; }
   .ctrl-btn { min-width: 36px; padding: 6px 7px; }
@@ -956,6 +982,8 @@ button, a { touch-action: manipulation; }
 @media (max-height: 500px) and (orientation: landscape) {
   :root { --header-h: 42px; --ctrl-h: 48px; }
   .ls-participant-strip { display: none !important; }
+  .ls-stage-wrap { padding-bottom: var(--ctrl-h) !important; }
+  .ls-main-video { inset: 0 0 var(--ctrl-h) 0 !important; }
   .ls-session-title { font-size: .78rem; }
   .ls-panel { top: var(--header-h) !important; bottom: 0 !important; }
   .mobile-panel-bar { display: none !important; }
@@ -1201,7 +1229,7 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 import {
   getFirestore, doc, getDoc, addDoc, updateDoc, deleteDoc,
   collection, query, orderBy, limit, onSnapshot,
-  serverTimestamp, increment
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 /* ──────────────── CONFIG ──────────────── */
@@ -1237,6 +1265,10 @@ let panelOpen = true;
 let chatUnread = 0;
 let confirmResolve = null;
 let hasSpokenToAgora = false;
+let currentSessionMuteAll = false;
+let currentMutedUsers = {};
+let explicitMainView = false;
+let viewerCountSyncTimer = null;
 
 const AV_COLORS = ['#E67E22','#2E86AB','#6C3483','#117A65','#922B21','#1B4F72','#1E8449','#00796B','#B7950B','#1A5276'];
 
@@ -1250,6 +1282,51 @@ function hideLoading(){
   const el = document.getElementById('loadingScreen');
   el.classList.add('fade-out');
   setTimeout(()=>el.style.display='none', 420);
+}
+function getLocalPrimaryVideoTrack(){ return screenTrack || localVideoTrack || null; }
+function isSelfSpotlight(uid){ return uid === '__self_host'; }
+function isAudienceForceMuted(){
+  return !isHost && (!!currentSessionMuteAll || !!currentMutedUsers?.[currentUser?.uid]);
+}
+function applyChatInputVisibility(tab){
+  const wrap = document.querySelector('.chat-input-wrap');
+  if (wrap) wrap.classList.toggle('hidden', tab !== 'chat');
+}
+function getAgoraViewerCount(){
+  if (!agoraClient) return 0;
+  return (agoraClient.remoteUsers || []).filter(u => u && u.uid !== undefined && u.uid !== null).length;
+}
+async function syncViewerCount(force = false){
+  if (!isHost || !sessionId || !agoraClient) return;
+  const count = getAgoraViewerCount();
+  document.getElementById('viewerCountH').textContent = count;
+  if (!force && sessionData?.viewerCount === count) return;
+  sessionData = { ...(sessionData || {}), viewerCount: count };
+  try { await updateDoc(doc(db,'liveSessions',sessionId), { viewerCount: count }); } catch(e){}
+}
+function queueViewerCountSync(force = false){
+  if (!isHost) return;
+  clearTimeout(viewerCountSyncTimer);
+  viewerCountSyncTimer = setTimeout(() => { syncViewerCount(force); }, force ? 0 : 180);
+}
+function applyRemoteAudioSuppression(uid){
+  const track = remoteUsers[uid]?.audioTrack;
+  if (!track || typeof track.setVolume !== 'function') return;
+  const shouldMute = !!muteAllActive || !!mutedByAdmin[uid] || !!currentMutedUsers?.[uid];
+  try { track.setVolume(shouldMute ? 0 : 100); } catch(e){}
+}
+function applyRemoteAudioSuppressionToAll(){
+  Object.keys(remoteUsers).forEach(uid => applyRemoteAudioSuppression(uid));
+}
+async function enforceHostMuteOnSelf(reason){
+  if (!agoraClient) return;
+  if (localAudioTrack) {
+    try { await localAudioTrack.setMuted(true); } catch(e){}
+    try { await agoraClient.unpublish([localAudioTrack]); } catch(e){}
+  }
+  micOn = false;
+  updateMicUI();
+  if (reason) showToast(reason, 'info');
 }
 
 async function backendFetch(method, path, body=null){
@@ -1363,26 +1440,31 @@ async function bootSession(){
 
   // Subscribe to session updates
   if (sessionId) {
-    sessionUnsub = onSnapshot(doc(db,'liveSessions',sessionId), snap => {
+    sessionUnsub = onSnapshot(doc(db,'liveSessions',sessionId), async snap => {
       if (!snap.exists()) return;
       const data = snap.data();
+      sessionData = { id: snap.id, ...data };
+      currentSessionMuteAll = !!data.muteAll;
+      currentMutedUsers = data.mutedUsers || {};
+      mutedByAdmin = { ...currentMutedUsers };
       document.getElementById('viewerCountH').textContent = data.viewerCount || 0;
       document.getElementById('sessionTitle').textContent = data.title || 'Live Class';
+      if (isHost) {
+        muteAllActive = !!data.muteAll;
+        const btn = document.getElementById('ctrlMuteAll');
+        if (btn) {
+          btn.classList.toggle('active', muteAllActive);
+          btn.querySelector('.ctrl-label').textContent = muteAllActive ? 'Unmute' : 'Mute All';
+          btn.title = muteAllActive ? 'Unmute everyone' : 'Mute everyone';
+        }
+        applyRemoteAudioSuppressionToAll();
+      }
       if (data.status === 'ended' && !isHost) {
         showToast('The class has ended.', 'info');
         setTimeout(()=> location.href = isAdmin ? 'admin.html' : 'student.html', 2500);
       }
-      // Handle admin mute-all command
-      if (!isHost && data.muteAll) {
-        if (localAudioTrack) { localAudioTrack.setMuted(true); micOn = false; updateMicUI(); }
-        showToast('You were muted by the host.', 'info');
-      }
-      // Handle individual mute by admin
-      if (!isHost && data.mutedUsers?.[currentUser.uid]) {
-        if (localAudioTrack) { localAudioTrack.setMuted(true); micOn = false; updateMicUI(); }
-        showToast('You were muted by the host.', 'info');
-        // Clear the flag so re-entry doesn't re-mute
-        updateDoc(doc(db,'liveSessions',sessionId),{[`mutedUsers.${currentUser.uid}`]: false}).catch(()=>{});
+      if (!isHost && isAudienceForceMuted() && micOn) {
+        await enforceHostMuteOnSelf('You were muted by the host.');
       }
       // Handle individual remove (kick)
       if (data.kickedUsers?.[currentUser.uid]) {
@@ -1439,15 +1521,6 @@ async function bootSession(){
     setTimeout(hideLoading, 1000);
   }
 
-  // Track viewer count — increment on join, decrement reliably on any kind of leave
-  if (sessionId && !isHost) {
-    try { await updateDoc(doc(db,'liveSessions',sessionId),{viewerCount:increment(1)}); } catch(e){}
-    // Decrement when user closes/navigates away (pagehide is more reliable than beforeunload)
-    window.addEventListener('pagehide', ()=>{
-      try { updateDoc(doc(db,'liveSessions',sessionId),{viewerCount:increment(-1)}); } catch(e){}
-    });
-  }
-
   startDurationTimer();
   startTime = Date.now();
   updateParticipantsList();
@@ -1477,26 +1550,27 @@ async function joinAgora(channelName){
       }
       if (mediaType === 'video') {
         remoteUsers[user.uid].videoTrack = user.videoTrack;
-        // If no main view yet, promote this user
-        if (!mainViewUid) setMainView(user.uid);
+        if (!mainViewUid || !explicitMainView) setMainView(user.uid, { manual:false });
         addOrUpdateTile(user.uid);
       }
       if (mediaType === 'audio') {
         remoteUsers[user.uid].audioTrack = user.audioTrack;
+        applyRemoteAudioSuppression(user.uid);
         user.audioTrack.play();
       }
       updateParticipantsList();
       updatePeopleCount();
+      queueViewerCountSync();
     });
 
     agoraClient.on('user-unpublished', (user, mediaType) => {
       if (mediaType === 'video') {
         if (remoteUsers[user.uid]) remoteUsers[user.uid].videoTrack = null;
         if (mainViewUid === user.uid) {
-          clearMainView();
-          // Try next available
+          clearMainView({ preserveManual:true });
           const next = Object.values(remoteUsers).find(u=>u.videoTrack && u.uid !== user.uid);
-          if (next) setMainView(next.uid);
+          if (next) setMainView(next.uid, { manual:false });
+          else if (isHost && getLocalPrimaryVideoTrack()) setMainView('__self_host', { manual:false });
         }
         removeTile(user.uid);
       }
@@ -1511,34 +1585,23 @@ async function joinAgora(channelName){
       }
       updateParticipantsList();
       updatePeopleCount();
-      // Host updates Firestore viewer count from Agora's real user list
-      if (isHost && sessionId) {
-        const cnt = agoraClient.remoteUsers.length;
-        updateDoc(doc(db,'liveSessions',sessionId),{ viewerCount: cnt }).catch(()=>{});
-        document.getElementById('viewerCountH').textContent = cnt;
-      }
+      queueViewerCountSync();
     });
 
     agoraClient.on('user-left', user => {
       delete remoteUsers[user.uid];
       removeTile(user.uid);
       if (mainViewUid === user.uid) {
-        clearMainView();
+        clearMainView({ preserveManual:true });
         const next = Object.values(remoteUsers).find(u=>u.videoTrack);
-        if (next) setMainView(next.uid);
-        else if (isHost && localVideoTrack) {
-          // Revert to host self-view when the spotlighted user leaves
-          setMainView('__self_host');
+        if (next) setMainView(next.uid, { manual:false });
+        else if (isHost && getLocalPrimaryVideoTrack()) {
+          setMainView('__self_host', { manual:false });
         }
       }
       updateParticipantsList();
       updatePeopleCount();
-      // Host keeps Firestore count accurate
-      if (isHost && sessionId) {
-        const cnt = agoraClient.remoteUsers.length;
-        updateDoc(doc(db,'liveSessions',sessionId),{ viewerCount: cnt }).catch(()=>{});
-        document.getElementById('viewerCountH').textContent = cnt;
-      }
+      queueViewerCountSync();
     });
 
     agoraClient.on('token-privilege-will-expire', async() => {
@@ -1579,6 +1642,7 @@ async function joinAgora(channelName){
         showToast('Could not access microphone.', 'error');
       }
       hasSpokenToAgora = true;
+      addSelfTile();
     } else {
       showToast('Connected to live class!', 'success');
     }
@@ -1593,6 +1657,7 @@ async function joinAgora(channelName){
     };
     updateParticipantsList();
     updatePeopleCount();
+    queueViewerCountSync(true);
 
   } catch(e){
     console.error('Agora error:', e);
@@ -1601,17 +1666,19 @@ async function joinAgora(channelName){
 }
 
 /* ──────────────── VIDEO TILES ──────────────── */
-function setMainView(uid){
+function setMainView(uid, { manual = true } = {}){
   mainViewUid = uid;
+  explicitMainView = manual;
   const container = document.getElementById('mainVideoContainer');
   container.innerHTML = '';
+  document.getElementById('hostBadge').style.display = 'none';
 
   // Special case: spotlighting self (host/admin)
-  if (uid === '__self_host' && localVideoTrack) {
+  if (isSelfSpotlight(uid) && getLocalPrimaryVideoTrack()) {
     const div = document.createElement('div');
     div.style.cssText = 'width:100%;height:100%;';
     container.appendChild(div);
-    localVideoTrack.play(div);
+    getLocalPrimaryVideoTrack().play(div);
     document.getElementById('noStream').style.display = 'none';
     document.getElementById('mainLabel').style.display = 'flex';
     document.getElementById('mainLabelText').textContent = 'You (Host)';
@@ -1636,11 +1703,13 @@ function setMainView(uid){
   });
 }
 
-function clearMainView(){
+function clearMainView({ preserveManual = false } = {}){
   mainViewUid = null;
+  if (!preserveManual) explicitMainView = false;
   document.getElementById('mainVideoContainer').innerHTML = '';
   document.getElementById('noStream').style.display = 'flex';
   document.getElementById('mainLabel').style.display = 'none';
+  document.getElementById('hostBadge').style.display = 'none';
 }
 
 function addOrUpdateTile(uid){
@@ -1690,23 +1759,42 @@ function addOrUpdateTile(uid){
   if (uid === mainViewUid) tile.classList.add('main-view');
 }
 
+function refreshSelfTile(){
+  const tile = document.getElementById('participantStrip').querySelector('[data-uid="__self_host"]');
+  if (!tile) return;
+  const placeholder = tile.querySelector('.ls-tile-placeholder');
+  const activeTrack = getLocalPrimaryVideoTrack();
+  if (placeholder) {
+    placeholder.innerHTML = '';
+    placeholder.style.cssText = 'width:100%;height:100%;';
+    if (activeTrack) {
+      activeTrack.play(placeholder);
+    } else {
+      placeholder.style.cssText = '';
+      placeholder.textContent = '🎤';
+      placeholder.style.background = 'var(--gold-glow)';
+    }
+  }
+  const name = tile.querySelector('.ls-tile-name');
+  if (name) name.textContent = screenSharing ? 'You (Sharing)' : 'You (Host)';
+  tile.classList.toggle('main-view', mainViewUid === '__self_host');
+}
+
 function addSelfTile(){
   const strip = document.getElementById('participantStrip');
-  if (strip.querySelector('[data-uid="__self_host"]')) return;
-  const tile = document.createElement('div');
-  tile.className = 'ls-tile main-view';
-  tile.dataset.uid = '__self_host';
-  tile.title = 'Spotlight yourself';
-  tile.onclick = () => setMainView('__self_host');
-  tile.innerHTML = `
-    <div class="ls-tile-placeholder" style="background:var(--gold-glow);">🎤</div>
-    <div class="ls-tile-name" style="color:var(--gold);">You (Host)</div>`;
-  strip.insertBefore(tile, strip.firstChild.nextSibling); // after label
-  // Play local video in the tile
-  if (localVideoTrack) {
-    const ph = tile.querySelector('.ls-tile-placeholder');
-    if (ph) { ph.innerHTML=''; ph.style.cssText='width:100%;height:100%;'; localVideoTrack.play(ph); }
+  let tile = strip.querySelector('[data-uid="__self_host"]');
+  if (!tile) {
+    tile = document.createElement('div');
+    tile.className = 'ls-tile';
+    tile.dataset.uid = '__self_host';
+    tile.title = 'Spotlight yourself';
+    tile.onclick = () => setMainView('__self_host');
+    tile.innerHTML = `
+      <div class="ls-tile-placeholder" style="background:var(--gold-glow);">🎤</div>
+      <div class="ls-tile-name" style="color:var(--gold);">You (Host)</div>`;
+    strip.insertBefore(tile, strip.firstChild.nextSibling);
   }
+  refreshSelfTile();
 }
 
 function removeTile(uid){
@@ -1718,6 +1806,10 @@ function removeTile(uid){
 /* ──────────────── CONTROLS ──────────────── */
 window.toggleMic = async function(){
   if (!agoraClient) return;
+  if (!micOn && isAudienceForceMuted()) {
+    showToast('The host has muted your microphone. Wait for the host to unmute everyone.', 'info');
+    return;
+  }
   micOn = !micOn;
   if (micOn) {
     try {
@@ -1726,6 +1818,7 @@ window.toggleMic = async function(){
         await agoraClient.publish([localAudioTrack]);
       } else {
         await localAudioTrack.setMuted(false);
+        await agoraClient.publish([localAudioTrack]).catch(()=>{});
       }
     } catch(e){ micOn = false; showToast('Microphone access denied','error'); }
   } else {
@@ -1751,12 +1844,14 @@ window.toggleCam = async function(){
       pipEl.style.display = 'block';
       document.getElementById('pipCamOff').style.display = 'none';
       localVideoTrack.play(pipEl);
-      // Host always defaults to spotlighting themselves when camera is first turned on
-      if (isHost && (!mainViewUid || mainViewUid === '__self_host')) {
-        setMainView('__self_host');
+      if (isHost) {
+        addSelfTile();
       }
-      // Add self-tile to participant strip so host can re-spotlight themselves
-      if (isHost) addSelfTile();
+      if (!mainViewUid) {
+        const nextRemote = Object.values(remoteUsers).find(u => u.videoTrack);
+        if (nextRemote) setMainView(nextRemote.uid, { manual:false });
+        else if (isHost) setMainView('__self_host', { manual:false });
+      }
     } catch(e){ camOn = false; showToast('Camera access denied','error'); }
   } else {
     if (localVideoTrack) {
@@ -1765,6 +1860,11 @@ window.toggleCam = async function(){
     }
     document.getElementById('pipVideoEl').style.display='none';
     document.getElementById('pipCamOff').style.display='flex';
+    if (isHost) {
+      refreshSelfTile();
+      if (mainViewUid === '__self_host' && screenTrack) setMainView('__self_host', { manual:false });
+      else if (mainViewUid === '__self_host') clearMainView();
+    }
   }
   updateCamUI();
 };
@@ -1774,26 +1874,51 @@ window.toggleScreenShare = async function(){
   if (screenSharing) {
     if (screenTrack) {
       await agoraClient.unpublish([screenTrack]).catch(()=>{});
+      if (typeof screenTrack.stop === 'function') screenTrack.stop();
       screenTrack.close();
       screenTrack = null;
     }
     screenSharing = false;
     document.getElementById('ctrlScreenShare').classList.remove('active');
+    if (isHost) {
+      refreshSelfTile();
+      if (mainViewUid === '__self_host' && localVideoTrack) setMainView('__self_host', { manual:false });
+      else if (mainViewUid === '__self_host' && !localVideoTrack) clearMainView();
+    }
     showToast('Screen sharing stopped.','info');
   } else {
-    // iOS Safari does not support getDisplayMedia at all
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) && !/CriOS/.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
     if (isIOS || !navigator.mediaDevices?.getDisplayMedia) {
-      showToast('Screen sharing is not supported on this device or browser. Use Chrome on Android or a desktop browser.','error');
+      showToast('Screen sharing is only supported on browsers that expose the system share-screen picker. On phones, use Chrome on Android.','error');
       return;
     }
     try {
-      screenTrack = await AgoraRTC.createScreenVideoTrack({encoderConfig:'1080p_1'}, 'disable');
+      try {
+        screenTrack = await AgoraRTC.createScreenVideoTrack(
+          { encoderConfig:'1080p_1', optimizationMode:'detail', frameRate: 15 },
+          'disable'
+        );
+      } catch (sdkErr) {
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: { frameRate: 15, displaySurface: 'browser' },
+          audio: false
+        });
+        const mediaStreamTrack = stream.getVideoTracks?.()[0];
+        if (!mediaStreamTrack || typeof AgoraRTC.createCustomVideoTrack !== 'function') throw sdkErr;
+        screenTrack = AgoraRTC.createCustomVideoTrack({ mediaStreamTrack });
+        mediaStreamTrack.addEventListener('ended', ()=>{ if (screenSharing) window.toggleScreenShare(); }, { once:true });
+      }
       await agoraClient.publish([screenTrack]);
       screenSharing = true;
       document.getElementById('ctrlScreenShare').classList.add('active');
+      if (isHost) {
+        addSelfTile();
+        setMainView('__self_host', { manual:false });
+      }
       showToast('Screen sharing started.','success');
-      screenTrack.on('track-ended', ()=>{ window.toggleScreenShare(); });
+      if (typeof screenTrack.on === 'function') {
+        screenTrack.on('track-ended', ()=>{ if (screenSharing) window.toggleScreenShare(); });
+      }
     } catch(e){
       if (e.code !== 'PERMISSION_DENIED') showToast('Could not share screen: ' + (e.message||'Permission denied.'),'error');
     }
@@ -1852,25 +1977,29 @@ window.toggleRecord = async function(){
 window.adminMuteUser = async function(e, uid){
   e.stopPropagation();
   if (!isAdmin) return;
+  const currentlyMuted = !!currentMutedUsers?.[uid] || !!mutedByAdmin[uid];
   const confirmed = await showConfirm({
-    icon:'🔇', title:'Mute this participant?',
-    sub:'They will be notified and their microphone will be disabled.',
-    okLabel:'Mute', okStyle:''
+    icon: currentlyMuted ? '🔈' : '🔇',
+    title: currentlyMuted ? 'Unmute this participant?' : 'Mute this participant?',
+    sub: currentlyMuted ? 'They will be allowed to turn their microphone back on.' : 'They will be notified and their microphone will be disabled.',
+    okLabel: currentlyMuted ? 'Unmute' : 'Mute', okStyle:''
   });
   if (!confirmed) return;
-  mutedByAdmin[uid] = true;
+  mutedByAdmin[uid] = !currentlyMuted;
+  currentMutedUsers[uid] = !currentlyMuted;
   if (sessionId) {
     try {
       await updateDoc(doc(db,'liveSessions',sessionId),{
-        [`mutedUsers.${uid}`]: true,
+        [`mutedUsers.${uid}`]: !currentlyMuted,
         [`muteCommand_${uid}`]: serverTimestamp(),
       });
     } catch(e) { showToast('Could not mute: ' + (e.message||e.code),'error'); return; }
   }
   const tile = document.getElementById('participantStrip').querySelector(`[data-uid="${uid}"]`);
-  if (tile) tile.classList.add('is-muted');
+  if (tile) tile.classList.toggle('is-muted', !currentlyMuted);
+  applyRemoteAudioSuppression(uid);
   updateParticipantsList();
-  showToast('Participant muted.','success');
+  showToast(currentlyMuted ? 'Participant unmuted.' : 'Participant muted.','success');
 };
 
 window.adminRemoveUser = async function(e, uid){
@@ -1913,6 +2042,7 @@ window.muteAllParticipants = async function(){
       btn.querySelector('.ctrl-label').textContent = 'Unmute';
       btn.title = 'Unmute everyone';
     }
+    applyRemoteAudioSuppressionToAll();
     showToast('All participants muted.','success');
   } else {
     muteAllActive = false;
@@ -1925,6 +2055,7 @@ window.muteAllParticipants = async function(){
       btn.querySelector('.ctrl-label').textContent = 'Mute All';
       btn.title = 'Mute everyone';
     }
+    applyRemoteAudioSuppressionToAll();
     showToast('All participants can speak again.','info');
   }
 };
@@ -1950,7 +2081,7 @@ function updateParticipantsList(){
     return;
   }
   list.innerHTML = users.map(u=>{
-    const isMuted = mutedByAdmin[u.uid] || false;
+    const isMuted = !!mutedByAdmin[u.uid] || !!currentMutedUsers?.[u.uid];
     const spotlightUid = u.isSelf ? '__self_host' : u.uid;
     const spotlightBtn = `<button class="p-action-btn" onclick="setMainView('${spotlightUid}')" title="Spotlight" style="background:rgba(245,166,35,.15);color:var(--gold);">
         <i class="fas fa-star p-mute-icon"></i>
@@ -1958,8 +2089,8 @@ function updateParticipantsList(){
     const adminControls = (isAdmin && !u.isSelf) ? `
       <div class="p-actions">
         ${spotlightBtn}
-        <button class="p-action-btn mute" onclick="adminMuteUser(event,'${u.uid}')" title="Mute">
-          <i class="fas fa-microphone-slash p-mute-icon"></i>
+        <button class="p-action-btn mute" onclick="adminMuteUser(event,'${u.uid}')" title="${isMuted ? 'Unmute' : 'Mute'}">
+          <i class="fas ${isMuted ? 'fa-microphone' : 'fa-microphone-slash'} p-mute-icon"></i>
         </button>
         <button class="p-action-btn remove" onclick="adminRemoveUser(event,'${u.uid}')" title="Remove">
           <i class="fas fa-times p-mute-icon"></i>
@@ -1969,7 +2100,7 @@ function updateParticipantsList(){
       <div class="p-av" style="background:${avatarColor(u.uid)};">${avatarInitials(u.name)}</div>
       <div class="p-info">
         <div class="p-name">${u.name||'Participant'}</div>
-        <div class="p-role">${u.role==='host'?'🎤 Host':`${isMuted?'🔇 Muted':'Student'}`}</div>
+        <div class="p-role">${u.role==='host'?'🎤 Host':`${isMuted?'🔇 Muted':'Student / Viewer'}`}</div>
       </div>
       ${adminControls}
     </div>`;
@@ -2142,6 +2273,7 @@ window.switchTab = function(tab, btn){
   btn.classList.add('active');
   document.querySelectorAll('.ls-pane').forEach(p=>p.classList.remove('active'));
   document.getElementById('pane-'+tab).classList.add('active');
+  applyChatInputVisibility(tab);
   if (tab === 'chat') {
     chatUnread = 0;
     const badge = document.getElementById('chatBadge');
@@ -2153,6 +2285,13 @@ window.switchTab = function(tab, btn){
 };
 
 window.mobileOpenTab = function(tab, btn){
+  const currentlyOpen = panelOpen && document.getElementById('pane-'+tab)?.classList.contains('active');
+  if (currentlyOpen && btn.classList.contains('active')) {
+    panelOpen = false;
+    document.getElementById('sidePanel').classList.remove('open');
+    document.getElementById('sidePanel').classList.add('hidden');
+    return;
+  }
   // Ensure panel is open
   const panel = document.getElementById('sidePanel');
   panel.classList.add('open');
@@ -2168,6 +2307,7 @@ window.mobileOpenTab = function(tab, btn){
   else {
     document.querySelectorAll('.ls-pane').forEach(p=>p.classList.remove('active'));
     document.getElementById('pane-'+tab).classList.add('active');
+    applyChatInputVisibility(tab);
     if (tab === 'chat') {
       chatUnread = 0;
       const mb = document.getElementById('mobChatBadge');
@@ -2268,6 +2408,24 @@ document.addEventListener('visibilitychange',()=>{
     // Don't stop; just let it run
   }
 });
+
+function applyResponsivePanelState(){
+  const panel = document.getElementById('sidePanel');
+  if (!panel) return;
+  if (window.innerWidth <= 700) {
+    panelOpen = false;
+    panel.classList.remove('open');
+    panel.classList.add('hidden');
+  } else {
+    panelOpen = true;
+    panel.classList.add('open');
+    panel.classList.remove('hidden');
+  }
+}
+
+applyChatInputVisibility('chat');
+applyResponsivePanelState();
+window.addEventListener('resize', applyResponsivePanelState);
 
 /* ──────────────── LISTEN FOR RAISED HANDS (admin) ──────────────── */
 if (true) { // runs after sessionId is set
