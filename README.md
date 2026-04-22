@@ -104,7 +104,7 @@ NLTC Online/
 ```js
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyA9vzT1TBpTdRJUfyYm51goS-5HfL3FcbU",
-  authDomain:        "nltc-online.firebaseapp.com",
+  authDomain:        "nltc-online.vercel.app",
   projectId:         "nltc-online",
   storageBucket:     "nltc-online.firebasestorage.app",
   messagingSenderId: "267993935158",
