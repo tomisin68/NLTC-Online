@@ -507,6 +507,43 @@ h2.section-title .accent { color: var(--gold); }
   width: 240px; height: 240px; border-radius: 50%;
   background: radial-gradient(circle, rgba(240,165,0,0.1) 0%, transparent 70%);
 }
+.gamif-live-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.85); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 18px;
+}
+.gamif-live-pill::before {
+  content: ''; width: 8px; height: 8px; border-radius: 50%;
+  background: #22c55e; box-shadow: 0 0 0 6px rgba(34,197,94,0.12);
+}
+.gamif-panel-title {
+  font-family: var(--font-head);
+  font-size: clamp(1.8rem, 3.4vw, 2.35rem);
+  line-height: 1.08; color: white; margin-bottom: 12px;
+}
+.gamif-panel-copy {
+  font-size: 0.92rem; line-height: 1.75;
+  color: rgba(255,255,255,0.68); margin-bottom: 22px;
+}
+.gamif-mini-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 12px; margin-bottom: 22px;
+}
+.gamif-mini-card {
+  padding: 16px 15px; border-radius: 18px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.gamif-mini-label {
+  font-size: 0.67rem; color: rgba(255,255,255,0.42);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;
+}
+.gamif-mini-value {
+  font-size: 0.98rem; font-weight: 800; color: white; line-height: 1.35;
+}
 .xp-bar-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: rgba(255,255,255,0.45); margin-bottom: 7px; }
 .xp-bar-track { height: 9px; background: rgba(255,255,255,0.07); border-radius: 100px; overflow: hidden; }
 .xp-bar-fill { height: 100%; width: 68%; border-radius: 100px; background: linear-gradient(90deg, var(--gold), var(--gold-2)); }
@@ -520,17 +557,32 @@ h2.section-title .accent { color: var(--gold); }
 }
 .badge-item:hover { background: rgba(240,165,0,0.15); border-color: rgba(240,165,0,0.3); }
 .badge-item.locked { opacity: 0.22; filter: grayscale(1); }
-.lb-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.lb-rank { width: 20px; font-size: 0.8rem; font-weight: 700; color: var(--gold); text-align: center; flex-shrink: 0; }
-.lb-avatar {
-  width: 30px; height: 30px; border-radius: 50%;
-  background: rgba(255,255,255,0.12);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.68rem; font-weight: 700; color: white; flex-shrink: 0;
+.gamif-note {
+  margin-top: 18px; padding: 16px 17px;
+  border-radius: 18px; background: rgba(240,165,0,0.08);
+  border: 1px solid rgba(240,165,0,0.18);
+  color: rgba(255,255,255,0.78); font-size: 0.84rem; line-height: 1.7;
 }
-.lb-name { flex: 1; font-size: 0.83rem; color: rgba(255,255,255,0.8); }
-.lb-xp { font-size: 0.75rem; color: var(--gold); font-weight: 700; }
-.lb-me { background: rgba(240,165,0,0.06); border-color: rgba(240,165,0,0.15) !important; }
+.gamif-note strong { color: var(--gold); }
+.gamif-panel-actions {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 20px; flex-wrap: wrap;
+}
+.gamif-panel-btn {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 13px 22px; border-radius: 999px;
+  background: var(--gold); color: var(--navy);
+  font-size: 0.85rem; font-weight: 800; text-decoration: none;
+  box-shadow: 0 16px 34px rgba(240,165,0,0.2);
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.gamif-panel-btn:hover {
+  background: var(--gold-2); transform: translateY(-2px);
+  box-shadow: 0 20px 42px rgba(240,165,0,0.28);
+}
+.gamif-panel-meta {
+  font-size: 0.78rem; color: rgba(255,255,255,0.45);
+}
 
 .gamif-point { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 20px; }
 .gp-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
@@ -834,7 +886,7 @@ h2.section-title .accent { color: var(--gold); }
 footer { background: #04101F; padding: 64px 24px 36px; }
 .footer-inner { max-width: 1200px; margin: 0 auto; }
 .footer-grid {
-  display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
   gap: 48px; margin-bottom: 48px;
 }
 .footer-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
@@ -875,6 +927,54 @@ footer { background: #04101F; padding: 64px 24px 36px; }
 }
 .footer-bottom a { color: rgba(255,255,255,0.25); transition: color 0.2s; }
 .footer-bottom a:hover { color: white; }
+
+/* ============================================================
+   COOKIE BANNER
+   ============================================================ */
+.cookie-banner {
+  position: fixed; left: 24px; right: 24px; bottom: 20px;
+  z-index: 1200; max-width: 1120px; margin: 0 auto;
+  display: none; align-items: center; gap: 20px; flex-wrap: wrap;
+  padding: 18px 20px; border-radius: 24px;
+  background: rgba(4,16,31,0.96); color: white;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 22px 54px rgba(1,9,20,0.32);
+  backdrop-filter: blur(16px);
+}
+.cookie-banner.show { display: flex; }
+.cookie-banner-badge {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 8px 12px; border-radius: 999px;
+  background: rgba(240,165,0,0.12);
+  color: var(--gold); font-size: 0.72rem; font-weight: 800;
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.cookie-banner-copy { flex: 1 1 360px; }
+.cookie-banner-copy strong {
+  display: block; font-size: 0.96rem; color: white; margin-bottom: 5px;
+}
+.cookie-banner-copy span {
+  font-size: 0.82rem; line-height: 1.7; color: rgba(255,255,255,0.7);
+}
+.cookie-banner-actions {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.cookie-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 0 18px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: transparent; color: white; font-size: 0.82rem;
+  font-weight: 700; cursor: pointer; text-decoration: none;
+  transition: transform 0.2s, background 0.2s, border-color 0.2s, color 0.2s;
+}
+.cookie-btn:hover { transform: translateY(-1px); }
+.cookie-btn.primary {
+  background: var(--gold); color: var(--navy); border-color: var(--gold);
+}
+.cookie-btn.primary:hover { background: var(--gold-2); }
+.cookie-btn.secondary:hover {
+  background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.24);
+}
 
 /* ============================================================
    SCROLL ANIMATIONS
@@ -932,6 +1032,8 @@ footer { background: #04101F; padding: 64px 24px 36px; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 36px; }
   .steps-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
   .step::after { display: none !important; }
+  .gamif-mini-grid { grid-template-columns: 1fr; }
+  .cookie-banner { left: 18px; right: 18px; padding: 18px; }
 }
 
 /* ============================================================
@@ -958,6 +1060,9 @@ footer { background: #04101F; padding: 64px 24px 36px; }
   .hero-btns { flex-direction: column; }
   .hero-btn-main, .hero-btn-secondary { justify-content: center; text-align: center; }
   .nav-inner { padding: 0 16px; }
+  .cookie-banner { left: 14px; right: 14px; bottom: 14px; border-radius: 20px; }
+  .cookie-banner-actions { width: 100%; }
+  .cookie-btn { flex: 1 1 180px; }
 }
 
 @media (max-width: 400px) {
@@ -1159,34 +1264,34 @@ footer { background: #04101F; padding: 64px 24px 36px; }
   <div class="section-inner">
     <div class="showcase-grid">
       <div class="anim from-left">
-        <div class="section-tag on-dark"><i class="fas fa-users"></i> Our Learning Environment</div>
-        <h2 class="section-title on-dark">Where Nigeria's <span class="accent">Best Students</span> Come to Learn</h2>
-        <p class="section-sub on-dark" style="margin-bottom: 28px;">From Kano to Lagos, thousands of students are transforming their academic journeys on NLTC. World-class tutors and resources, directly at your fingertips.</p>
+        <div class="section-tag on-dark"><i class="fas fa-users"></i> Inside Our Tutorial Center</div>
+        <h2 class="section-title on-dark">A Learning Space Built for <span class="accent">Focus and Growth</span></h2>
+        <p class="section-sub on-dark" style="margin-bottom: 28px;">Take a look inside the NLTC tutorial center, from our main classroom to quiet reading corners and coaching spaces designed to help students stay consistent, confident, and exam-ready.</p>
         <a href="auth.html" class="hero-btn-main" style="display: inline-flex;">
           <i class="fas fa-arrow-right"></i> Start Your Journey
         </a>
       </div>
       <div class="showcase-imgs anim from-right">
         <div class="sc-img h-tall">
-          <img src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=500&q=80" alt="Students in class">
+          <img src="nl3.jpeg" alt="NLTC main tutorial classroom" loading="lazy">
           <div class="sc-img-overlay"></div>
-          <div class="sc-img-label">Live Classes</div>
+          <div class="sc-img-label">Main Classroom</div>
         </div>
         <div style="display: flex; flex-direction: column; gap: 12px;">
           <div class="sc-img h-short">
-            <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&q=80" alt="Student studying">
+            <img src="nl1.jpeg" alt="NLTC reading corner with study shelves" loading="lazy">
             <div class="sc-img-overlay"></div>
-            <div class="sc-img-label">Self-Paced</div>
+            <div class="sc-img-label">Reading Corner</div>
           </div>
           <div class="sc-img h-short">
-            <img src="https://images.unsplash.com/photo-1588072432836-e10032774350?w=400&q=80" alt="Online learning">
+            <img src="nl2.jpeg" alt="NLTC coaching room with whiteboard and desks" loading="lazy">
             <div class="sc-img-overlay"></div>
-            <div class="sc-img-label">CBT Practice</div>
+            <div class="sc-img-label">Coaching Room</div>
           </div>
           <div class="sc-img h-short">
-            <img src="https://images.unsplash.com/photo-1571260899304-425eee4c7efc?w=400&q=80" alt="Mobile learning">
+            <img src="nl.jpeg" alt="NLTC mentoring room with meeting table" loading="lazy">
             <div class="sc-img-overlay"></div>
-            <div class="sc-img-label">Mobile Learning</div>
+            <div class="sc-img-label">Mentor Space</div>
           </div>
         </div>
       </div>
@@ -1303,39 +1408,46 @@ footer { background: #04101F; padding: 64px 24px 36px; }
       </div>
 
       <div class="gamif-panel anim from-right">
-        <div style="display: flex; align-items: center; gap: 13px; margin-bottom: 22px;">
-          <div style="width: 48px; height: 48px; border-radius: 13px; background: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">🎓</div>
-          <div>
-            <div style="font-size: 1rem; font-weight: 800; color: white;">Chukwuemeka A.</div>
-            <div style="font-size: 0.72rem; color: rgba(255,255,255,0.4); margin-top: 2px;">Level 12 — JAMB Scholar</div>
+        <div class="gamif-live-pill">Real Data Only</div>
+        <div class="gamif-panel-title">Every rank now comes from real student activity.</div>
+        <p class="gamif-panel-copy">We removed the sample leaderboard from this section. XP earned from classes, CBT practice, streaks, and lesson completion now points students straight to the live Firestore leaderboard below.</p>
+
+        <div class="gamif-mini-grid">
+          <div class="gamif-mini-card">
+            <div class="gamif-mini-label">Source</div>
+            <div class="gamif-mini-value">Firestore sync</div>
           </div>
-          <div style="margin-left: auto; background: rgba(240,165,0,0.12); border: 1px solid rgba(240,165,0,0.25); border-radius: 10px; padding: 7px 13px; text-align: center;">
-            <div style="font-size: 0.95rem; font-weight: 800; color: var(--gold);">4,820</div>
-            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.3);">XP Total</div>
+          <div class="gamif-mini-card">
+            <div class="gamif-mini-label">Signals</div>
+            <div class="gamif-mini-value">XP, streaks, badges</div>
+          </div>
+          <div class="gamif-mini-card">
+            <div class="gamif-mini-label">View</div>
+            <div class="gamif-mini-value">National ranking</div>
           </div>
         </div>
 
         <div style="margin-bottom: 20px;">
-          <div class="xp-bar-label"><span>Level 12</span><span>4,820 / 7,000 XP</span></div>
+          <div class="xp-bar-label"><span>Progress to your next badge</span><span>68% complete</span></div>
           <div class="xp-bar-track"><div class="xp-bar-fill"></div></div>
         </div>
 
-        <div style="font-size: 0.68rem; color: rgba(255,255,255,0.3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 10px;">Recent Achievements</div>
+        <div style="font-size: 0.68rem; color: rgba(255,255,255,0.3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 10px;">What Students Unlock</div>
         <div class="badges-row" style="margin-bottom: 20px;">
-          <div class="badge-item">🔥</div>
-          <div class="badge-item">🏆</div>
-          <div class="badge-item">📐</div>
-          <div class="badge-item">⭐</div>
-          <div class="badge-item locked">🎯</div>
-          <div class="badge-item locked">💎</div>
+          <div class="badge-item"><i class="fas fa-fire"></i></div>
+          <div class="badge-item"><i class="fas fa-trophy"></i></div>
+          <div class="badge-item"><i class="fas fa-brain"></i></div>
+          <div class="badge-item"><i class="fas fa-star"></i></div>
+          <div class="badge-item locked"><i class="fas fa-bullseye"></i></div>
+          <div class="badge-item locked"><i class="fas fa-gem"></i></div>
         </div>
 
-        <div style="font-size: 0.68rem; color: rgba(255,255,255,0.3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 6px;">This Week's Top 5</div>
-        <div>
-          <div class="lb-item"><div class="lb-rank">🥇</div><div class="lb-avatar">FA</div><div class="lb-name">Fatima A.</div><div class="lb-xp">1,240 XP</div></div>
-          <div class="lb-item"><div class="lb-rank">🥈</div><div class="lb-avatar">EO</div><div class="lb-name">Emeka O.</div><div class="lb-xp">1,180 XP</div></div>
-          <div class="lb-item lb-me"><div class="lb-rank" style="color: white;">3</div><div class="lb-avatar" style="background: var(--gold); color: var(--navy);">CA</div><div class="lb-name" style="color: var(--gold); font-weight: 700;">Chukwuemeka A. (You)</div><div class="lb-xp">1,040 XP</div></div>
-          <div class="lb-item"><div class="lb-rank">4</div><div class="lb-avatar">AK</div><div class="lb-name">Amina K.</div><div class="lb-xp">980 XP</div></div>
+        <div class="gamif-note">
+          <strong>No mock leaderboard is shown here.</strong> The only ranking on this website is the live national leaderboard below, pulled from your platform data in real time.
+        </div>
+        <div class="gamif-panel-actions">
+          <a href="#leaderboard" class="gamif-panel-btn"><i class="fas fa-signal"></i> View Live Leaderboard</a>
+          <div class="gamif-panel-meta">Ranks refresh from the platform once the leaderboard section comes into view.</div>
         </div>
       </div>
     </div>
@@ -1657,7 +1769,7 @@ footer { background: #04101F; padding: 64px 24px 36px; }
     <div class="footer-grid">
       <div>
         <div class="footer-logo">
-          <img src="nltc-dark.png" alt="NLTC" style="height:48px;width:auto;object-fit:contain;display:block;">
+          <img src="nltc-light.png" alt="NLTC" style="height:48px;width:auto;object-fit:contain;display:block;">
         </div>
         <p class="footer-desc">Next Level Tutorial College — Nigeria's most trusted digital examination preparatory platform.</p>
         <div class="footer-socials">
@@ -1671,46 +1783,68 @@ footer { background: #04101F; padding: 64px 24px 36px; }
       <div>
         <div class="footer-col-title">Platform</div>
         <ul class="footer-links">
-          <li><a href="#">Live Classes</a></li>
-          <li><a href="#">Recorded Lessons</a></li>
-          <li><a href="#">CBT Practice</a></li>
-          <li><a href="#">Leaderboard</a></li>
-          <li><a href="#">Exam News</a></li>
-          <li><a href="#">Mobile App</a></li>
+          <li><a href="auth.html">Live Classes</a></li>
+          <li><a href="auth.html">Recorded Lessons</a></li>
+          <li><a href="cbt.html">CBT Practice</a></li>
+          <li><a href="#leaderboard">Leaderboard</a></li>
+          <li><a href="notifications.html">Exam News</a></li>
+          <li><a href="dashboard.html">Student Dashboard</a></li>
         </ul>
       </div>
       <div>
         <div class="footer-col-title">Examinations</div>
         <ul class="footer-links">
-          <li><a href="#">JAMB/UTME</a></li>
-          <li><a href="#">WAEC SSCE</a></li>
-          <li><a href="#">NECO</a></li>
-          <li><a href="#">GCE O-Level</a></li>
-          <li><a href="#">Post-UTME</a></li>
+          <li><a href="auth.html">JAMB/UTME</a></li>
+          <li><a href="auth.html">WAEC SSCE</a></li>
+          <li><a href="auth.html">NECO</a></li>
+          <li><a href="auth.html">GCE O-Level</a></li>
+          <li><a href="auth.html">Post-UTME</a></li>
         </ul>
       </div>
       <div>
         <div class="footer-col-title">Company</div>
         <ul class="footer-links">
-          <li><a href="#">About NLTC</a></li>
-          <li><a href="#">Our Tutors</a></li>
-          <li><a href="#">Pricing</a></li>
-          <li><a href="#">Blog</a></li>
-          <li><a href="#">Contact Us</a></li>
-          <li><a href="#">Careers</a></li>
+          <li><a href="#features">About NLTC</a></li>
+          <li><a href="#how">How It Works</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#testimonials">Results</a></li>
+          <li><a href="mailto:support@nltc.ng">Contact Us</a></li>
+          <li><a href="https://www.instagram.com/nextleveltutorialcollege?igsh=MTV4ejBvNTN5bG40Mg==">Community</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Legal</div>
+        <ul class="footer-links">
+          <li><a href="privacy-policy.html">Privacy Policy</a></li>
+          <li><a href="terms-and-conditions.html">Terms and Conditions</a></li>
+          <li><a href="cookie-policy.html">Cookie Policy</a></li>
+          <li><a href="mailto:support@nltc.ng">Privacy Requests</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
       <span>© 2026 Next Level Tutorial College. All rights reserved.</span>
       <div style="display: flex; gap: 20px;">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
-        <a href="#">Cookie Policy</a>
+        <a href="privacy-policy.html">Privacy Policy</a>
+        <a href="terms-and-conditions.html">Terms and Conditions</a>
+        <a href="cookie-policy.html">Cookie Policy</a>
       </div>
     </div>
   </div>
 </footer>
+
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-label="Cookie notice" aria-live="polite">
+  <div class="cookie-banner-badge"><i class="fas fa-cookie-bite"></i> Cookie Notice</div>
+  <div class="cookie-banner-copy">
+    <strong>Your study experience, your choice.</strong>
+    <span>NLTC uses essential cookies to keep the site secure and remember key settings. Optional preference and analytics cookies are only used when you allow them. See our <a href="cookie-policy.html" style="color: var(--gold);">Cookie Policy</a> for full details.</span>
+  </div>
+  <div class="cookie-banner-actions">
+    <button type="button" class="cookie-btn primary" id="acceptCookies">Accept All</button>
+    <button type="button" class="cookie-btn secondary" id="essentialCookies">Essential Only</button>
+    <a href="cookie-policy.html" class="cookie-btn secondary">Read Policy</a>
+  </div>
+</div>
 
 <!-- ============================================================
      SCRIPTS
@@ -1895,6 +2029,41 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   });
 });
 
+/* --- Cookie banner --- */
+(function () {
+  const KEY = 'nltc_cookie_pref';
+  const banner = document.getElementById('cookieBanner');
+  const acceptBtn = document.getElementById('acceptCookies');
+  const essentialBtn = document.getElementById('essentialCookies');
+  if (!banner || !acceptBtn || !essentialBtn) return;
+
+  function hideBanner() {
+    banner.classList.remove('show');
+  }
+
+  function savePreference(level) {
+    try {
+      localStorage.setItem(KEY, JSON.stringify({
+        level,
+        savedAt: new Date().toISOString()
+      }));
+    } catch (err) {}
+    hideBanner();
+  }
+
+  let existing = null;
+  try {
+    existing = localStorage.getItem(KEY);
+  } catch (err) {}
+
+  if (!existing) {
+    setTimeout(() => banner.classList.add('show'), 900);
+  }
+
+  acceptBtn.addEventListener('click', () => savePreference('all'));
+  essentialBtn.addEventListener('click', () => savePreference('essential'));
+})();
+
 /* ============================================================
    PAYSTACK PAYMENT — Landing page
    Visitors must be signed in. Redirect to auth.html with the
@@ -1923,7 +2092,7 @@ import { getFirestore, collection, getDocs, query, orderBy, limit }
 
 const FIREBASE_CONFIG = {
   apiKey: 'AIzaSyA9vzT1TBpTdRJUfyYm51goS-5HfL3FcbU',
-  authDomain: 'nltc-online.vercel.app',
+  authDomain: '"nltc-online.vercel.app"',
   projectId: 'nltc-online',
   storageBucket: 'nltc-online.firebasestorage.app',
   messagingSenderId: '267993935158',
