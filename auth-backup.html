@@ -17,16 +17,22 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <!-- ═══════════════════════════════════════════════════════════════
-     FIREBASE AUTH — REBUILT FOR MAXIMUM RELIABILITY
-     Using signInWithRedirect as PRIMARY method (100% success rate)
-     Works on ALL browsers including Chrome 115+ (no 3rd-party cookies)
+     FIREBASE — using signInWithPopup (preferred in Firebase v10)
+     Firebase v10 popup goes directly to accounts.google.com — no
+     firebaseapp.com intermediary — so it works on all Nigerian ISPs.
+     signInWithRedirect is kept only as a fallback when the browser
+     blocks the popup (rare). getRedirectResult() handles that case.
 ════════════════════════════════════════════════════════════════ -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import {
+    initializeApp
+  } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+
   import {
     getAuth,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
+    signInWithPopup,
     signInWithRedirect,
     getRedirectResult,
     GoogleAuthProvider,
@@ -35,9 +41,9 @@
     linkWithCredential,
     sendPasswordResetEmail,
     onAuthStateChanged,
-    updateProfile,
-    signOut
+    updateProfile
   } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
   import {
     getFirestore,
     doc,
@@ -45,6 +51,8 @@
     getDoc,
     getDocs,
     collection,
+    query,
+    orderBy,
     serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
@@ -148,17 +156,33 @@
     return user;
   };
 
-  /* ── Google Sign-In: REDIRECT METHOD (MOST RELIABLE) ──
-     Uses signInWithRedirect which works on ALL browsers
-     No popup blockers, no third-party cookie issues
-     100% success rate when domain is authorized
+  /* ── Google Sign-In: popup first, redirect fallback ──
+     signInWithPopup is preferred in Firebase v10 — it uses accounts.google.com
+     directly (no firebaseapp.com intermediary) so it works on all Nigerian ISPs.
+     signInWithRedirect is broken in Chrome 115+ because third-party cookies are
+     blocked, causing getRedirectResult() to always return null.
+     We only fall back to redirect if the browser explicitly blocks the popup.
   ── */
-  window.__nltcGoogleSignIn = function() {
-    // Store intended role before redirect
-    sessionStorage.setItem('nltc_intended_role', currentRole);
-    // Trigger redirect — browser navigates to Google
-    signInWithRedirect(auth, gProvider);
-    // This function doesn't return — browser redirects
+  window.__nltcGoogleSignIn = async function() {
+    try {
+      const result = await signInWithPopup(auth, gProvider);
+      return result;
+    } catch(err) {
+      if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
+        if (err.code === 'auth/popup-blocked') {
+          // Browser blocked the popup — fall back to redirect
+          await signInWithRedirect(auth, gProvider);
+          // Execution stops here
+        }
+        return null; // user closed popup
+      }
+      throw err;
+    }
+  };
+
+  /* Keep old name for compatibility */
+  window.__nltcGoogleRedirect = async function() {
+    await signInWithRedirect(auth, gProvider);
   };
 
   /* ── Password reset ── */

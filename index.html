@@ -1408,46 +1408,54 @@ footer { background: #04101F; padding: 64px 24px 36px; }
       </div>
 
       <div class="gamif-panel anim from-right">
-        <div class="gamif-live-pill">Real Data Only</div>
-        <div class="gamif-panel-title">Every rank now comes from real student activity.</div>
-        <p class="gamif-panel-copy">We removed the sample leaderboard from this section. XP earned from classes, CBT practice, streaks, and lesson completion now points students straight to the live Firestore leaderboard below.</p>
-
-        <div class="gamif-mini-grid">
-          <div class="gamif-mini-card">
-            <div class="gamif-mini-label">Source</div>
-            <div class="gamif-mini-value">Firestore sync</div>
+        <div class="live-badge-dot" style="margin-bottom: 16px;">Live Data</div>
+        <div class="live-lb-grid">
+          <!-- Top Students Card -->
+          <div class="live-lb-card">
+            <div class="live-lb-card-title">🏆 Top Students by XP</div>
+            <div id="lbTopList">
+              <!-- skeleton rows -->
+              <div class="live-lb-skeleton"><div class="sk-circle"></div><div style="flex:1;display:flex;flex-direction:column;gap:5px;"><div class="sk-line" style="width:60%;"></div><div class="sk-line" style="width:35%;height:8px;"></div></div><div class="sk-line" style="width:50px;"></div></div>
+              <div class="live-lb-skeleton"><div class="sk-circle"></div><div style="flex:1;display:flex;flex-direction:column;gap:5px;"><div class="sk-line" style="width:55%;"></div><div class="sk-line" style="width:40%;height:8px;"></div></div><div class="sk-line" style="width:50px;"></div></div>
+              <div class="live-lb-skeleton"><div class="sk-circle"></div><div style="flex:1;display:flex;flex-direction:column;gap:5px;"><div class="sk-line" style="width:65%;"></div><div class="sk-line" style="width:30%;height:8px;"></div></div><div class="sk-line" style="width:50px;"></div></div>
+              <div class="live-lb-skeleton"><div class="sk-circle"></div><div style="flex:1;display:flex;flex-direction:column;gap:5px;"><div class="sk-line" style="width:50%;"></div><div class="sk-line" style="width:45%;height:8px;"></div></div><div class="sk-line" style="width:50px;"></div></div>
+              <div class="live-lb-skeleton"><div class="sk-circle"></div><div style="flex:1;display:flex;flex-direction:column;gap:5px;"><div class="sk-line" style="width:70%;"></div><div class="sk-line" style="width:35%;height:8px;"></div></div><div class="sk-line" style="width:50px;"></div></div>
+            </div>
           </div>
-          <div class="gamif-mini-card">
-            <div class="gamif-mini-label">Signals</div>
-            <div class="gamif-mini-value">XP, streaks, badges</div>
+          <!-- Platform Stats Card -->
+          <div class="live-lb-card">
+            <div class="live-lb-card-title">📊 Platform Snapshot</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+              <div style="background:rgba(255,255,255,.04);border-radius:var(--r-md);padding:16px;text-align:center;">
+                <div id="lbStatStudents" style="font-family:var(--font-head);font-size:1.8rem;font-weight:900;color:var(--gold);">—</div>
+                <div style="font-size:.68rem;color:rgba(255,255,255,.4);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;">Students</div>
+              </div>
+              <div style="background:rgba(255,255,255,.04);border-radius:var(--r-md);padding:16px;text-align:center;">
+                <div id="lbStatAvgXP" style="font-family:var(--font-head);font-size:1.8rem;font-weight:900;color:var(--gold);">—</div>
+                <div style="font-size:.68rem;color:rgba(255,255,255,.4);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;">Avg XP</div>
+              </div>
+              <div style="background:rgba(255,255,255,.04);border-radius:var(--r-md);padding:16px;text-align:center;">
+                <div id="lbStatTopXP" style="font-family:var(--font-head);font-size:1.8rem;font-weight:900;color:var(--gold);">—</div>
+                <div style="font-size:.68rem;color:rgba(255,255,255,.4);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;">Top XP</div>
+              </div>
+              <div style="background:rgba(255,255,255,.04);border-radius:var(--r-md);padding:16px;text-align:center;">
+                <div id="lbStatStates" style="font-family:var(--font-head);font-size:1.8rem;font-weight:900;color:var(--gold);">—</div>
+                <div style="font-size:.68rem;color:rgba(255,255,255,.4);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;">States</div>
+              </div>
+            </div>
+            <div style="margin-top:16px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.15);border-radius:var(--r-md);padding:14px;">
+              <div style="font-size:.75rem;color:rgba(255,255,255,.5);line-height:1.6;">
+                <i class="fas fa-fire" style="color:var(--gold);margin-right:5px;"></i>
+                <strong style="color:var(--gold);">Top students</strong> earn up to <strong style="color:var(--gold);">500 XP/day</strong> through live classes, CBT practice, and daily streaks.
+              </div>
+            </div>
+            <div style="margin-top:14px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:var(--r-md);padding:14px;">
+              <div style="font-size:.75rem;color:rgba(255,255,255,.5);line-height:1.6;">
+                <i class="fas fa-trophy" style="color:#10B981;margin-right:5px;"></i>
+                Your rank updates in <strong style="color:#10B981;">real time</strong>. Sign up today to claim your spot.
+              </div>
+            </div>
           </div>
-          <div class="gamif-mini-card">
-            <div class="gamif-mini-label">View</div>
-            <div class="gamif-mini-value">National ranking</div>
-          </div>
-        </div>
-
-        <div style="margin-bottom: 20px;">
-          <div class="xp-bar-label"><span>Progress to your next badge</span><span>68% complete</span></div>
-          <div class="xp-bar-track"><div class="xp-bar-fill"></div></div>
-        </div>
-
-        <div style="font-size: 0.68rem; color: rgba(255,255,255,0.3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 10px;">What Students Unlock</div>
-        <div class="badges-row" style="margin-bottom: 20px;">
-          <div class="badge-item"><i class="fas fa-fire"></i></div>
-          <div class="badge-item"><i class="fas fa-trophy"></i></div>
-          <div class="badge-item"><i class="fas fa-brain"></i></div>
-          <div class="badge-item"><i class="fas fa-star"></i></div>
-          <div class="badge-item locked"><i class="fas fa-bullseye"></i></div>
-          <div class="badge-item locked"><i class="fas fa-gem"></i></div>
-        </div>
-
-        <div class="gamif-note">
-          <strong>No mock leaderboard is shown here.</strong> The only ranking on this website is the live national leaderboard below, pulled from your platform data in real time.
-        </div>
-        <div class="gamif-panel-actions">
-          <a href="#leaderboard" class="gamif-panel-btn"><i class="fas fa-signal"></i> View Live Leaderboard</a>
-          <div class="gamif-panel-meta">Ranks refresh from the platform once the leaderboard section comes into view.</div>
         </div>
       </div>
     </div>
@@ -1480,72 +1488,7 @@ footer { background: #04101F; padding: 64px 24px 36px; }
   </div>
 </section>
 
-<!-- ============================================================
-     LIVE LEADERBOARD
-     ============================================================ -->
-<section class="section live-lb-bg" id="leaderboard">
-  <div class="live-lb-inner">
-    <div class="live-lb-head anim">
-      <div class="live-badge-dot">Live Data</div>
-      <h2 class="section-title on-dark">The National <span class="accent">Leaderboard</span></h2>
-      <p class="section-sub on-dark">Real students. Real scores. Updated live from our platform.</p>
-    </div>
-    <div class="live-lb-grid anim">
-      <!-- Top Students Card -->
-      <div class="live-lb-card">
-        <div class="live-lb-card-title">🏆 Top Students by XP</div>
-        <div id="lbTopList">
-          <!-- skeleton rows -->
-          <div class="live-lb-skeleton"><div class="sk-circle"></div><div style="flex:1;display:flex;flex-direction:column;gap:5px;"><div class="sk-line" style="width:60%;"></div><div class="sk-line" style="width:35%;height:8px;"></div></div><div class="sk-line" style="width:50px;"></div></div>
-          <div class="live-lb-skeleton"><div class="sk-circle"></div><div style="flex:1;display:flex;flex-direction:column;gap:5px;"><div class="sk-line" style="width:55%;"></div><div class="sk-line" style="width:40%;height:8px;"></div></div><div class="sk-line" style="width:50px;"></div></div>
-          <div class="live-lb-skeleton"><div class="sk-circle"></div><div style="flex:1;display:flex;flex-direction:column;gap:5px;"><div class="sk-line" style="width:65%;"></div><div class="sk-line" style="width:30%;height:8px;"></div></div><div class="sk-line" style="width:50px;"></div></div>
-          <div class="live-lb-skeleton"><div class="sk-circle"></div><div style="flex:1;display:flex;flex-direction:column;gap:5px;"><div class="sk-line" style="width:50%;"></div><div class="sk-line" style="width:45%;height:8px;"></div></div><div class="sk-line" style="width:50px;"></div></div>
-          <div class="live-lb-skeleton"><div class="sk-circle"></div><div style="flex:1;display:flex;flex-direction:column;gap:5px;"><div class="sk-line" style="width:70%;"></div><div class="sk-line" style="width:35%;height:8px;"></div></div><div class="sk-line" style="width:50px;"></div></div>
-        </div>
-      </div>
-      <!-- Platform Stats Card -->
-      <div class="live-lb-card">
-        <div class="live-lb-card-title">📊 Platform Snapshot</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-          <div style="background:rgba(255,255,255,.04);border-radius:var(--r-md);padding:16px;text-align:center;">
-            <div id="lbStatStudents" style="font-family:var(--font-head);font-size:1.8rem;font-weight:900;color:var(--gold);">—</div>
-            <div style="font-size:.68rem;color:rgba(255,255,255,.4);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;">Students</div>
-          </div>
-          <div style="background:rgba(255,255,255,.04);border-radius:var(--r-md);padding:16px;text-align:center;">
-            <div id="lbStatAvgXP" style="font-family:var(--font-head);font-size:1.8rem;font-weight:900;color:var(--gold);">—</div>
-            <div style="font-size:.68rem;color:rgba(255,255,255,.4);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;">Avg XP</div>
-          </div>
-          <div style="background:rgba(255,255,255,.04);border-radius:var(--r-md);padding:16px;text-align:center;">
-            <div id="lbStatTopXP" style="font-family:var(--font-head);font-size:1.8rem;font-weight:900;color:var(--gold);">—</div>
-            <div style="font-size:.68rem;color:rgba(255,255,255,.4);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;">Top XP</div>
-          </div>
-          <div style="background:rgba(255,255,255,.04);border-radius:var(--r-md);padding:16px;text-align:center;">
-            <div id="lbStatStates" style="font-family:var(--font-head);font-size:1.8rem;font-weight:900;color:var(--gold);">—</div>
-            <div style="font-size:.68rem;color:rgba(255,255,255,.4);margin-top:3px;text-transform:uppercase;letter-spacing:.06em;">States</div>
-          </div>
-        </div>
-        <div style="margin-top:16px;background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.15);border-radius:var(--r-md);padding:14px;">
-          <div style="font-size:.75rem;color:rgba(255,255,255,.5);line-height:1.6;">
-            <i class="fas fa-fire" style="color:var(--gold);margin-right:5px;"></i>
-            <strong style="color:var(--gold);">Top students</strong> earn up to <strong style="color:var(--gold);">500 XP/day</strong> through live classes, CBT practice, and daily streaks.
-          </div>
-        </div>
-        <div style="margin-top:14px;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:var(--r-md);padding:14px;">
-          <div style="font-size:.75rem;color:rgba(255,255,255,.5);line-height:1.6;">
-            <i class="fas fa-trophy" style="color:#10B981;margin-right:5px;"></i>
-            Your rank updates in <strong style="color:#10B981;">real time</strong>. Sign up today to claim your spot.
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="live-lb-cta">
-      <p>Join thousands of students already competing on the national leaderboard</p>
-      <a href="auth.html" class="hero-cta-btn" style="display:inline-flex;align-items:center;gap:9px;background:var(--gold);color:var(--navy);border-radius:100px;padding:13px 30px;font-weight:800;font-size:.92rem;text-decoration:none;transition:transform .2s,box-shadow .2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 32px rgba(245,166,35,.4)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
-        <i class="fas fa-user-plus"></i> Join the Leaderboard Free
-      </a>
-    </div>
-  </div>
-</section>
+
 
 <!-- ============================================================
      PRICING
