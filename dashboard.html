@@ -1108,12 +1108,6 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Exam Year</label>
-          <select class="form-input" id="oqYear">
-            <option value="">Any Year</option>
-          </select>
-        </div>
-        <div class="form-group">
           <label class="form-label">Difficulty</label>
           <select class="form-input" id="oqDifficulty">
             <option value="">Any Difficulty</option>
@@ -1315,7 +1309,6 @@ tbody td{padding:10px 12px;font-size:.82rem;color:var(--text-1);vertical-align:m
       <div style="background:#FEF3C7;border:1.5px solid var(--warning);border-radius:var(--r-sm);padding:14px 16px;">
         <div style="font-weight:800;color:#92400E;font-size:.84rem;margin-bottom:8px;"><i class="fas fa-shield-alt"></i> Anti-Cheat Policy — Please Read</div>
         <ul style="font-size:.78rem;color:#78350F;line-height:1.8;padding-left:16px;margin:0;">
-          <li>This test runs in <strong>fullscreen mode</strong>. Exiting fullscreen will trigger a warning.</li>
           <li><strong>Switching tabs, minimising, or leaving this window</strong> is detected automatically.</li>
           <li>After <strong>3 violations</strong>, your test will be <strong>auto-submitted</strong>.</li>
           <li><strong>Copy, paste, and right-click</strong> are disabled during the test.</li>
@@ -1786,11 +1779,6 @@ function installOQAntiCheat() {
   const bar = document.getElementById('oqWarnBar');
   if (bar) bar.style.display = 'none';
 
-  try {
-    const el = document.getElementById('view-officialquiz');
-    (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
-  } catch(e) {}
-
   _oqH.ctx  = e => e.preventDefault();
   _oqH.copy = e => e.preventDefault();
   _oqH.cut  = e => e.preventDefault();
@@ -1819,12 +1807,7 @@ function installOQAntiCheat() {
   };
   window.addEventListener('blur', _oqH.blur);
 
-  _oqH.fs = () => {
-    if (document.getElementById('oqQuizScreen').style.display === 'none') return;
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) recordOQViolation('fullscreen_exit');
-  };
-  document.addEventListener('fullscreenchange',       _oqH.fs);
-  document.addEventListener('webkitfullscreenchange', _oqH.fs);
+  // Fullscreen disabled to avoid blocking calculator/question map
 }
 
 function uninstallOQAntiCheat() {
@@ -1836,15 +1819,12 @@ function uninstallOQAntiCheat() {
   document.removeEventListener('keydown',              _oqH.key);
   document.removeEventListener('visibilitychange',     _oqH.vis);
   window.removeEventListener('blur',                   _oqH.blur);
-  document.removeEventListener('fullscreenchange',     _oqH.fs);
-  document.removeEventListener('webkitfullscreenchange', _oqH.fs);
-  try { (document.exitFullscreen || document.webkitExitFullscreen)?.call(document); } catch(e) {}
 }
 
 function recordOQViolation(type) {
   if (document.getElementById('oqQuizScreen').style.display === 'none') return;
   _oqViol++;
-  const labels = { tab_switch:'Tab switch detected', window_blur:'You left the quiz window', fullscreen_exit:'You exited fullscreen', devtools:'Developer tools detected' };
+  const labels = { tab_switch:'Tab switch detected', window_blur:'You left the quiz window', devtools:'Developer tools detected' };
   const msg = labels[type] || 'Violation detected';
   const bar = document.getElementById('oqWarnBar');
   const txt = document.getElementById('oqWarnText');
@@ -1852,9 +1832,7 @@ function recordOQViolation(type) {
   if (bar) { bar.style.display = 'flex'; }
   if (txt) txt.textContent = `⚠ ${msg}! Violation ${_oqViol}/3`;
   if (cnt) cnt.textContent = _oqViol >= 2 ? '⛔ Next violation = auto-submit!' : '';
-  if (type === 'fullscreen_exit' || type === 'tab_switch') {
-    try { const el = document.getElementById('view-officialquiz'); (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el); } catch(e) {}
-  }
+  // Fullscreen re-entry disabled
   showToast(`Violation ${_oqViol}/3: ${msg}`, 'error');
   if (_oqViol >= 3) {
     if (txt) txt.textContent = '🚫 3 violations — quiz auto-submitting…';

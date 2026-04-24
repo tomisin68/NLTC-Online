@@ -1271,28 +1271,17 @@ footer { background: #04101F; padding: 64px 24px 36px; }
           <i class="fas fa-arrow-right"></i> Start Your Journey
         </a>
       </div>
-      <div class="showcase-imgs anim from-right">
-        <div class="sc-img h-tall">
-          <img src="nl3.jpeg" alt="NLTC main tutorial classroom" loading="lazy">
-          <div class="sc-img-overlay"></div>
-          <div class="sc-img-label">Main Classroom</div>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <div class="sc-img h-short">
-            <img src="nl1.jpeg" alt="NLTC reading corner with study shelves" loading="lazy">
-            <div class="sc-img-overlay"></div>
-            <div class="sc-img-label">Reading Corner</div>
-          </div>
-          <div class="sc-img h-short">
-            <img src="nl2.jpeg" alt="NLTC coaching room with whiteboard and desks" loading="lazy">
-            <div class="sc-img-overlay"></div>
-            <div class="sc-img-label">Coaching Room</div>
-          </div>
-          <div class="sc-img h-short">
-            <img src="nl.jpeg" alt="NLTC mentoring room with meeting table" loading="lazy">
-            <div class="sc-img-overlay"></div>
-            <div class="sc-img-label">Mentor Space</div>
-          </div>
+      <div class="showcase-imgs anim from-right" style="display: flex; align-items: center; justify-content: center;">
+        <div style="width: 100%; max-width: 600px; border-radius: 16px; overflow: hidden; box-shadow: 0 24px 80px rgba(11,29,58,0.20);">
+          <iframe
+            src="https://player.cloudinary.com/embed/?cloud_name=dbprcgtog&public_id=nltc_video_lbmv51"
+            width="640"
+            height="360"
+            style="height: auto; width: 100%; aspect-ratio: 640 / 360; border: none; border-radius: 16px;"
+            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+            allowfullscreen
+            frameborder="0"
+          ></iframe>
         </div>
       </div>
     </div>
@@ -2137,5 +2126,106 @@ if (lbSection && 'IntersectionObserver' in window) {
 }
 </script>
 <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});</script>
+<!-- Cloudinary Video Player -->
+<script src="https://cdn.jsdelivr.net/npm/cloudinary-video-player@1.14.2/dist/index.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/cloudinary-video-player@1.14.2/dist/cld-video-player.css" rel="stylesheet">
+
+<!-- GSAP Animation Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+<script>
+  // Register plugins
+  gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+
+  // ══════════════════════════════════════════════════════════════
+  // HERO SECTION — On Page Load (only hero, don't touch .anim elements)
+  // ══════════════════════════════════════════════════════════════
+  gsap.timeline()
+    .from('.hero-badge', { duration: 0.8, opacity: 0, y: -20, ease: 'power2.out' }, 0)
+    .from('h1', { duration: 1, opacity: 0, y: 30, ease: 'power2.out' }, 0.2)
+    .from('.hero-sub', { duration: 0.8, opacity: 0, y: 20, ease: 'power2.out' }, 0.4)
+    .from('.hero-btns', { duration: 0.8, opacity: 0, y: 20, ease: 'power2.out' }, 0.5)
+    .from('.hero-stats > div', { duration: 0.8, opacity: 0, y: 15, stagger: 0.1, ease: 'power2.out' }, 0.6)
+    .from('.hero-mosaic', { duration: 1, opacity: 0, scale: 0.95, ease: 'power2.out' }, 0.3)
+    .from('.hero-float', { duration: 1, opacity: 0, y: 30, stagger: 0.2, ease: 'power2.out' }, 0.5);
+
+  // ══════════════════════════════════════════════════════════════
+  // SHOWCASE VIDEO — Parallax effect
+  // ══════════════════════════════════════════════════════════════
+  const showCaseVid = document.querySelector('.showcase-imgs');
+  if (showCaseVid) {
+    gsap.to(showCaseVid, {
+      scrollTrigger: { trigger: showCaseVid, start: 'top center', end: 'bottom center', scrub: 0.5 },
+      y: -30,
+      ease: 'none'
+    });
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // PARALLAX HERO ORB BACKGROUND
+  // ══════════════════════════════════════════════════════════════
+  gsap.to('.hero-orb-1', {
+    scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 1 },
+    y: 100,
+    opacity: 0.5,
+    ease: 'none'
+  });
+
+  gsap.to('.hero-orb-2', {
+    scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 1 },
+    y: -80,
+    ease: 'none'
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // CARD HOVER EFFECTS — Enhanced with GSAP
+  // ══════════════════════════════════════════════════════════════
+  document.querySelectorAll('.feat-card, .exam-card, .plan, .live-lb-card').forEach(card => {
+    card.addEventListener('mouseenter', () => {
+      gsap.to(card, { duration: 0.3, y: -8, boxShadow: '0 24px 60px rgba(11,29,58,0.25)', ease: 'power2.out' });
+    });
+    card.addEventListener('mouseleave', () => {
+      gsap.to(card, { duration: 0.3, y: 0, boxShadow: 'var(--shadow-md)', ease: 'power2.out' });
+    });
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // BUTTON HOVER EFFECTS
+  // ══════════════════════════════════════════════════════════════
+  document.querySelectorAll('.hero-btn-main, .btn-primary, .hero-cta-btn').forEach(btn => {
+    btn.addEventListener('mouseenter', () => {
+      gsap.to(btn, { duration: 0.2, scale: 1.05, ease: 'power2.out' });
+    });
+    btn.addEventListener('mouseleave', () => {
+      gsap.to(btn, { duration: 0.2, scale: 1, ease: 'power2.out' });
+    });
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // SMOOTH SCROLL FOR ANCHOR LINKS
+  // ══════════════════════════════════════════════════════════════
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      const href = this.getAttribute('href');
+      if (href !== '#' && document.querySelector(href)) {
+        e.preventDefault();
+        gsap.to(window, { duration: 1, scrollTo: { y: href, offsetY: 70 }, ease: 'power2.inOut' });
+      }
+    });
+  });
+
+  console.log('✨ GSAP animations initialized');
+</script>
+
+<!-- Cloudinary Video Player Init -->
+<script>
+  if (typeof cloudinary !== 'undefined' && cloudinary.videoPlayer) {
+    const players = document.querySelectorAll('iframe[src*="player.cloudinary.com"]');
+    players.forEach((player, index) => {
+      // The iframe is already functional via the embed URL
+    });
+  }
+</script>
 </body>
 </html>

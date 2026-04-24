@@ -2120,11 +2120,7 @@ function installCBTAntiCheat() {
   const bar = document.getElementById('cbtWarnBar');
   if (bar) bar.style.display = 'none';
 
-  // Fullscreen — whole page
-  try {
-    const el = document.documentElement;
-    (el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen)?.call(el);
-  } catch(e) {}
+  // Fullscreen disabled to avoid blocking calculator/question map
 
   _acH.ctx   = e => e.preventDefault();
   _acH.copy  = e => e.preventDefault();
@@ -2157,12 +2153,7 @@ function installCBTAntiCheat() {
   };
   window.addEventListener('blur', _acH.blur);
 
-  _acH.fs = () => {
-    if (!document.getElementById('exam-screen').classList.contains('active')) return;
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) recordCBTViolation('fullscreen_exit');
-  };
-  document.addEventListener('fullscreenchange',       _acH.fs);
-  document.addEventListener('webkitfullscreenchange', _acH.fs);
+  // Fullscreen disabled to avoid blocking calculator/question map
 }
 
 function uninstallCBTAntiCheat() {
@@ -2175,9 +2166,6 @@ function uninstallCBTAntiCheat() {
   document.removeEventListener('keydown',              _acH.key);
   document.removeEventListener('visibilitychange',     _acH.vis);
   window.removeEventListener('blur',                   _acH.blur);
-  document.removeEventListener('fullscreenchange',     _acH.fs);
-  document.removeEventListener('webkitfullscreenchange', _acH.fs);
-  try { (document.exitFullscreen || document.webkitExitFullscreen)?.call(document); } catch(e) {}
 }
 
 function recordCBTViolation(type) {
@@ -2186,7 +2174,6 @@ function recordCBTViolation(type) {
   const labels = {
     tab_switch:     'Tab switch detected',
     window_blur:    'You left the exam window',
-    fullscreen_exit:'You exited fullscreen',
     devtools:       'Developer tools detected'
   };
   const msg = labels[type] || 'Cheating detected';
@@ -2197,13 +2184,7 @@ function recordCBTViolation(type) {
   if (txt) txt.textContent = `⚠ ${msg}! Violation ${acViolations}/3`;
   if (cnt) cnt.textContent = acViolations >= 2 ? '⛔ Next violation = auto-submit!' : '';
 
-  // Re-enter fullscreen if they left it
-  if (type === 'fullscreen_exit' || type === 'tab_switch') {
-    try {
-      const el = document.documentElement;
-      (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
-    } catch(e) {}
-  }
+  // Fullscreen re-entry disabled
 
   showToast(`Violation ${acViolations}/3: ${msg}`, 'error');
 
