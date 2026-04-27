@@ -141,7 +141,7 @@ export default function VideoLessonsView() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon">🎬</div>
+          <div className="empty-state-icon"><i className="fas fa-film" /></div>
           <h3>No lessons found</h3>
           <p>Try adjusting your filters or check back soon.</p>
         </div>
@@ -157,7 +157,7 @@ export default function VideoLessonsView() {
                 <div className="video-thumb">
                   {v.thumbnail ? <img src={v.thumbnail} alt={v.title} /> : <div className="video-thumb-placeholder"><i className="fas fa-play-circle" /></div>}
                   {!accessible && <div className="video-lock-overlay"><i className="fas fa-lock" /></div>}
-                  <span className={`video-access-badge ${v.access || 'free'}`}>{v.access === 'elite' ? '⭐ Elite' : v.access === 'pro' ? '🔥 Pro' : '✓ Free'}</span>
+                  <span className={`video-access-badge ${v.access || 'free'}`}>{v.access === 'elite' ? <><i className="fas fa-star" /> Elite</> : v.access === 'pro' ? <><i className="fas fa-fire" /> Pro</> : <><i className="fas fa-check" /> Free</>}</span>
                 </div>
                 <div className="video-info">
                   <div className="video-title">{v.title}</div>

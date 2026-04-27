@@ -100,7 +100,7 @@ export default function QuickTestsView() {
         <div className="card card-body">{Array.from({length:5}).map((_,i) => <SkeletonListItem key={i} />)}</div>
       ) : tests.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon">⚡</div>
+          <div className="empty-state-icon"><i className="fas fa-bolt" /></div>
           <h3>No quick tests yet</h3>
           <p>New tests are added regularly. Check back soon!</p>
         </div>
@@ -109,7 +109,7 @@ export default function QuickTestsView() {
           {tests.map(t => (
             <div key={t.id} className="card">
               <div className="card-body" style={{ display:'flex', alignItems:'center', gap:14 }}>
-                <div style={{ fontSize:'1.8rem' }}>⚡</div>
+                <div style={{ fontSize:'1.5rem', color:'var(--gold)' }}><i className="fas fa-bolt" /></div>
                 <div style={{ flex:1 }}>
                   <div style={{ fontWeight:700, fontSize:'.9rem', color:'var(--navy)' }}>{t.title}</div>
                   <div style={{ fontSize:'.75rem', color:'var(--text-3)', marginTop:2 }}>

@@ -35,7 +35,7 @@ export default function MockExamsView() {
       {!canAccess() && (
         <div className="upgrade-banner" style={{ marginBottom:16 }}>
           <div>
-            <div style={{ fontWeight:700, color:'var(--navy)', marginBottom:4 }}>🔒 Pro Feature</div>
+            <div style={{ fontWeight:700, color:'var(--navy)', marginBottom:4 }}><i className="fas fa-lock" style={{marginRight:5}} />Pro Feature</div>
             <div style={{ fontSize:'.82rem', color:'var(--text-2)' }}>Upgrade to Pro or Elite to unlock full mock exams.</div>
           </div>
         </div>
@@ -44,7 +44,7 @@ export default function MockExamsView() {
         <div className="card card-body">{Array.from({length:4}).map((_,i) => <SkeletonListItem key={i} lines={2} />)}</div>
       ) : exams.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon">📄</div>
+          <div className="empty-state-icon"><i className="fas fa-file-alt" /></div>
           <h3>No mock exams available</h3>
           <p>Check back soon — new mock exams are added regularly.</p>
         </div>
@@ -53,7 +53,7 @@ export default function MockExamsView() {
           {exams.map(exam => (
             <div key={exam.id} className="card mock-exam-card">
               <div className="card-body" style={{ display:'flex', alignItems:'center', gap:14 }}>
-                <div style={{ fontSize:'2rem', flexShrink:0 }}>📝</div>
+                <div style={{ fontSize:'1.5rem', flexShrink:0, color:'var(--gold)' }}><i className="fas fa-file-alt" /></div>
                 <div style={{ flex:1 }}>
                   <div style={{ fontWeight:700, fontSize:'.95rem', color:'var(--navy)', marginBottom:4 }}>{exam.title}</div>
                   <div style={{ fontSize:'.78rem', color:'var(--text-3)' }}>

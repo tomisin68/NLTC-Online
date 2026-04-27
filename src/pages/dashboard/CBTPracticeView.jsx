@@ -7,14 +7,14 @@ import { SkeletonTable } from '../../components/ui/Skeleton';
 import { formatDate } from '../../contexts/AuthContext';
 
 const SUBJECTS = [
-  { key:'mathematics', name:'Mathematics', emoji:'📐', color:'#2E90FA' },
-  { key:'english',     name:'English',     emoji:'📖', color:'#7A5AF8' },
-  { key:'physics',     name:'Physics',     emoji:'⚛️',  color:'#F04438' },
-  { key:'chemistry',   name:'Chemistry',   emoji:'🧪', color:'#12B76A' },
-  { key:'biology',     name:'Biology',     emoji:'🌿', color:'#16B364' },
-  { key:'economics',   name:'Economics',   emoji:'📊', color:'#F79009' },
-  { key:'government',  name:'Government',  emoji:'⚖️',  color:'#0BA5EC' },
-  { key:'literature',  name:'Literature',  emoji:'📚', color:'#9E77ED' },
+  { key:'mathematics', name:'Mathematics', icon:'fa-calculator',    color:'#2E90FA' },
+  { key:'english',     name:'English',     icon:'fa-book',          color:'#7A5AF8' },
+  { key:'physics',     name:'Physics',     icon:'fa-atom',          color:'#F04438' },
+  { key:'chemistry',   name:'Chemistry',   icon:'fa-flask',         color:'#12B76A' },
+  { key:'biology',     name:'Biology',     icon:'fa-leaf',          color:'#16B364' },
+  { key:'economics',   name:'Economics',   icon:'fa-chart-bar',     color:'#F79009' },
+  { key:'government',  name:'Government',  icon:'fa-balance-scale', color:'#0BA5EC' },
+  { key:'literature',  name:'Literature',  icon:'fa-book-open',     color:'#9E77ED' },
 ];
 
 export default function CBTPracticeView() {
@@ -45,17 +45,17 @@ export default function CBTPracticeView() {
 
       {/* Mode selector */}
       <div className="card" style={{ marginBottom:16 }}>
-        <div className="card-header"><div className="card-title">⚙️ Exam Mode</div></div>
+        <div className="card-header"><div className="card-title"><i className="fas fa-cog" style={{marginRight:6}} />Exam Mode</div></div>
         <div className="card-body">
           <div className="cbt-mode-grid">
             {[
-              { k:'jamb', icon:'🎯', name:'JAMB', desc:'4 subjects · 180 qs · 2 hrs' },
-              { k:'waec', icon:'📋', name:'WAEC', desc:'1 subject · 45 min' },
-              { k:'practice', icon:'🔁', name:'Practice', desc:'Custom subject & count' },
-              { k:'postutme', icon:'🏛️', name:'Post UTME', desc:'1 subject · 30 min' },
+              { k:'jamb',     icon:'fa-bullseye',       name:'JAMB',     desc:'4 subjects · 180 qs · 2 hrs' },
+              { k:'waec',     icon:'fa-clipboard-list', name:'WAEC',     desc:'1 subject · 45 min' },
+              { k:'practice', icon:'fa-sync-alt',       name:'Practice', desc:'Custom subject & count' },
+              { k:'postutme', icon:'fa-university',     name:'Post UTME', desc:'1 subject · 30 min' },
             ].map(m => (
               <div key={m.k} className={`cbt-mode-card${mode===m.k?' selected':''}`} onClick={() => setMode(m.k)}>
-                <div className="cbt-mode-icon">{m.icon}</div>
+                <div className="cbt-mode-icon"><i className={`fas ${m.icon}`} /></div>
                 <div className="cbt-mode-name">{m.name}</div>
                 <div className="cbt-mode-desc">{m.desc}</div>
               </div>
@@ -70,12 +70,12 @@ export default function CBTPracticeView() {
 
       {/* Quick subject practice */}
       <div className="card" style={{ marginBottom:16 }}>
-        <div className="card-header"><div className="card-title">⚡ Quick Practice by Subject</div></div>
+        <div className="card-header"><div className="card-title"><i className="fas fa-bolt" style={{marginRight:6}} />Quick Practice by Subject</div></div>
         <div className="card-body">
           <div className="cbt-subj-grid">
             {SUBJECTS.map(s => (
               <div key={s.key} className="quick-cbt-card" onClick={() => launch('practice', s.key)}>
-                <div style={{ fontSize:'1.4rem', marginBottom:6 }}>{s.emoji}</div>
+                <div style={{ fontSize:'1.4rem', marginBottom:6, color:s.color }}><i className={`fas ${s.icon}`} /></div>
                 <div className="qcc-name">{s.name}</div>
                 <div className="qcc-sub">Practice</div>
               </div>
@@ -86,10 +86,10 @@ export default function CBTPracticeView() {
 
       {/* History */}
       <div className="card">
-        <div className="card-header"><div className="card-title">📜 Past Sessions</div></div>
+        <div className="card-header"><div className="card-title"><i className="fas fa-history" style={{marginRight:6}} />Past Sessions</div></div>
         {loadingHistory ? <SkeletonTable rows={5} cols={4} /> : history.length === 0 ? (
           <div className="empty-state" style={{ padding:'32px 20px' }}>
-            <div className="empty-state-icon">📋</div>
+            <div className="empty-state-icon"><i className="fas fa-clipboard-list" /></div>
             <h3>No sessions yet</h3>
             <p>Start your first CBT session above!</p>
           </div>

@@ -9,6 +9,234 @@ import { SkeletonTable, SkeletonStatCard } from '../components/ui/Skeleton';
 import '../styles/admin.css';
 import '../styles/dashboard.css';
 
+/* ── Analytics ── */
+function AnalyticsView() {
+  const [data, setData] = useState({ users:[], loading:true });
+
+  useEffect(() => {
+    getDocs(collection(db,'users'))
+      .then(snap => setData({ users: snap.docs.map(d => d.data()), loading:false }))
+      .catch(() => setData({ users:[], loading:false }));
+  }, []);
+
+  const { users, loading } = data;
+  const total = users.length;
+  const free  = users.filter(u => !u.plan || u.plan === 'free').length;
+  const pro   = users.filter(u => u.plan === 'pro').length;
+  const elite = users.filter(u => u.plan === 'elite').length;
+  const avgXp = total ? Math.round(users.reduce((a,u) => a+(u.xp||0),0)/total) : 0;
+  const withStreak = users.filter(u => (u.streak||0) >= 3).length;
+
+  const examMap = {};
+  users.forEach(u => { const e = u.targetExam||'JAMB'; examMap[e] = (examMap[e]||0)+1; });
+  const examRows = Object.entries(examMap).sort((a,b) => b[1]-a[1]);
+
+  // Signups by month (last 6 months)
+  const now = new Date();
+  const months = Array.from({length:6},(_,i) => {
+    const d = new Date(now.getFullYear(), now.getMonth()-5+i, 1);
+    return { label: d.toLocaleString('default',{month:'short'}), year:d.getFullYear(), month:d.getMonth() };
+  });
+  const byMonth = months.map(m => ({
+    ...m,
+    count: users.filter(u => {
+      const s = u.createdAt?.seconds;
+      if (!s) return false;
+      const d = new Date(s*1000);
+      return d.getFullYear()===m.year && d.getMonth()===m.month;
+    }).length
+  }));
+  const maxCount = Math.max(...byMonth.map(m => m.count), 1);
+
+  return (
+    <div>
+      <div className="page-hdr"><h2>Analytics</h2><p>Platform usage and engagement overview.</p></div>
+      {loading ? <div className="stats-grid">{[1,2,3,4].map(i=><SkeletonStatCard key={i}/>)}</div> : (
+        <>
+          <div className="stats-grid">
+            <div className="stat-card s1"><div className="sc-icon blue"><i className="fas fa-users"/></div><div className="sc-num">{total}</div><div className="sc-label">Total Users</div></div>
+            <div className="stat-card s2"><div className="sc-icon gold"><i className="fas fa-star"/></div><div className="sc-num">{avgXp.toLocaleString()}</div><div className="sc-label">Average XP</div></div>
+            <div className="stat-card s3"><div className="sc-icon green"><i className="fas fa-fire"/></div><div className="sc-num">{withStreak}</div><div className="sc-label">Active Streaks (3d+)</div></div>
+            <div className="stat-card s4"><div className="sc-icon teal"><i className="fas fa-chart-pie"/></div><div className="sc-num">{total?Math.round((pro+elite)/total*100):0}%</div><div className="sc-label">Paid Conversion</div></div>
+          </div>
+
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16}}>
+            {/* Plan distribution */}
+            <div className="card">
+              <div className="card-header"><div className="card-title"><i className="fas fa-chart-pie" style={{marginRight:6}}/>Plan Distribution</div></div>
+              <div className="card-body">
+                {[['Free',free,'var(--border-2)'],['Pro',pro,'var(--gold)'],['Elite',elite,'#7C3AED']].map(([label,n,color])=>(
+                  <div key={label} style={{marginBottom:10}}>
+                    <div style={{display:'flex',justifyContent:'space-between',fontSize:'.8rem',marginBottom:4}}>
+                      <span style={{fontWeight:700}}>{label}</span>
+                      <span style={{color:'var(--text-3)'}}>{n} ({total?Math.round(n/total*100):0}%)</span>
+                    </div>
+                    <div style={{height:8,background:'var(--surface-2)',borderRadius:4,overflow:'hidden'}}>
+                      <div style={{height:'100%',background:color,width:`${total?n/total*100:0}%`,borderRadius:4,transition:'width .5s'}}/>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Exam distribution */}
+            <div className="card">
+              <div className="card-header"><div className="card-title"><i className="fas fa-graduation-cap" style={{marginRight:6}}/>Target Exams</div></div>
+              <div className="card-body">
+                {examRows.map(([exam,n])=>(
+                  <div key={exam} style={{marginBottom:10}}>
+                    <div style={{display:'flex',justifyContent:'space-between',fontSize:'.8rem',marginBottom:4}}>
+                      <span style={{fontWeight:700}}>{exam}</span>
+                      <span style={{color:'var(--text-3)'}}>{n}</span>
+                    </div>
+                    <div style={{height:8,background:'var(--surface-2)',borderRadius:4,overflow:'hidden'}}>
+                      <div style={{height:'100%',background:'var(--navy)',width:`${total?n/total*100:0}%`,borderRadius:4}}/>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Signups by month */}
+          <div className="card">
+            <div className="card-header"><div className="card-title"><i className="fas fa-chart-bar" style={{marginRight:6}}/>Signups (Last 6 Months)</div></div>
+            <div className="card-body">
+              <div style={{display:'flex',alignItems:'flex-end',gap:8,height:120}}>
+                {byMonth.map(m=>(
+                  <div key={m.label} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:4}}>
+                    <div style={{fontSize:'.68rem',color:'var(--gold)',fontWeight:700}}>{m.count||''}</div>
+                    <div style={{width:'100%',background:'var(--gold)',borderRadius:'4px 4px 0 0',height:`${(m.count/maxCount)*90}px`,minHeight:m.count?4:0,transition:'height .4s'}}/>
+                    <div style={{fontSize:'.65rem',color:'var(--text-3)',fontWeight:600}}>{m.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ── CBT Manager (Questions) ── */
+function CBTManagerView() {
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [saving, setSaving]     = useState(false);
+  const [search, setSearch]     = useState('');
+  const [filterSubj, setFilterSubj] = useState('all');
+  const SUBJ_LIST = ['Mathematics','English','Physics','Chemistry','Biology','Economics','Government','Literature','CRK','Accounting','Geography'];
+  const [form, setForm] = useState({ subject:'Mathematics', question:'', a:'', b:'', c:'', d:'', answer:'a' });
+
+  useEffect(() => {
+    getDocs(collection(db,'questions'))
+      .then(snap => setQuestions(snap.docs.map(d => ({ id:d.id, ...d.data() }))))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function saveQuestion(e) {
+    e.preventDefault();
+    if (!form.question.trim()) { showToast('Question text required','error'); return; }
+    if (!form.a || !form.b || !form.c || !form.d) { showToast('All 4 options required','error'); return; }
+    setSaving(true);
+    try {
+      const payload = { subject:form.subject, question:form.question.trim(), a:form.a, b:form.b, c:form.c, d:form.d, answer:form.answer, createdAt:serverTimestamp() };
+      const ref = await addDoc(collection(db,'questions'), payload);
+      setQuestions(prev => [{ id:ref.id, ...payload }, ...prev]);
+      setForm({ subject:'Mathematics', question:'', a:'', b:'', c:'', d:'', answer:'a' });
+      setModalOpen(false);
+      showToast('Question added!','success');
+    } catch(err) { showToast(err.message||'Failed','error'); }
+    setSaving(false);
+  }
+
+  async function deleteQuestion(id) {
+    if (!window.confirm('Delete this question?')) return;
+    try {
+      await deleteDoc(doc(db,'questions',id));
+      setQuestions(prev => prev.filter(q => q.id !== id));
+      showToast('Deleted','success');
+    } catch { showToast('Delete failed','error'); }
+  }
+
+  const filtered = questions.filter(q =>
+    (filterSubj === 'all' || q.subject === filterSubj) &&
+    (q.question||'').toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div>
+      <div className="page-hdr" style={{ display:'flex',alignItems:'center',justifyContent:'space-between' }}>
+        <div><h2>CBT Manager</h2><p>{questions.length} questions in the bank</p></div>
+        <button className="btn-gold" onClick={() => setModalOpen(true)}><i className="fas fa-plus"/> Add Question</button>
+      </div>
+      <div className="filter-bar">
+        <div className="filter-input-wrap" style={{ flex:1 }}>
+          <i className="fas fa-search"/>
+          <input className="filter-input" placeholder="Search questions…" value={search} onChange={e=>setSearch(e.target.value)}/>
+        </div>
+        <select className="filter-select" value={filterSubj} onChange={e=>setFilterSubj(e.target.value)}>
+          <option value="all">All Subjects</option>
+          {SUBJ_LIST.map(s=><option key={s}>{s}</option>)}
+        </select>
+      </div>
+      <div className="card">
+        {loading ? <SkeletonTable rows={8} cols={4}/> : filtered.length === 0 ? (
+          <div className="empty-state"><div className="empty-state-icon"><i className="fas fa-question-circle"/></div><h3>No questions{search?' found':' yet'}</h3><p>{search?'Try a different search.':'Add questions to build the bank.'}</p></div>
+        ) : (
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead><tr><th>#</th><th>Subject</th><th>Question</th><th>Answer</th><th></th></tr></thead>
+              <tbody>
+                {filtered.map((q,i)=>(
+                  <tr key={q.id}>
+                    <td style={{color:'var(--text-3)',width:40}}>{i+1}</td>
+                    <td><span className="badge badge-navy">{q.subject}</span></td>
+                    <td style={{maxWidth:320,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',fontSize:'.82rem'}}>{q.question}</td>
+                    <td style={{fontWeight:700,color:'var(--gold)',textTransform:'uppercase'}}>{q.answer}</td>
+                    <td><button className="btn-error btn-xs" onClick={()=>deleteQuestion(q.id)}><i className="fas fa-trash"/></button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+      <Modal open={modalOpen} onClose={()=>setModalOpen(false)} title="Add Question">
+        <form onSubmit={saveQuestion}>
+          <div className="form-group"><label className="form-label">Subject</label>
+            <select className="form-select" value={form.subject} onChange={e=>setForm(p=>({...p,subject:e.target.value}))}>
+              {SUBJ_LIST.map(s=><option key={s}>{s}</option>)}
+            </select>
+          </div>
+          <div className="form-group"><label className="form-label">Question *</label>
+            <textarea className="form-input" rows={3} value={form.question} onChange={e=>setForm(p=>({...p,question:e.target.value}))} placeholder="Enter the full question text…" style={{resize:'vertical'}} required/>
+          </div>
+          {['a','b','c','d'].map(k=>(
+            <div key={k} className="form-group"><label className="form-label">Option {k.toUpperCase()} *</label>
+              <input className="form-input" value={form[k]} onChange={e=>setForm(p=>({...p,[k]:e.target.value}))} placeholder={`Option ${k.toUpperCase()}`} required/>
+            </div>
+          ))}
+          <div className="form-group"><label className="form-label">Correct Answer</label>
+            <select className="form-select" value={form.answer} onChange={e=>setForm(p=>({...p,answer:e.target.value}))}>
+              {['a','b','c','d'].map(k=><option key={k} value={k}>Option {k.toUpperCase()}</option>)}
+            </select>
+          </div>
+          <div style={{display:'flex',gap:8}}>
+            <button type="button" className="btn-outline" style={{flex:1,justifyContent:'center'}} onClick={()=>setModalOpen(false)}>Cancel</button>
+            <button type="submit" className="btn-gold" style={{flex:2,justifyContent:'center'}} disabled={saving}>
+              {saving?<span className="spinner spinner-white" style={{width:16,height:16}}/>:<><i className="fas fa-plus"/> Add Question</>}
+            </button>
+          </div>
+        </form>
+      </Modal>
+    </div>
+  );
+}
+
 /* ── Admin Sidebar ── */
 function AdminSidebar({ view, onNav, open, onClose }) {
   const { signOut, userData } = useAuth();
@@ -26,13 +254,13 @@ function AdminSidebar({ view, onNav, open, onClose }) {
         </div>
         <nav className="sb-nav">
           <div className="sb-sec">Overview</div>
-          {[['overview','fas fa-chart-pie','Dashboard']].map(([v,i,l]) => (
+          {[['overview','fas fa-chart-pie','Dashboard'],['analytics','fas fa-chart-bar','Analytics']].map(([v,i,l]) => (
             <button key={v} className={`sb-link${view===v?' active':''}`} onClick={() => { onNav(v); onClose(); }}>
               <i className={i} />{l}
             </button>
           ))}
           <div className="sb-sec">Management</div>
-          {[['students','fas fa-users','Students'],['videos','fas fa-film','Video Lessons'],['broadcasts','fas fa-bullhorn','Broadcasts']].map(([v,i,l]) => (
+          {[['students','fas fa-users','Students'],['videos','fas fa-film','Video Lessons'],['questions','fas fa-question-circle','CBT Manager'],['broadcasts','fas fa-bullhorn','Broadcasts']].map(([v,i,l]) => (
             <button key={v} className={`sb-link${view===v?' active':''}`} onClick={() => { onNav(v); onClose(); }}>
               <i className={i} />{l}
             </button>
@@ -94,7 +322,7 @@ function OverviewView() {
         <div className="stat-card s4"><div className="sc-icon teal"><i className="fas fa-naira-sign" /></div><div className="sc-num">₦{(revenue/1000).toFixed(0)}k</div><div className="sc-label">Est. Revenue</div></div>
       </div>
       <div className="card">
-        <div className="card-header"><div className="card-title">👥 Recent Students</div></div>
+        <div className="card-header"><div className="card-title"><i className="fas fa-users" style={{marginRight:6}} />Recent Students</div></div>
         {loading ? <SkeletonTable rows={8} cols={5} /> : (
           <div className="table-wrap">
             <table className="data-table">
@@ -315,7 +543,7 @@ function VideosView() {
       </div>
       <div className="card">
         {loading ? <SkeletonTable rows={6} cols={5} /> : videos.length === 0 ? (
-          <div className="empty-state"><div className="empty-state-icon">🎬</div><h3>No videos yet</h3><p>Add your first video lesson.</p></div>
+          <div className="empty-state"><div className="empty-state-icon"><i className="fas fa-film" /></div><h3>No videos yet</h3><p>Add your first video lesson.</p></div>
         ) : (
           <div className="table-wrap">
             <table className="data-table">
@@ -423,12 +651,12 @@ function BroadcastsView() {
       </div>
       <div className="card">
         {loading ? <SkeletonTable rows={5} cols={3} /> : broadcasts.length === 0 ? (
-          <div className="empty-state"><div className="empty-state-icon">📢</div><h3>No broadcasts yet</h3></div>
+          <div className="empty-state"><div className="empty-state-icon"><i className="fas fa-bullhorn" /></div><h3>No broadcasts yet</h3></div>
         ) : (
           <div>
             {broadcasts.map(b => (
               <div key={b.id} className="annc-item">
-                <div className="annc-icon">📢</div>
+                <div className="annc-icon"><i className="fas fa-bullhorn" /></div>
                 <div style={{ flex:1 }}>
                   <div className="annc-header"><div className="annc-title">{b.title}</div>
                     {b.category && <span className="badge badge-navy">{b.category}</span>}
@@ -498,6 +726,7 @@ function LiveView() {
         status: 'scheduled',
         viewerCount: 0,
         hostName,
+        hostId: auth.currentUser?.uid || '',
         createdAt: serverTimestamp(),
       });
       setSessions(prev => [{ id:ref.id, ...form, status:'scheduled', viewerCount:0, hostName }, ...prev]);
@@ -535,7 +764,7 @@ function LiveView() {
       </div>
       <div className="card">
         {loading ? <SkeletonTable rows={5} cols={4} /> : sessions.length === 0 ? (
-          <div className="empty-state"><div className="empty-state-icon">📡</div><h3>No sessions yet</h3><p>Create your first live class.</p></div>
+          <div className="empty-state"><div className="empty-state-icon"><i className="fas fa-satellite-dish" /></div><h3>No sessions yet</h3><p>Create your first live class.</p></div>
         ) : (
           <div className="table-wrap">
             <table className="data-table">
@@ -670,7 +899,7 @@ function ScheduleView() {
         ))
       )}
       {items.length === 0 && !loading && (
-        <div className="empty-state"><div className="empty-state-icon">📅</div><h3>No schedule yet</h3><p>Add your first class to the timetable.</p></div>
+        <div className="empty-state"><div className="empty-state-icon"><i className="fas fa-calendar-alt" /></div><h3>No schedule yet</h3><p>Add your first class to the timetable.</p></div>
       )}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Add to Schedule">
         <form onSubmit={saveSchedule}>
@@ -758,8 +987,8 @@ function RevenueView() {
 
 /* ── Main Admin Page ── */
 const VIEW_TITLES = {
-  overview:'Overview', students:'Students', videos:'Video Lessons',
-  broadcasts:'Broadcasts', live:'Live Classes', schedule:'Schedule', revenue:'Revenue',
+  overview:'Overview', analytics:'Analytics', students:'Students', videos:'Video Lessons',
+  questions:'CBT Manager', broadcasts:'Broadcasts', live:'Live Classes', schedule:'Schedule', revenue:'Revenue',
 };
 
 export default function AdminPage() {
@@ -769,8 +998,10 @@ export default function AdminPage() {
   function renderView() {
     switch (view) {
       case 'overview':   return <OverviewView />;
+      case 'analytics':  return <AnalyticsView />;
       case 'students':   return <StudentsView />;
       case 'videos':     return <VideosView />;
+      case 'questions':  return <CBTManagerView />;
       case 'broadcasts': return <BroadcastsView />;
       case 'live':       return <LiveView />;
       case 'schedule':   return <ScheduleView />;

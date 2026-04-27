@@ -26,7 +26,7 @@ export default function AnnouncementsView() {
           <div className="card-body">{Array.from({length:6}).map((_,i) => <SkeletonListItem key={i} lines={2} />)}</div>
         ) : announcements.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">📢</div>
+            <div className="empty-state-icon"><i className="fas fa-bullhorn" /></div>
             <h3>No announcements yet</h3>
             <p>Check back soon for updates.</p>
           </div>
@@ -34,7 +34,7 @@ export default function AnnouncementsView() {
           <div style={{ padding:'0' }}>
             {announcements.map(a => (
               <div key={a.id} className="annc-item">
-                <div className="annc-icon">📢</div>
+                <div className="annc-icon"><i className="fas fa-bullhorn" /></div>
                 <div style={{ flex:1, minWidth:0 }}>
                   <div className="annc-header">
                     <div className="annc-title">{a.title}</div>

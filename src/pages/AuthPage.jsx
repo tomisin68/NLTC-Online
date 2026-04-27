@@ -150,7 +150,7 @@ export default function AuthPage() {
     return (
       <div className="auth-success-ov">
         <div className="auth-success-card">
-          <div className="auth-success-icon">🎉</div>
+          <div className="auth-success-icon"><i className="fas fa-check-circle" style={{color:'var(--success)',fontSize:'3rem'}} /></div>
           <h2>Welcome to NLTC!</h2>
           <p>Taking you to your dashboard…</p>
         </div>
@@ -167,9 +167,9 @@ export default function AuthPage() {
           <h1 className="auth-hero-title">Ace JAMB, WAEC &amp; NECO with Nigeria's #1 Exam Prep</h1>
           <p className="auth-hero-sub">Join 50,000+ students scoring higher with AI-powered CBT, live classes, and personalised study plans.</p>
           <div className="auth-trust-pills">
-            <span className="auth-pill">🏆 Top-rated platform</span>
-            <span className="auth-pill">📚 10,000+ questions</span>
-            <span className="auth-pill">📡 Daily live classes</span>
+            <span className="auth-pill"><i className="fas fa-trophy" /> Top-rated platform</span>
+            <span className="auth-pill"><i className="fas fa-book" /> 10,000+ questions</span>
+            <span className="auth-pill"><i className="fas fa-signal" /> Daily live classes</span>
           </div>
         </div>
       </div>
@@ -331,7 +331,7 @@ export default function AuthPage() {
 
               {resetSent ? (
                 <div className="auth-reset-success">
-                  <div className="auth-reset-icon">📧</div>
+                  <div className="auth-reset-icon"><i className="fas fa-envelope-open-text" style={{fontSize:'3rem',color:'var(--gold)'}} /></div>
                   <h3>Check your inbox</h3>
                   <p>We've sent a password reset link to <strong>{email}</strong>. Click the link in the email to set a new password.</p>
                   <p className="auth-reset-tip">Didn't receive it? Check your spam folder or try again.</p>

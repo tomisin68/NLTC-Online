@@ -79,14 +79,14 @@ export default function LiveClassesView() {
       {!canJoin() && (
         <div className="upgrade-banner" style={{ marginBottom:16 }}>
           <div>
-            <div style={{ fontWeight:700, color:'var(--navy)', marginBottom:4 }}>🔒 Pro Feature</div>
+            <div style={{ fontWeight:700, color:'var(--navy)', marginBottom:4 }}><i className="fas fa-lock" style={{marginRight:5}} />Pro Feature</div>
             <div style={{ fontSize:'.82rem', color:'var(--text-2)' }}>Upgrade to Pro to join live classes and interact with tutors.</div>
           </div>
         </div>
       )}
-      <Section title="🔴 Live Now" items={live} empty="No live classes right now. Check the schedule below." />
-      <Section title="📅 Upcoming" items={upcoming} empty="No upcoming sessions scheduled yet." />
-      <Section title="📼 Past Sessions" items={past} empty="No past sessions recorded." />
+      <Section title={<><i className="fas fa-circle" style={{color:'var(--error)',marginRight:5}} />Live Now</>} items={live} empty="No live classes right now. Check the schedule below." />
+      <Section title={<><i className="fas fa-calendar-alt" style={{marginRight:5}} />Upcoming</>} items={upcoming} empty="No upcoming sessions scheduled yet." />
+      <Section title={<><i className="fas fa-video" style={{marginRight:5}} />Past Sessions</>} items={past} empty="No past sessions recorded." />
     </div>
   );
 }

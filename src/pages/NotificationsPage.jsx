@@ -7,10 +7,15 @@ import { showToast } from '../contexts/ToastContext';
 import { SkeletonListItem } from '../components/ui/Skeleton';
 import './NotificationsPage.css';
 
-const NOTIF_ICONS = {
-  welcome:'🎓', live_class_start:'📡', session_ended:'📡', announcement:'📢',
-  new_lesson:'🎬', class_reminder:'📅', new_signup:'👤', payment:'💳', achievement:'🏆',
+const NOTIF_ICON_CLS = {
+  welcome:'fa-graduation-cap', live_class_start:'fa-satellite-dish', session_ended:'fa-satellite-dish',
+  announcement:'fa-bullhorn', new_lesson:'fa-film', class_reminder:'fa-calendar-alt',
+  new_signup:'fa-user', payment:'fa-credit-card', achievement:'fa-trophy',
 };
+function NotifIcon({ type }) {
+  const cls = NOTIF_ICON_CLS[type] || 'fa-bell';
+  return <i className={`fas ${cls}`} />;
+}
 const FILTERS = ['All','Announcements','Lessons','Live','Achievements','Payments'];
 
 export default function NotificationsPage() {
@@ -97,14 +102,14 @@ export default function NotificationsPage() {
           Array.from({length:8}).map((_,i) => <SkeletonListItem key={i} lines={2} />)
         ) : displayed.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">🔔</div>
+            <div className="empty-state-icon"><i className="fas fa-bell" /></div>
             <h3>No notifications</h3>
             <p>{activeTab === 'unread' ? 'You\'re all caught up!' : 'No notifications match this filter.'}</p>
           </div>
         ) : (
           displayed.map(n => (
             <div key={n.id} className={`notif-card${!n.read?' unread':''}`}>
-              <div className="notif-card-icon">{NOTIF_ICONS[n.type] || '📌'}</div>
+              <div className="notif-card-icon"><NotifIcon type={n.type} /></div>
               <div className="notif-card-body">
                 <div className="notif-card-title">{n.title}</div>
                 <div className="notif-card-text">{n.body}</div>

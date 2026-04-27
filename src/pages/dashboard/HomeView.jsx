@@ -92,7 +92,7 @@ export default function HomeView({ onNav }) {
       {/* Level badge */}
       <div className="level-banner">
         <div className="level-banner-left">
-          <span className="level-badge">⚡ {levelName}</span>
+          <span className="level-badge"><i className="fas fa-bolt" /> {levelName}</span>
           <span className="level-text">Level {level} · Keep studying to level up!</span>
         </div>
         <button className="card-action" onClick={() => onNav('leaderboard')}>
@@ -125,7 +125,7 @@ export default function HomeView({ onNav }) {
 
           {/* Quick actions */}
           <div className="card">
-            <div className="card-header"><div className="card-title">⚡ Quick Start</div></div>
+            <div className="card-header"><div className="card-title"><i className="fas fa-bolt" style={{marginRight:6}} />Quick Start</div></div>
             <div className="card-body quick-actions-grid">
               <div className="quick-action" onClick={() => onNav('cbt')}>
                 <div className="qa-icon" style={{ background:'#EFF6FF', color:'#2563EB' }}><i className="fas fa-laptop-code" /></div>
@@ -150,7 +150,7 @@ export default function HomeView({ onNav }) {
           {upcomingClasses.length > 0 && (
             <div className="card">
               <div className="card-header">
-                <div className="card-title">📅 Upcoming Classes</div>
+                <div className="card-title"><i className="fas fa-calendar-alt" style={{marginRight:6}} />Upcoming Classes</div>
                 <button className="card-action" onClick={() => onNav('schedule')}>View all <i className="fas fa-arrow-right" /></button>
               </div>
               <div className="card-body" style={{ padding:'8px 0' }}>
@@ -173,7 +173,7 @@ export default function HomeView({ onNav }) {
           {/* Achievements */}
           <div className="card">
             <div className="card-header">
-              <div className="card-title">🏆 Achievements</div>
+              <div className="card-title"><i className="fas fa-trophy" style={{marginRight:6}} />Achievements</div>
               <span style={{ fontSize:'.72rem', color:'var(--text-3)', fontWeight:700 }}>{earnedCount}/{achievements.length}</span>
             </div>
             <div className="card-body" style={{ padding:'10px 12px' }}>
@@ -182,7 +182,7 @@ export default function HomeView({ onNav }) {
                   <div className="ach-grid">
                     {achievements.map(a => (
                       <div key={a.id} className={`ach-chip${a.isEarned ? ' earned' : ' locked'}`} title={`${a.desc}${a.isEarned ? ' — Earned!' : ` — ${Math.round(a.progress*100)}% complete`}`}>
-                        {a.isEarned && <div className="ach-chip-badge">✓</div>}
+                        {a.isEarned && <div className="ach-chip-badge"><i className="fas fa-check" /></div>}
                         <div className="ach-chip-icon">{a.icon}</div>
                         <div className="ach-chip-name">{a.label}</div>
                         {!a.isEarned && (
@@ -204,7 +204,7 @@ export default function HomeView({ onNav }) {
           {/* Mini Leaderboard */}
           <div className="card">
             <div className="card-header">
-              <div className="card-title">🥇 Top Students</div>
+              <div className="card-title"><i className="fas fa-medal" style={{marginRight:6}} />Top Students</div>
               <button className="card-action" onClick={() => onNav('leaderboard')}>Full board <i className="fas fa-arrow-right" /></button>
             </div>
             <div className="card-body" style={{ padding:'8px 12px' }}>
@@ -213,7 +213,7 @@ export default function HomeView({ onNav }) {
                 : miniLb.map((u,i) => (
                   <div key={u.id} className="mini-lb-row" style={{ background: u.id === currentUser?.uid ? 'var(--gold-pale)' : 'transparent' }}>
                     <div className="mini-lb-rank" style={{ color: i < 3 ? 'var(--gold)' : 'var(--text-3)' }}>
-                      {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`}
+                      {i < 3 ? <i className="fas fa-medal" /> : `#${i+1}`}
                     </div>
                     <div className="mini-lb-avatar">{(u.firstName?.[0] || '?')}</div>
                     <div style={{ flex:1, minWidth:0 }}>

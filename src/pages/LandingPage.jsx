@@ -5,12 +5,12 @@ import { db } from '../firebase';
 import '../styles/landing.css';
 
 const FEATURES = [
-  { icon:'🎬', title:'Video Lessons', desc:'Expert-recorded JAMB, WAEC & NECO lessons across all major subjects, free and premium.' },
-  { icon:'📝', title:'CBT Practice', desc:'Authentic exam-mode CBT with past questions from JAMB\'s ALOC database. No peeking.' },
-  { icon:'📡', title:'Live Classes', desc:'Join real-time interactive sessions with certified tutors. Ask questions, get answers.' },
-  { icon:'🏆', title:'XP & Leaderboard', desc:'Earn XP for every activity. Climb the leaderboard and unlock achievement badges.' },
-  { icon:'📅', title:'Exam Schedule', desc:'Never miss a revision session. Structured weekly timetables for every exam type.' },
-  { icon:'📱', title:'Works Everywhere', desc:'Installable PWA — works on any phone, tablet, or PC, even with slow connections.' },
+  { icon:'fa-film',        title:'Video Lessons', desc:'Expert-recorded JAMB, WAEC & NECO lessons across all major subjects, free and premium.' },
+  { icon:'fa-file-alt',    title:'CBT Practice', desc:'Authentic exam-mode CBT with past questions from JAMB\'s ALOC database. No peeking.' },
+  { icon:'fa-signal',      title:'Live Classes', desc:'Join real-time interactive sessions with certified tutors. Ask questions, get answers.' },
+  { icon:'fa-trophy',      title:'XP & Leaderboard', desc:'Earn XP for every activity. Climb the leaderboard and unlock achievement badges.' },
+  { icon:'fa-calendar-alt',title:'Exam Schedule', desc:'Never miss a revision session. Structured weekly timetables for every exam type.' },
+  { icon:'fa-mobile-alt',  title:'Works Everywhere', desc:'Installable PWA — works on any phone, tablet, or PC, even with slow connections.' },
 ];
 
 const PLANS = [
@@ -123,7 +123,7 @@ export default function LandingPage() {
         <div className="lp-hero-bg" />
         <div className="lp-hero-inner">
           <img src="/nltc-light.png" alt="NLTC Online" className="lp-hero-logo" />
-          <div className="lp-hero-badge">🎓 Nigeria's #1 Exam Prep Platform</div>
+          <div className="lp-hero-badge"><i className="fas fa-graduation-cap" /> Nigeria's #1 Exam Prep Platform</div>
           <h1 className="lp-hero-title">
             Ace <span className="lp-hero-accent">JAMB, WAEC</span><br />& NECO with Confidence
           </h1>
@@ -183,7 +183,7 @@ export default function LandingPage() {
           <div className="lp-features-grid">
             {FEATURES.map(f => (
               <div key={f.title} className="lp-feature-card">
-                <div className="lp-feature-icon">{f.icon}</div>
+                <div className="lp-feature-icon"><i className={`fas ${f.icon}`} /></div>
                 <h3 className="lp-feature-title">{f.title}</h3>
                 <p className="lp-feature-desc">{f.desc}</p>
               </div>

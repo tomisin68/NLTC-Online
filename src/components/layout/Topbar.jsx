@@ -69,7 +69,7 @@ export default function Topbar({ title, onHamburger, streak, onSearch }) {
       <div className="topbar-title">{title}</div>
 
       {streak > 0 && (
-        <div className="tb-streak">🔥 {streak} day{streak !== 1 ? 's' : ''}</div>
+        <div className="tb-streak"><i className="fas fa-fire" /> {streak} day{streak !== 1 ? 's' : ''}</div>
       )}
 
       {onSearch && (
@@ -96,7 +96,7 @@ export default function Topbar({ title, onHamburger, streak, onSearch }) {
             )}
             {!loading && notifs.length === 0 && (
               <div className="notif-empty">
-                <div className="notif-empty-icon">🔔</div>
+                <div className="notif-empty-icon"><i className="fas fa-bell" /></div>
                 <p>No notifications yet</p>
               </div>
             )}

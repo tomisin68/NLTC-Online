@@ -105,7 +105,7 @@ export default function SettingsView() {
       <div className="settings-grid">
         {/* Profile */}
         <div className="card">
-          <div className="card-header"><div className="card-title">👤 Profile Information</div></div>
+          <div className="card-header"><div className="card-title"><i className="fas fa-user" style={{marginRight:6}} />Profile Information</div></div>
           <form className="card-body" onSubmit={handleSaveProfile}>
             <div className="form-row-2">
               <div className="form-group">
@@ -147,13 +147,13 @@ export default function SettingsView() {
 
         {/* Subscription */}
         <div className="card">
-          <div className="card-header"><div className="card-title">💳 Subscription</div></div>
+          <div className="card-header"><div className="card-title"><i className="fas fa-credit-card" style={{marginRight:6}} />Subscription</div></div>
           <div className="card-body">
             <div className="current-plan-box">
               <div style={{ fontSize:'.82rem', color:'var(--text-3)', marginBottom:4 }}>Current Plan</div>
               <div style={{ display:'flex', alignItems:'center', gap:10 }}>
                 <span className={`plan-tag plan-${plan}`} style={{ fontSize:'.9rem', padding:'4px 14px' }}>
-                  {plan === 'elite' ? '⭐ Elite' : plan === 'pro' ? '🔥 Pro' : 'Free'}
+                  {plan === 'elite' ? <><i className="fas fa-star" /> Elite</> : plan === 'pro' ? <><i className="fas fa-fire" /> Pro</> : 'Free'}
                 </span>
               </div>
             </div>
@@ -165,7 +165,7 @@ export default function SettingsView() {
           </div>
 
           {/* Lesson Fee */}
-          <div className="card-header" style={{ borderTop:'1px solid var(--border)' }}><div className="card-title">📚 Pay Lesson Fee</div></div>
+          <div className="card-header" style={{ borderTop:'1px solid var(--border)' }}><div className="card-title"><i className="fas fa-book" style={{marginRight:6}} />Pay Lesson Fee</div></div>
           <form className="card-body" onSubmit={handleLessonFee}>
             <div className="form-group">
               <label className="form-label">Amount (₦)</label>
@@ -191,12 +191,12 @@ export default function SettingsView() {
 
       {/* Payment history */}
       <div className="card" style={{ marginTop:16 }}>
-        <div className="card-header"><div className="card-title">📜 Payment History</div></div>
+        <div className="card-header"><div className="card-title"><i className="fas fa-history" style={{marginRight:6}} />Payment History</div></div>
         {loadingHistory ? (
           <div style={{ padding:'20px', textAlign:'center' }}><div className="spinner" style={{ margin:'0 auto' }} /></div>
         ) : payHistory.length === 0 ? (
           <div className="empty-state" style={{ padding:'28px' }}>
-            <div className="empty-state-icon">💳</div>
+            <div className="empty-state-icon"><i className="fas fa-receipt" /></div>
             <h3>No payments yet</h3>
             <p>Your payment history will appear here.</p>
           </div>
@@ -242,7 +242,7 @@ export default function SettingsView() {
             {payLoading ? <span className="spinner spinner-white" style={{width:16,height:16}} /> : <><i className="fas fa-credit-card" /> Pay with Paystack</>}
           </button>
         </div>
-        <div style={{ textAlign:'center', marginTop:11, fontSize:'.72rem', color:'var(--text-3)' }}>🔒 Secured by Paystack · Cancel anytime</div>
+        <div style={{ textAlign:'center', marginTop:11, fontSize:'.72rem', color:'var(--text-3)' }}><i className="fas fa-lock" style={{marginRight:4}} />Secured by Paystack · Cancel anytime</div>
       </Modal>
     </div>
   );

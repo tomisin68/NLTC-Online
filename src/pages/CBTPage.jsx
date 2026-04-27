@@ -11,21 +11,21 @@ import '../styles/cbt.css';
 /* ─── Constants ─── */
 const ALOC_BASE = 'https://questions.aloc.com.ng/api/v2';
 const SUBJECTS_CONFIG = {
-  mathematics:{ name:'Mathematics', emoji:'📐', color:'#2E90FA' },
-  english:    { name:'English',     emoji:'📖', color:'#7A5AF8' },
-  physics:    { name:'Physics',     emoji:'⚛️',  color:'#F04438' },
-  chemistry:  { name:'Chemistry',   emoji:'🧪', color:'#12B76A' },
-  biology:    { name:'Biology',     emoji:'🌿', color:'#16B364' },
-  economics:  { name:'Economics',   emoji:'📊', color:'#F79009' },
-  government: { name:'Government',  emoji:'⚖️',  color:'#0BA5EC' },
-  literature: { name:'Literature',  emoji:'📚', color:'#9E77ED' },
-  crk:        { name:'CRK',         emoji:'✝️',  color:'#E77729' },
-  accounting: { name:'Accounting',  emoji:'💰', color:'#2D9D78' },
+  mathematics:{ name:'Mathematics', icon:'fa-calculator',    color:'#2E90FA' },
+  english:    { name:'English',     icon:'fa-book',          color:'#7A5AF8' },
+  physics:    { name:'Physics',     icon:'fa-atom',          color:'#F04438' },
+  chemistry:  { name:'Chemistry',   icon:'fa-flask',         color:'#12B76A' },
+  biology:    { name:'Biology',     icon:'fa-leaf',          color:'#16B364' },
+  economics:  { name:'Economics',   icon:'fa-chart-bar',     color:'#F79009' },
+  government: { name:'Government',  icon:'fa-balance-scale', color:'#0BA5EC' },
+  literature: { name:'Literature',  icon:'fa-book-open',     color:'#9E77ED' },
+  crk:        { name:'CRK',         icon:'fa-cross',         color:'#E77729' },
+  accounting: { name:'Accounting',  icon:'fa-coins',         color:'#2D9D78' },
 };
 const OPTION_KEYS   = ['a','b','c','d'];
 const OPTION_LABELS = ['A','B','C','D'];
 
-function getOptionText(q, k) { return q[k] || q[`option_${k}`] || q.options?.[k] || ''; }
+function getOptionText(q, k) { return q[k] || q[`option_${k}`] || q.options?.[k] || q.option?.[k] || ''; }
 function getAnswer(q)        { return (q.answer || q.correct_option || '').toLowerCase().trim(); }
 function fmtTime(s)          { const m=Math.floor(s/60); return `${m}:${(s%60).toString().padStart(2,'0')}`; }
 
@@ -92,11 +92,11 @@ function SetupScreen({ onStart, initialMode, initialSubject }) {
   };
 
   const MODES = [
-    { k:'jamb',     icon:'🎯', name:'JAMB',     desc:'English + 3 subjects · 2 hrs' },
-    { k:'practice', icon:'🔁', name:'Practice', desc:'Custom subject & count' },
-    { k:'waec',     icon:'📋', name:'WAEC',     desc:'1 subject · 45 min' },
-    { k:'postutme', icon:'🏛️', name:'Post UTME', desc:'1 subject · 30 min' },
-    { k:'topic',    icon:'📌', name:'Topic',    desc:'Practice by topic' },
+    { k:'jamb',     icon:'fa-bullseye',       name:'JAMB',     desc:'English + 3 subjects · 2 hrs' },
+    { k:'practice', icon:'fa-sync-alt',       name:'Practice', desc:'Custom subject & count' },
+    { k:'waec',     icon:'fa-clipboard-list', name:'WAEC',     desc:'1 subject · 45 min' },
+    { k:'postutme', icon:'fa-university',     name:'Post UTME', desc:'1 subject · 30 min' },
+    { k:'topic',    icon:'fa-map-marker-alt', name:'Topic',    desc:'Practice by topic' },
   ];
 
   function handleStart() {
@@ -121,7 +121,7 @@ function SetupScreen({ onStart, initialMode, initialSubject }) {
             {MODES.map(m => (
               <div key={m.k} className={`mode-card${mode===m.k?' selected':''}`} onClick={() => setMode(m.k)}>
                 {mode===m.k && <span className="mode-rec">Selected</span>}
-                <div className="mode-icon">{m.icon}</div>
+                <div className="mode-icon"><i className={`fas ${m.icon}`} /></div>
                 <div className="mode-name">{m.name}</div>
                 <div className="mode-desc">{m.desc}</div>
               </div>
@@ -130,9 +130,9 @@ function SetupScreen({ onStart, initialMode, initialSubject }) {
 
           {mode === 'jamb' && (
             <div className="jamb-subject-picker">
-              <div className="section-label">📖 English (Required)</div>
+              <div className="section-label"><i className="fas fa-book" /> English (Required)</div>
               <div className="jamb-english-chip">
-                <span>📖 English Language</span>
+                <span><i className="fas fa-book" /> English Language</span>
                 <span className="jamb-chip-lock"><i className="fas fa-lock" /></span>
               </div>
               <div className="section-label" style={{ marginTop:12 }}>
@@ -146,7 +146,7 @@ function SetupScreen({ onStart, initialMode, initialSubject }) {
                     onClick={() => toggleJambSubject(s.key)}
                     disabled={!jambExtra.includes(s.key) && jambExtra.length >= 3}
                   >
-                    {s.emoji} {s.name}
+                    <i className={`fas ${s.icon}`} /> {s.name}
                     {jambExtra.includes(s.key) && <i className="fas fa-check" style={{ marginLeft:4 }} />}
                   </button>
                 ))}
@@ -158,7 +158,7 @@ function SetupScreen({ onStart, initialMode, initialSubject }) {
             <>
               <div className="section-label">Subject</div>
               <select className="ctrl-select" style={{ width:'100%', marginBottom:12 }} value={subject} onChange={e=>setSubject(e.target.value)}>
-                {Object.entries(SUBJECTS_CONFIG).map(([k,v]) => <option key={k} value={k}>{v.emoji} {v.name}</option>)}
+                {Object.entries(SUBJECTS_CONFIG).map(([k,v]) => <option key={k} value={k}>{v.name}</option>)}
               </select>
             </>
           )}
@@ -206,7 +206,7 @@ function LoadingScreen({ subjects, progress }) {
           const pct = Math.round((progress[i] || 0) * 100);
           return (
             <div key={s.key} className="load-subj-row">
-              <span className="load-subj-icon">{cfg.emoji}</span>
+              <span className="load-subj-icon"><i className={`fas ${cfg.icon || 'fa-book'}`} /></span>
               <div style={{ flex:1 }}>
                 <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                   <span className="load-subj-name">{cfg.name}</span>
@@ -256,7 +256,7 @@ function ExamScreen({ subjects, currentSubIdx, currentQIdx, answers, onAnswer, o
         return (
           <div key={si} style={{ marginBottom:14 }}>
             <div style={{ fontSize:'.68rem', fontWeight:700, color:'rgba(255,255,255,.4)', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:6 }}>
-              {sCfg.emoji} {sCfg.name}
+              {sCfg.icon && <i className={`fas ${sCfg.icon}`} />} {sCfg.name}
             </div>
             <div className="qmap-grid-exam">
               {s.questions.map((_, qi) => {
@@ -304,7 +304,7 @@ function ExamScreen({ subjects, currentSubIdx, currentQIdx, answers, onAnswer, o
                 style={{ '--pill-color': sCfg.color }}
                 onClick={() => onNav(si, 0)}
               >
-                {sCfg.emoji} {sCfg.name.split(' ')[0]}
+                {sCfg.icon && <i className={`fas ${sCfg.icon}`} />} {sCfg.name.split(' ')[0]}
                 <span className="pill-count">{done}/{s.questions.length}</span>
               </button>
             );
@@ -339,7 +339,7 @@ function ExamScreen({ subjects, currentSubIdx, currentQIdx, answers, onAnswer, o
         {/* Question */}
         <div className="exam-question-wrap">
           <div className="exam-q-header">
-            <span className="exam-q-label" style={{ color: cfg.color }}>{cfg.emoji} {cfg.name}</span>
+            <span className="exam-q-label" style={{ color: cfg.color }}>{cfg.icon && <i className={`fas ${cfg.icon}`} />} {cfg.name}</span>
             <span className="exam-q-num">Q{currentQIdx + 1} of {sub.questions.length}</span>
             {q.year && <span className="exam-year-tag">{q.year}</span>}
           </div>
@@ -466,7 +466,7 @@ function ResultsScreen({ subjects, answers, elapsed, mode, onReview, onRetry, on
           </div>
           <div>
             <div style={{ fontFamily:'var(--font-cbt-head)', fontSize:'1.1rem', fontWeight:800, color:'white', marginBottom:4 }}>
-              {pass ? '🎉 Excellent Work!' : '📚 Keep Practising'}
+              {pass ? <><i className="fas fa-trophy" /> Excellent Work!</> : <><i className="fas fa-book" /> Keep Practising</>}
             </div>
             <div className={`results-verdict ${pass?'pass':'fail'}`}>{pass ? 'PASSED' : 'FAILED'}</div>
             <div style={{ color:'rgba(255,255,255,.5)', fontSize:'.78rem', marginTop:6 }}>
@@ -482,14 +482,14 @@ function ResultsScreen({ subjects, answers, elapsed, mode, onReview, onRetry, on
             return (
               <div key={r.key} className="results-subj-row">
                 <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6 }}>
-                  <span>{cfg.emoji}</span>
+                  <span><i className={`fas ${cfg.icon || 'fa-book'}`} /></span>
                   <span style={{ fontWeight:700, fontSize:'.84rem', color:'white' }}>{cfg.name || r.name}</span>
                   <span style={{ marginLeft:'auto', fontWeight:800, color: r.pct>=50?'#34D399':'#F87171' }}>{r.pct}%</span>
                 </div>
                 <div style={{ display:'flex', gap:12, fontSize:'.72rem', color:'rgba(255,255,255,.5)' }}>
-                  <span style={{ color:'#34D399' }}>✓ {r.correct}</span>
-                  <span style={{ color:'#F87171' }}>✗ {r.wrong}</span>
-                  <span>— {r.skipped}</span>
+                  <span style={{ color:'#34D399' }}><i className="fas fa-check" /> {r.correct}</span>
+                  <span style={{ color:'#F87171' }}><i className="fas fa-times" /> {r.wrong}</span>
+                  <span style={{ color:'rgba(255,255,255,.4)' }}><i className="fas fa-minus" /> {r.skipped}</span>
                 </div>
               </div>
             );
@@ -550,7 +550,7 @@ function ReviewScreen({ subjects, answers, onBack }) {
       <div className="review-sub-tabs">
         {subjects.map((s,i) => (
           <button key={i} className={`review-sub-tab${i===si?' active':''}`} onClick={() => { setSi(i); setQi(0); }}>
-            {(SUBJECTS_CONFIG[s.key]||{}).emoji} {(SUBJECTS_CONFIG[s.key]||{}).name?.split(' ')[0] || s.key}
+            {(SUBJECTS_CONFIG[s.key]||{}).icon && <i className={`fas ${(SUBJECTS_CONFIG[s.key]||{}).icon}`} />} {(SUBJECTS_CONFIG[s.key]||{}).name?.split(' ')[0] || s.key}
           </button>
         ))}
       </div>
@@ -574,7 +574,7 @@ function ReviewScreen({ subjects, answers, onBack }) {
       {/* Question card */}
       <div className="review-question-card">
         <div className="exam-q-header">
-          <span className="exam-q-label" style={{ color:cfg.color }}>{cfg.emoji} {cfg.name}</span>
+          <span className="exam-q-label" style={{ color:cfg.color }}>{cfg.icon && <i className={`fas ${cfg.icon}`} />} {cfg.name}</span>
           <span className="exam-q-num">Q{qi+1}</span>
           {q.year && <span className="exam-year-tag">{q.year}</span>}
         </div>

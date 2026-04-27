@@ -10,7 +10,7 @@ const SUBJECTS = ['Mathematics','English','Physics','Chemistry','Biology','Econo
 const OPTION_KEYS = ['a','b','c','d'];
 const OPTION_LABELS = ['A','B','C','D'];
 
-function getOptionText(q, key) { return q[key] || q[`option_${key}`] || q.options?.[key] || ''; }
+function getOptionText(q, key) { return q[key] || q[`option_${key}`] || q.options?.[key] || q.option?.[key] || ''; }
 function getAnswer(q) { return (q.answer || q.correct_option || '').toLowerCase(); }
 
 /* ─── Setup screen ─── */
@@ -21,7 +21,7 @@ function SetupScreen({ onStart }) {
     <div className="quiz-setup">
       <div className="quiz-setup-card">
         <div className="quiz-setup-top">
-          <div style={{ fontSize:'2.5rem', marginBottom:10 }}>📝</div>
+          <div style={{ fontSize:'2.5rem', marginBottom:10, color:'var(--gold)' }}><i className="fas fa-file-alt" /></div>
           <h2 className="quiz-setup-title">NLTC Official Quiz</h2>
           <p className="quiz-setup-sub">Test yourself with our curated question bank</p>
         </div>
@@ -224,7 +224,7 @@ function ResultsScreen({ questions, answers, subject, elapsed, onReview, onRetry
         </svg>
         <div className="quiz-score-label">
           <div className="quiz-score-pct" style={{ color: pass ? 'var(--success)' : 'var(--error)' }}>{pct}%</div>
-          <div className="quiz-score-tag">{pass ? 'PASSED ✓' : 'TRY AGAIN'}</div>
+          <div className="quiz-score-tag">{pass ? <><i className="fas fa-check" /> PASSED</> : 'TRY AGAIN'}</div>
         </div>
       </div>
 
@@ -261,7 +261,7 @@ function ReviewScreen({ questions, answers, onBack }) {
 
   if (filtered.length === 0) return (
     <div className="quiz-review">
-      <div className="empty-state"><div className="empty-state-icon">🎉</div><h3>All correct!</h3><p>No {filter} questions to review.</p></div>
+      <div className="empty-state"><div className="empty-state-icon"><i className="fas fa-trophy" /></div><h3>All correct!</h3><p>No {filter} questions to review.</p></div>
       <div style={{ textAlign:'center', marginTop:16 }}>
         <button className="btn-outline" onClick={onBack}><i className="fas fa-arrow-left" /> Back to results</button>
       </div>

@@ -40,7 +40,7 @@ export default function LeaderboardView() {
     load();
   }, [currentUser]);
 
-  const MEDALS = ['🥇','🥈','🥉'];
+  const MEDALS = ['#1','#2','#3'];
 
   return (
     <div>
@@ -48,7 +48,7 @@ export default function LeaderboardView() {
 
       {myRank && (
         <div className="my-rank-banner">
-          <span className="my-rank-icon">🎯</span>
+          <span className="my-rank-icon"><i className="fas fa-crosshairs" /></span>
           <div>
             <div style={{ fontWeight:700, color:'var(--navy)' }}>Your Rank: #{myRank}</div>
             <div style={{ fontSize:'.78rem', color:'var(--text-3)' }}>Keep studying to climb higher!</div>
@@ -57,10 +57,10 @@ export default function LeaderboardView() {
       )}
 
       <div className="card">
-        <div className="card-header"><div className="card-title">🏆 Top 50 Students</div></div>
+        <div className="card-header"><div className="card-title"><i className="fas fa-trophy" style={{marginRight:6}} />Top 50 Students</div></div>
         {loading ? <SkeletonTable rows={10} cols={4} /> : users.length === 0 ? (
           <div className="empty-state" style={{ padding:40 }}>
-            <div className="empty-state-icon">🏆</div>
+            <div className="empty-state-icon"><i className="fas fa-trophy" /></div>
             <h3>No rankings yet</h3>
             <p>Start studying to appear on the leaderboard!</p>
           </div>
