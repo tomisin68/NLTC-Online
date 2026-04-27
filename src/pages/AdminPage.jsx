@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { collection, getDocs, query, orderBy, limit, addDoc, updateDoc, doc, deleteDoc, serverTimestamp, where } from 'firebase/firestore';
-import { db } from '../firebase';
-import { useAuth } from '../contexts/AuthContext';
+import { collection, getDocs, query, orderBy, limit, addDoc, updateDoc, doc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { db, auth } from '../firebase';
+import { useAuth, formatDate, timeAgo } from '../contexts/AuthContext';
 import { showToast } from '../contexts/ToastContext';
 import Modal from '../components/ui/Modal';
 import { SkeletonTable, SkeletonStatCard } from '../components/ui/Skeleton';
-import { formatDate, timeAgo } from '../contexts/AuthContext';
 import '../styles/admin.css';
 import '../styles/dashboard.css';
 
@@ -14,9 +14,9 @@ function AdminSidebar({ view, onNav, open, onClose }) {
   const { signOut, userData } = useAuth();
   return (
     <>
-      <div className={`sb-overlay${open?' show':''}`} onClick={onClose} />
-      <aside className={`sidebar${open?' open':''}`}>
-        <div className="sb-logo"><img src="/NLTC.png" alt="NLTC" className="sb-logo-img" /></div>
+      <div className={`sb-overlay${open ? ' show' : ''}`} onClick={onClose} />
+      <aside className={`sidebar${open ? ' open' : ''}`}>
+        <div className="sb-logo"><img src="/nltc-light.png" alt="NLTC Online" className="sb-logo-img" /></div>
         <div className="sb-user">
           <div className="sb-avatar" style={{ background:'linear-gradient(135deg,#F0A500,#FFBE33)' }}>A</div>
           <div>
@@ -26,25 +26,25 @@ function AdminSidebar({ view, onNav, open, onClose }) {
         </div>
         <nav className="sb-nav">
           <div className="sb-sec">Overview</div>
-          {[['overview','fas fa-chart-pie','Dashboard'],['analytics','fas fa-chart-line','Analytics']].map(([v,i,l]) => (
+          {[['overview','fas fa-chart-pie','Dashboard']].map(([v,i,l]) => (
             <button key={v} className={`sb-link${view===v?' active':''}`} onClick={() => { onNav(v); onClose(); }}>
               <i className={i} />{l}
             </button>
           ))}
           <div className="sb-sec">Management</div>
-          {[['students','fas fa-users','Students'],['videos','fas fa-film','Video Lessons'],['cbt','fas fa-laptop-code','CBT Manager'],['quicktests','fas fa-bolt','Quick Tests'],['mockexams','fas fa-file-alt','Mock Exams'],['centres','fas fa-school','Physical Centres'],['teachers','fas fa-chalkboard-teacher','Teachers']].map(([v,i,l]) => (
+          {[['students','fas fa-users','Students'],['videos','fas fa-film','Video Lessons'],['broadcasts','fas fa-bullhorn','Broadcasts']].map(([v,i,l]) => (
             <button key={v} className={`sb-link${view===v?' active':''}`} onClick={() => { onNav(v); onClose(); }}>
               <i className={i} />{l}
             </button>
           ))}
           <div className="sb-sec">Live &amp; Comms</div>
-          {[['live','fas fa-signal','Live Classes'],['broadcasts','fas fa-bullhorn','Broadcasts'],['schedule','fas fa-calendar-alt','Schedule']].map(([v,i,l]) => (
+          {[['live','fas fa-signal','Live Classes'],['schedule','fas fa-calendar-alt','Schedule']].map(([v,i,l]) => (
             <button key={v} className={`sb-link${view===v?' active':''}`} onClick={() => { onNav(v); onClose(); }}>
               <i className={i} />{l}
             </button>
           ))}
-          <div className="sb-sec">System</div>
-          {[['revenue','fas fa-money-bill-wave','Revenue'],['settings','fas fa-cog','Settings']].map(([v,i,l]) => (
+          <div className="sb-sec">Finance</div>
+          {[['revenue','fas fa-money-bill-wave','Revenue']].map(([v,i,l]) => (
             <button key={v} className={`sb-link${view===v?' active':''}`} onClick={() => { onNav(v); onClose(); }}>
               <i className={i} />{l}
             </button>
@@ -65,16 +65,21 @@ function OverviewView() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getDocs(query(collection(db,'users'), orderBy('createdAt','desc'), limit(100)))
-      .then(snap => {
-        const users = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    async function load() {
+      try {
+        // Get accurate total count
+        const allSnap = await getDocs(collection(db,'users'));
+        const users = allSnap.docs.map(d => ({ id:d.id, ...d.data() }));
         const pro = users.filter(u => u.plan==='pro').length;
         const elite = users.filter(u => u.plan==='elite').length;
         setStats({ total:users.length, pro, elite, free:users.length-pro-elite });
-        setStudents(users.slice(0,10));
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+        // Recent 10
+        const sorted = [...users].sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+        setStudents(sorted.slice(0,10));
+      } catch { }
+      setLoading(false);
+    }
+    load();
   }, []);
 
   const revenue = stats.pro * 5000 + stats.elite * 10000;
@@ -119,10 +124,16 @@ function StudentsView() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [planFilter, setPlanFilter] = useState('all');
+  const [selected, setSelected] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
-    getDocs(query(collection(db,'users'), orderBy('createdAt','desc')))
-      .then(snap => setStudents(snap.docs.map(d => ({ id:d.id, ...d.data() }))))
+    getDocs(collection(db,'users'))
+      .then(snap => {
+        const users = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+        setStudents(users.sort((a,b) => (b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)));
+      })
       .catch(() => setStudents([]))
       .finally(() => setLoading(false));
   }, []);
@@ -140,13 +151,28 @@ function StudentsView() {
     } catch { showToast('Update failed','error'); }
   }
 
+  async function sendPasswordReset(student) {
+    if (!student?.email) return;
+    setResetting(true);
+    try {
+      await sendPasswordResetEmail(auth, student.email);
+      showToast(`Password reset email sent to ${student.email}`, 'success');
+      setModalOpen(false);
+    } catch (err) {
+      showToast(err.message || 'Failed to send reset email', 'error');
+    }
+    setResetting(false);
+  }
+
+  function openStudent(s) { setSelected(s); setModalOpen(true); }
+
   return (
     <div>
-      <div className="page-hdr"><h2>Students</h2><p>{students.length} registered students</p></div>
+      <div className="page-hdr"><h2>Students</h2><p>{students.length} registered students total</p></div>
       <div className="filter-bar">
         <div className="filter-input-wrap" style={{ flex:1 }}>
           <i className="fas fa-search" />
-          <input className="filter-input" placeholder="Search students…" value={search} onChange={e=>setSearch(e.target.value)} />
+          <input className="filter-input" placeholder="Search by name or email…" value={search} onChange={e=>setSearch(e.target.value)} />
         </div>
         <select className="filter-select" value={planFilter} onChange={e=>setPlanFilter(e.target.value)}>
           <option value="all">All Plans</option>
@@ -156,25 +182,30 @@ function StudentsView() {
         </select>
       </div>
       <div className="card">
-        {loading ? <SkeletonTable rows={10} cols={6} /> : (
+        {loading ? <SkeletonTable rows={10} cols={7} /> : (
           <div className="table-wrap">
             <table className="data-table">
-              <thead><tr><th>Name</th><th>Email</th><th>State</th><th>Plan</th><th>XP</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Name</th><th>Email</th><th>State</th><th>Plan</th><th>XP</th><th>Change Plan</th><th>Actions</th></tr></thead>
               <tbody>
                 {filtered.map(s => (
                   <tr key={s.id}>
-                    <td style={{ fontWeight:700 }}>{s.firstName} {s.lastName}</td>
+                    <td style={{ fontWeight:700, whiteSpace:'nowrap' }}>{s.firstName} {s.lastName}</td>
                     <td style={{ color:'var(--text-3)', fontSize:'.78rem' }}>{s.email}</td>
                     <td style={{ color:'var(--text-3)' }}>{s.state||'—'}</td>
                     <td><span className={`plan-tag plan-${s.plan||'free'}`}>{s.plan||'free'}</span></td>
                     <td style={{ fontWeight:700, color:'var(--gold)' }}>{(s.xp||0).toLocaleString()}</td>
                     <td>
                       <select value={s.plan||'free'} onChange={e=>updatePlan(s.id,e.target.value)}
-                        style={{ padding:'4px 8px', borderRadius:6, border:'1px solid var(--border-2)', fontSize:'.74rem', cursor:'pointer' }}>
+                        style={{ padding:'4px 8px', borderRadius:6, border:'1px solid var(--border-2)', fontSize:'.74rem', cursor:'pointer', background:'white' }}>
                         <option value="free">Free</option>
                         <option value="pro">Pro</option>
                         <option value="elite">Elite</option>
                       </select>
+                    </td>
+                    <td>
+                      <button className="btn-outline btn-xs" onClick={() => openStudent(s)}>
+                        <i className="fas fa-user" /> View
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -183,6 +214,166 @@ function StudentsView() {
           </div>
         )}
       </div>
+
+      {/* Student detail modal */}
+      <Modal open={modalOpen} onClose={() => { setModalOpen(false); setSelected(null); }} title="Student Details">
+        {selected && (
+          <div>
+            <div className="admin-student-detail">
+              <div className="asd-avatar">{(selected.firstName?.[0]||'?').toUpperCase()}</div>
+              <div>
+                <div className="asd-name">{selected.firstName} {selected.lastName}</div>
+                <div className="asd-email">{selected.email}</div>
+              </div>
+            </div>
+            <div className="asd-grid">
+              <div className="asd-item"><span>Plan</span><span className={`plan-tag plan-${selected.plan||'free'}`}>{selected.plan||'free'}</span></div>
+              <div className="asd-item"><span>XP</span><strong>{(selected.xp||0).toLocaleString()}</strong></div>
+              <div className="asd-item"><span>Streak</span><strong>{selected.streak||0} days</strong></div>
+              <div className="asd-item"><span>Target Exam</span><strong>{selected.targetExam||'JAMB'}</strong></div>
+              <div className="asd-item"><span>State</span><strong>{selected.state||'—'}</strong></div>
+              <div className="asd-item"><span>Mode</span><strong>{selected.studentMode||'online'}</strong></div>
+            </div>
+
+            <div style={{ borderTop:'1px solid var(--border)', marginTop:16, paddingTop:16 }}>
+              <div style={{ fontWeight:700, fontSize:'.84rem', color:'var(--navy)', marginBottom:8 }}>Change Plan</div>
+              <select
+                defaultValue={selected.plan||'free'}
+                onChange={e => updatePlan(selected.id, e.target.value)}
+                className="form-select"
+                style={{ marginBottom:16 }}
+              >
+                <option value="free">Free</option>
+                <option value="pro">Pro (₦2,000)</option>
+                <option value="elite">Elite (₦5,000)</option>
+              </select>
+
+              <div style={{ fontWeight:700, fontSize:'.84rem', color:'var(--navy)', marginBottom:8 }}>Password Reset</div>
+              <p style={{ fontSize:'.8rem', color:'var(--text-3)', marginBottom:10 }}>
+                This will send a password reset email to <strong>{selected.email}</strong>. The student can then set a new password.
+              </p>
+              <button
+                className="btn-error"
+                style={{ width:'100%', justifyContent:'center' }}
+                onClick={() => sendPasswordReset(selected)}
+                disabled={resetting}
+              >
+                {resetting ? <span className="spinner spinner-white" style={{width:16,height:16}} /> : <><i className="fas fa-key" /> Send Password Reset Email</>}
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
+    </div>
+  );
+}
+
+/* ── Video Lessons (admin upload) ── */
+function VideosView() {
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({ title:'', subject:'', url:'', thumbnail:'', access:'free', duration:'' });
+  const SUBJECTS = ['Mathematics','English','Physics','Chemistry','Biology','Economics','Government','Literature','CRK','Accounting','Geography'];
+
+  useEffect(() => {
+    getDocs(query(collection(db,'videos'), orderBy('createdAt','desc')))
+      .then(snap => setVideos(snap.docs.map(d => ({ id:d.id, ...d.data() }))))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function saveVideo(e) {
+    e.preventDefault();
+    if (!form.title || !form.url) { showToast('Title and URL are required','error'); return; }
+    setSaving(true);
+    try {
+      const ref = await addDoc(collection(db,'videos'), { ...form, createdAt:serverTimestamp() });
+      setVideos(prev => [{ id:ref.id, ...form, createdAt:{ seconds:Date.now()/1000 } }, ...prev]);
+      setForm({ title:'', subject:'', url:'', thumbnail:'', access:'free', duration:'' });
+      setModalOpen(false);
+      showToast('Video added!', 'success');
+    } catch { showToast('Failed to add video','error'); }
+    setSaving(false);
+  }
+
+  async function deleteVideo(id) {
+    if (!window.confirm('Delete this video?')) return;
+    try {
+      await deleteDoc(doc(db,'videos',id));
+      setVideos(prev => prev.filter(v => v.id !== id));
+      showToast('Video deleted','success');
+    } catch { showToast('Delete failed','error'); }
+  }
+
+  return (
+    <div>
+      <div className="page-hdr" style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+        <div><h2>Video Lessons</h2><p>Manage all video content.</p></div>
+        <button className="btn-gold" onClick={() => setModalOpen(true)}><i className="fas fa-plus" /> Add Video</button>
+      </div>
+      <div className="card">
+        {loading ? <SkeletonTable rows={6} cols={5} /> : videos.length === 0 ? (
+          <div className="empty-state"><div className="empty-state-icon">🎬</div><h3>No videos yet</h3><p>Add your first video lesson.</p></div>
+        ) : (
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead><tr><th>Title</th><th>Subject</th><th>Access</th><th>Duration</th><th>Actions</th></tr></thead>
+              <tbody>
+                {videos.map(v => (
+                  <tr key={v.id}>
+                    <td style={{ fontWeight:700 }}>{v.title}</td>
+                    <td>{v.subject}</td>
+                    <td><span className={`plan-tag plan-${v.access||'free'}`}>{v.access||'free'}</span></td>
+                    <td style={{ color:'var(--text-3)' }}>{v.duration||'—'}</td>
+                    <td style={{ display:'flex', gap:6 }}>
+                      <a href={v.url} target="_blank" rel="noopener noreferrer" className="btn-outline btn-xs"><i className="fas fa-external-link-alt" /></a>
+                      <button className="btn-error btn-xs" onClick={() => deleteVideo(v.id)}><i className="fas fa-trash" /></button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Add Video Lesson">
+        <form onSubmit={saveVideo}>
+          <div className="form-group"><label className="form-label">Title *</label>
+            <input className="form-input" value={form.title} onChange={e=>setForm(p=>({...p,title:e.target.value}))} placeholder="e.g. JAMB Maths – Quadratic Equations" required />
+          </div>
+          <div className="form-row-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+            <div className="form-group"><label className="form-label">Subject</label>
+              <select className="form-select" value={form.subject} onChange={e=>setForm(p=>({...p,subject:e.target.value}))}>
+                {SUBJECTS.map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className="form-group"><label className="form-label">Access Level</label>
+              <select className="form-select" value={form.access} onChange={e=>setForm(p=>({...p,access:e.target.value}))}>
+                <option value="free">Free</option>
+                <option value="pro">Pro</option>
+                <option value="elite">Elite</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-group"><label className="form-label">Video URL * (YouTube or direct MP4)</label>
+            <input className="form-input" value={form.url} onChange={e=>setForm(p=>({...p,url:e.target.value}))} placeholder="https://youtube.com/watch?v=... or https://..." required />
+          </div>
+          <div className="form-group"><label className="form-label">Thumbnail URL</label>
+            <input className="form-input" value={form.thumbnail} onChange={e=>setForm(p=>({...p,thumbnail:e.target.value}))} placeholder="https://..." />
+          </div>
+          <div className="form-group"><label className="form-label">Duration</label>
+            <input className="form-input" value={form.duration} onChange={e=>setForm(p=>({...p,duration:e.target.value}))} placeholder="e.g. 45 min" />
+          </div>
+          <div style={{ display:'flex', gap:8 }}>
+            <button type="button" className="btn-outline" style={{ flex:1, justifyContent:'center' }} onClick={() => setModalOpen(false)}>Cancel</button>
+            <button type="submit" className="btn-gold" style={{ flex:2, justifyContent:'center' }} disabled={saving}>
+              {saving ? <span className="spinner spinner-white" style={{width:16,height:16}} /> : <><i className="fas fa-plus" /> Add Video</>}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
@@ -216,6 +407,14 @@ function BroadcastsView() {
     setSending(false);
   }
 
+  async function deleteBroadcast(id) {
+    try {
+      await deleteDoc(doc(db,'announcements',id));
+      setBroadcasts(prev => prev.filter(b => b.id !== id));
+      showToast('Deleted','success');
+    } catch { showToast('Delete failed','error'); }
+  }
+
   return (
     <div>
       <div className="page-hdr" style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
@@ -237,6 +436,9 @@ function BroadcastsView() {
                   <div className="annc-text">{b.body}</div>
                   <div className="annc-time">{timeAgo(b.createdAt)}</div>
                 </div>
+                <button className="btn-error btn-xs" style={{ flexShrink:0 }} onClick={() => deleteBroadcast(b.id)}>
+                  <i className="fas fa-trash" />
+                </button>
               </div>
             ))}
           </div>
@@ -274,7 +476,7 @@ function LiveView() {
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({ title:'', subject:'', channel:'' });
   const [saving, setSaving] = useState(false);
-  const { currentUser, userData } = useAuth();
+  const { userData } = useAuth();
 
   useEffect(() => {
     getDocs(query(collection(db,'liveSessions'), orderBy('createdAt','desc'), limit(20)))
@@ -288,16 +490,23 @@ function LiveView() {
     if (!form.title || !form.subject || !form.channel) { showToast('Fill all fields','error'); return; }
     setSaving(true);
     try {
+      const hostName = `${userData?.firstName||''} ${userData?.lastName||''}`.trim() || 'Admin';
       const ref = await addDoc(collection(db,'liveSessions'), {
-        ...form, status:'scheduled', viewerCount:0,
-        host: `${userData?.firstName} ${userData?.lastName}`,
-        createdAt:serverTimestamp(),
+        title: form.title,
+        subject: form.subject,
+        channel: form.channel,
+        status: 'scheduled',
+        viewerCount: 0,
+        hostName,
+        createdAt: serverTimestamp(),
       });
-      setSessions(prev => [{ id:ref.id, ...form, status:'scheduled', viewerCount:0 }, ...prev]);
+      setSessions(prev => [{ id:ref.id, ...form, status:'scheduled', viewerCount:0, hostName }, ...prev]);
       setModalOpen(false);
       setForm({ title:'', subject:'', channel:'' });
       showToast('Session created!','success');
-    } catch { showToast('Failed to create session','error'); }
+    } catch(err) {
+      showToast(err.message || 'Failed to create session','error');
+    }
     setSaving(false);
   }
 
@@ -309,6 +518,15 @@ function LiveView() {
     } catch { showToast('Update failed','error'); }
   }
 
+  async function deleteSession(id) {
+    if (!window.confirm('Delete this session?')) return;
+    try {
+      await deleteDoc(doc(db,'liveSessions',id));
+      setSessions(prev => prev.filter(s => s.id !== id));
+      showToast('Deleted','success');
+    } catch { showToast('Delete failed','error'); }
+  }
+
   return (
     <div>
       <div className="page-hdr" style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
@@ -317,24 +535,26 @@ function LiveView() {
       </div>
       <div className="card">
         {loading ? <SkeletonTable rows={5} cols={4} /> : sessions.length === 0 ? (
-          <div className="empty-state"><div className="empty-state-icon">📡</div><h3>No sessions yet</h3></div>
+          <div className="empty-state"><div className="empty-state-icon">📡</div><h3>No sessions yet</h3><p>Create your first live class.</p></div>
         ) : (
           <div className="table-wrap">
             <table className="data-table">
-              <thead><tr><th>Title</th><th>Subject</th><th>Status</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Title</th><th>Subject</th><th>Channel</th><th>Status</th><th>Viewers</th><th>Actions</th></tr></thead>
               <tbody>
                 {sessions.map(s => (
                   <tr key={s.id}>
                     <td style={{ fontWeight:700 }}>{s.title}</td>
                     <td>{s.subject}</td>
+                    <td style={{ fontFamily:'monospace', fontSize:'.75rem', color:'var(--text-3)' }}>{s.channel}</td>
                     <td>
                       <span className={`badge ${s.status==='live'?'badge-error':s.status==='ended'?'badge-navy':'badge-gold'}`}>
                         {s.status}
                       </span>
                     </td>
-                    <td style={{ display:'flex', gap:6 }}>
+                    <td style={{ color:'var(--text-3)' }}>{s.viewerCount||0}</td>
+                    <td style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
                       {s.status !== 'live' && s.status !== 'ended' && (
-                        <button className="btn-error btn-xs" onClick={() => setStatus(s.id,'live')}>
+                        <button className="btn-gold btn-xs" onClick={() => setStatus(s.id,'live')}>
                           <i className="fas fa-play" /> Go Live
                         </button>
                       )}
@@ -346,6 +566,7 @@ function LiveView() {
                           <button className="btn-outline btn-xs" onClick={() => setStatus(s.id,'ended')}>End</button>
                         </>
                       )}
+                      <button className="btn-error btn-xs" onClick={() => deleteSession(s.id)}><i className="fas fa-trash" /></button>
                     </td>
                   </tr>
                 ))}
@@ -356,19 +577,128 @@ function LiveView() {
       </div>
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Create Live Session">
         <form onSubmit={createSession}>
-          <div className="form-group"><label className="form-label">Session Title</label>
+          <div className="form-group"><label className="form-label">Session Title *</label>
             <input className="form-input" value={form.title} onChange={e=>setForm(p=>({...p,title:e.target.value}))} placeholder="e.g. JAMB Maths Intensive" required />
           </div>
-          <div className="form-group"><label className="form-label">Subject</label>
+          <div className="form-group"><label className="form-label">Subject *</label>
             <input className="form-input" value={form.subject} onChange={e=>setForm(p=>({...p,subject:e.target.value}))} placeholder="e.g. Mathematics" required />
           </div>
-          <div className="form-group"><label className="form-label">Channel Name</label>
-            <input className="form-input" value={form.channel} onChange={e=>setForm(p=>({...p,channel:e.target.value}))} placeholder="e.g. maths-live-001" required />
+          <div className="form-group"><label className="form-label">Channel Name *</label>
+            <input className="form-input" value={form.channel} onChange={e=>setForm(p=>({...p,channel:e.target.value}))} placeholder="e.g. maths-live-001 (no spaces)" required />
+            <p style={{ fontSize:'.74rem', color:'var(--text-3)', marginTop:4 }}>Use lowercase letters, numbers and hyphens only.</p>
           </div>
           <div style={{ display:'flex', gap:8 }}>
             <button type="button" className="btn-outline" style={{ flex:1, justifyContent:'center' }} onClick={() => setModalOpen(false)}>Cancel</button>
             <button type="submit" className="btn-gold" style={{ flex:2, justifyContent:'center' }} disabled={saving}>
-              {saving ? <span className="spinner spinner-white" style={{width:16,height:16}} /> : <><i className="fas fa-plus" /> Create</>}
+              {saving ? <span className="spinner spinner-white" style={{width:16,height:16}} /> : <><i className="fas fa-plus" /> Create Session</>}
+            </button>
+          </div>
+        </form>
+      </Modal>
+    </div>
+  );
+}
+
+/* ── Schedule ── */
+function ScheduleView() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({ title:'', subject:'', day:'Monday', time:'', duration:'60' });
+  const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+  useEffect(() => {
+    getDocs(collection(db,'schedule'))
+      .then(snap => setItems(snap.docs.map(d => ({ id:d.id, ...d.data() }))))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  async function saveSchedule(e) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const ref = await addDoc(collection(db,'schedule'), { ...form, createdAt:serverTimestamp() });
+      setItems(prev => [...prev, { id:ref.id, ...form }]);
+      setForm({ title:'', subject:'', day:'Monday', time:'', duration:'60' });
+      setModalOpen(false);
+      showToast('Schedule added!','success');
+    } catch { showToast('Failed','error'); }
+    setSaving(false);
+  }
+
+  async function deleteItem(id) {
+    try {
+      await deleteDoc(doc(db,'schedule',id));
+      setItems(prev => prev.filter(i => i.id !== id));
+    } catch { showToast('Delete failed','error'); }
+  }
+
+  const grouped = DAYS.reduce((acc, d) => {
+    acc[d] = items.filter(i => i.day === d);
+    return acc;
+  }, {});
+
+  return (
+    <div>
+      <div className="page-hdr" style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+        <div><h2>Schedule</h2><p>Manage weekly class timetable.</p></div>
+        <button className="btn-gold" onClick={() => setModalOpen(true)}><i className="fas fa-plus" /> Add Class</button>
+      </div>
+      {loading ? <div className="card"><SkeletonTable rows={5} cols={4} /></div> : (
+        DAYS.map(day => grouped[day].length > 0 && (
+          <div key={day} className="card" style={{ marginBottom:12 }}>
+            <div className="card-header"><div className="card-title">{day}</div></div>
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead><tr><th>Time</th><th>Title</th><th>Subject</th><th>Duration</th><th></th></tr></thead>
+                <tbody>
+                  {grouped[day].map(s => (
+                    <tr key={s.id}>
+                      <td style={{ fontWeight:700, color:'var(--gold)' }}>{s.time}</td>
+                      <td>{s.title}</td>
+                      <td>{s.subject}</td>
+                      <td style={{ color:'var(--text-3)' }}>{s.duration} min</td>
+                      <td><button className="btn-error btn-xs" onClick={() => deleteItem(s.id)}><i className="fas fa-trash" /></button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))
+      )}
+      {items.length === 0 && !loading && (
+        <div className="empty-state"><div className="empty-state-icon">📅</div><h3>No schedule yet</h3><p>Add your first class to the timetable.</p></div>
+      )}
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Add to Schedule">
+        <form onSubmit={saveSchedule}>
+          <div className="form-group"><label className="form-label">Class Title</label>
+            <input className="form-input" value={form.title} onChange={e=>setForm(p=>({...p,title:e.target.value}))} placeholder="e.g. JAMB Mathematics" required />
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+            <div className="form-group"><label className="form-label">Day</label>
+              <select className="form-select" value={form.day} onChange={e=>setForm(p=>({...p,day:e.target.value}))}>
+                {DAYS.map(d => <option key={d}>{d}</option>)}
+              </select>
+            </div>
+            <div className="form-group"><label className="form-label">Time</label>
+              <input className="form-input" type="time" value={form.time} onChange={e=>setForm(p=>({...p,time:e.target.value}))} required />
+            </div>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+            <div className="form-group"><label className="form-label">Subject</label>
+              <input className="form-input" value={form.subject} onChange={e=>setForm(p=>({...p,subject:e.target.value}))} placeholder="Mathematics" />
+            </div>
+            <div className="form-group"><label className="form-label">Duration (min)</label>
+              <input className="form-input" type="number" value={form.duration} onChange={e=>setForm(p=>({...p,duration:e.target.value}))} min={10} />
+            </div>
+          </div>
+          <div style={{ display:'flex', gap:8 }}>
+            <button type="button" className="btn-outline" style={{ flex:1, justifyContent:'center' }} onClick={() => setModalOpen(false)}>Cancel</button>
+            <button type="submit" className="btn-gold" style={{ flex:2, justifyContent:'center' }} disabled={saving}>
+              {saving ? <span className="spinner spinner-white" style={{width:16,height:16}} /> : <><i className="fas fa-plus" /> Add</>}
             </button>
           </div>
         </form>
@@ -379,20 +709,18 @@ function LiveView() {
 
 /* ── Revenue ── */
 function RevenueView() {
-  const [payments, setPayments] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ pro:0, elite:0 });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      getDocs(query(collection(db,'users'), where('plan','in',['pro','elite']))),
-    ]).then(([snap]) => {
-      const pro = snap.docs.filter(d => d.data().plan==='pro').length;
-      const elite = snap.docs.filter(d => d.data().plan==='elite').length;
-      setStats({ pro, elite });
-    }).catch(() => {});
-    // Simulated payment history
-    setLoading(false);
+    getDocs(collection(db,'users'))
+      .then(snap => {
+        const pro = snap.docs.filter(d => d.data().plan==='pro').length;
+        const elite = snap.docs.filter(d => d.data().plan==='elite').length;
+        setStats({ pro, elite });
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const mrr = stats.pro * 5000 + stats.elite * 10000;
@@ -401,12 +729,16 @@ function RevenueView() {
   return (
     <div>
       <div className="page-hdr"><h2>Revenue</h2><p>Financial overview and payment tracking.</p></div>
-      <div className="stats-grid">
-        <div className="stat-card s1"><div className="sc-icon blue"><i className="fas fa-chart-line" /></div><div className="sc-num">₦{mrr.toLocaleString()}</div><div className="sc-label">Estimated MRR</div></div>
-        <div className="stat-card s2"><div className="sc-icon gold"><i className="fas fa-fire" /></div><div className="sc-num">{stats.pro}</div><div className="sc-label">Pro Subscribers</div></div>
-        <div className="stat-card s3"><div className="sc-icon green"><i className="fas fa-star" /></div><div className="sc-num">{stats.elite}</div><div className="sc-label">Elite Subscribers</div></div>
-        <div className="stat-card s4"><div className="sc-icon teal"><i className="fas fa-percent" /></div><div className="sc-num">₦{fee.toLocaleString()}</div><div className="sc-label">Paystack Fees (est.)</div></div>
-      </div>
+      {loading ? (
+        <div className="stats-grid">{[1,2,3,4].map(i => <SkeletonStatCard key={i} />)}</div>
+      ) : (
+        <div className="stats-grid">
+          <div className="stat-card s1"><div className="sc-icon blue"><i className="fas fa-chart-line" /></div><div className="sc-num">₦{mrr.toLocaleString()}</div><div className="sc-label">Estimated MRR</div></div>
+          <div className="stat-card s2"><div className="sc-icon gold"><i className="fas fa-fire" /></div><div className="sc-num">{stats.pro}</div><div className="sc-label">Pro Subscribers</div></div>
+          <div className="stat-card s3"><div className="sc-icon green"><i className="fas fa-star" /></div><div className="sc-num">{stats.elite}</div><div className="sc-label">Elite Subscribers</div></div>
+          <div className="stat-card s4"><div className="sc-icon teal"><i className="fas fa-percent" /></div><div className="sc-num">₦{fee.toLocaleString()}</div><div className="sc-label">Paystack Fees (est.)</div></div>
+        </div>
+      )}
       <div className="card">
         <div className="card-header"><div className="card-title">Revenue Summary</div></div>
         <div className="card-body">
@@ -426,31 +758,24 @@ function RevenueView() {
 
 /* ── Main Admin Page ── */
 const VIEW_TITLES = {
-  overview:'Overview', analytics:'Analytics', students:'Students', videos:'Video Lessons',
-  cbt:'CBT Manager', quicktests:'Quick Tests', mockexams:'Mock Exams', centres:'Physical Centres',
-  teachers:'Teachers', live:'Live Classes', broadcasts:'Broadcasts', schedule:'Schedule',
-  revenue:'Revenue', settings:'Settings',
+  overview:'Overview', students:'Students', videos:'Video Lessons',
+  broadcasts:'Broadcasts', live:'Live Classes', schedule:'Schedule', revenue:'Revenue',
 };
 
 export default function AdminPage() {
-  const { userData } = useAuth();
   const [view, setView] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   function renderView() {
     switch (view) {
-      case 'overview':    return <OverviewView />;
-      case 'students':    return <StudentsView />;
-      case 'broadcasts':  return <BroadcastsView />;
-      case 'live':        return <LiveView />;
-      case 'revenue':     return <RevenueView />;
-      default: return (
-        <div className="empty-state" style={{ marginTop:60 }}>
-          <div className="empty-state-icon">🚧</div>
-          <h3>{VIEW_TITLES[view] || view}</h3>
-          <p>This section is coming soon.</p>
-        </div>
-      );
+      case 'overview':   return <OverviewView />;
+      case 'students':   return <StudentsView />;
+      case 'videos':     return <VideosView />;
+      case 'broadcasts': return <BroadcastsView />;
+      case 'live':       return <LiveView />;
+      case 'schedule':   return <ScheduleView />;
+      case 'revenue':    return <RevenueView />;
+      default:           return <OverviewView />;
     }
   }
 

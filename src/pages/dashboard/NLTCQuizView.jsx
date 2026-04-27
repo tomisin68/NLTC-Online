@@ -3,6 +3,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useBackendFetch } from '../../hooks/useBackendFetch';
 import { showToast } from '../../contexts/ToastContext';
+import Calculator from '../../components/ui/Calculator';
 
 /* ─── helpers ─── */
 const SUBJECTS = ['Mathematics','English','Physics','Chemistry','Biology','Economics','Government','Literature'];
@@ -100,6 +101,7 @@ function QuestionMap({ questions, answers, currentIdx, phase, onJump }) {
 
 /* ─── Exam screen ─── */
 function ExamScreen({ questions, answers, currentIdx, onAnswer, onPrev, onNext, onSubmit, timeLeft, subject }) {
+  const [calcOpen, setCalcOpen] = useState(false);
   const q = questions[currentIdx];
   const selectedAns = answers[currentIdx];
   const answeredCount = Object.keys(answers).length;
@@ -123,7 +125,16 @@ function ExamScreen({ questions, answers, currentIdx, onAnswer, onPrev, onNext, 
           {timeLeft !== null ? <><i className="fas fa-clock" /> {fmtTime(timeLeft)}</> : null}
         </div>
         <div className="quiz-answered-count">{answeredCount}/{questions.length} answered</div>
+        <button className="quiz-calc-btn" onClick={() => setCalcOpen(o => !o)} title="Calculator">
+          <i className="fas fa-calculator" />
+        </button>
       </div>
+
+      {calcOpen && (
+        <div className="quiz-calc-float">
+          <Calculator onClose={() => setCalcOpen(false)} />
+        </div>
+      )}
 
       {/* Progress bar */}
       <div style={{ height:3, background:'var(--surface-2)' }}>

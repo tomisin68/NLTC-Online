@@ -135,6 +135,15 @@
 .auth-switch { font-size: .8rem; color: var(--text-3); text-align: center; }
 .auth-link-btn { background: none; border: none; color: var(--gold); font-weight: 700; cursor: pointer; font-size: inherit; padding: 0; }
 .auth-link-btn:hover { color: var(--navy); }
+.auth-forgot-btn { text-align: right; font-size: .78rem; margin-bottom: 4px; display: block; }
+.auth-pwd-mismatch { font-size: .74rem; color: var(--error); margin-top: 4px; }
+
+/* ── Reset success ── */
+.auth-reset-success { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 8px 0; }
+.auth-reset-icon { font-size: 3rem; }
+.auth-reset-success h3 { font-family: var(--font-head); font-size: 1.2rem; font-weight: 800; color: var(--navy); margin: 0; }
+.auth-reset-success p { font-size: .84rem; color: var(--text-2); line-height: 1.6; margin: 0; }
+.auth-reset-tip { font-size: .76rem; color: var(--text-3); }
 
 /* ── Student mode toggle ── */
 .student-mode-toggle { display: flex; gap: 8px; }

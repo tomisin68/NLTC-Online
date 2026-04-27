@@ -6,3 +6,13 @@
 .annc-title { font-weight:700;font-size:.84rem;color:var(--navy);flex:1; }
 .annc-text { font-size:.77rem;color:var(--text-2);line-height:1.6; }
 .annc-time { font-size:.67rem;color:var(--text-3);margin-top:5px; }
+
+/* Student detail modal */
+.admin-student-detail { display:flex;align-items:center;gap:14px;padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid var(--border); }
+.asd-avatar { width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--navy),#1a3a5c);color:white;font-size:1.4rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.asd-name { font-size:1rem;font-weight:800;color:var(--navy);line-height:1.2; }
+.asd-email { font-size:.78rem;color:var(--text-3);margin-top:3px; }
+.asd-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px; }
+.asd-item { background:var(--surface);border-radius:var(--r-sm);padding:10px 12px;display:flex;flex-direction:column;gap:4px; }
+.asd-item span:first-child { font-size:.68rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;font-weight:600; }
+.asd-item span:last-child,.asd-item strong { font-size:.84rem;color:var(--navy);font-weight:700; }

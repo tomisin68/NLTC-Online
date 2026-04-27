@@ -5,6 +5,7 @@ import { db, ALOC_TOKEN } from '../firebase';
 import { useBackendFetch } from '../hooks/useBackendFetch';
 import { showToast } from '../contexts/ToastContext';
 import Modal from '../components/ui/Modal';
+import Calculator from '../components/ui/Calculator';
 import '../styles/cbt.css';
 
 /* ─── Constants ─── */
@@ -70,25 +71,48 @@ async function fetchAlocQuestions(subject, count = 40, examType = 'utme', onProg
 /* ═══════════════════════════════════════
    SETUP SCREEN
 ═══════════════════════════════════════ */
+const JAMB_OPTIONAL_SUBJECTS = Object.entries(SUBJECTS_CONFIG)
+  .filter(([k]) => k !== 'english')
+  .map(([k,v]) => ({ key:k, ...v }));
+
 function SetupScreen({ onStart, initialMode, initialSubject }) {
   const [mode, setMode] = useState(initialMode || 'jamb');
   const [subject, setSubject] = useState(initialSubject || 'mathematics');
   const [count, setCount] = useState(40);
   const [examType, setExamType] = useState('utme');
+  // JAMB: english is required + user picks up to 3 more
+  const [jambExtra, setJambExtra] = useState(['mathematics','physics','chemistry']);
+
+  const toggleJambSubject = (key) => {
+    setJambExtra(prev => {
+      if (prev.includes(key)) return prev.filter(k => k !== key);
+      if (prev.length >= 3) return prev; // max 3
+      return [...prev, key];
+    });
+  };
 
   const MODES = [
-    { k:'jamb',     icon:'🎯', name:'JAMB',     desc:'4 subjects · 180 qs · 2 hrs' },
+    { k:'jamb',     icon:'🎯', name:'JAMB',     desc:'English + 3 subjects · 2 hrs' },
     { k:'practice', icon:'🔁', name:'Practice', desc:'Custom subject & count' },
     { k:'waec',     icon:'📋', name:'WAEC',     desc:'1 subject · 45 min' },
     { k:'postutme', icon:'🏛️', name:'Post UTME', desc:'1 subject · 30 min' },
     { k:'topic',    icon:'📌', name:'Topic',    desc:'Practice by topic' },
   ];
 
+  function handleStart() {
+    if (mode === 'jamb') {
+      if (jambExtra.length === 0) { alert('Please select at least 1 subject alongside English.'); return; }
+      onStart({ mode, subject: jambExtra[0], count, examType, jambSubjects: jambExtra });
+    } else {
+      onStart({ mode, subject, count, examType });
+    }
+  }
+
   return (
     <div className="setup-screen">
       <div className="setup-card">
         <div className="setup-top">
-          <img src="/NLTC.png" alt="NLTC" style={{ height:44, marginBottom:12, margin:'0 auto 12px' }} />
+          <img src="/nltc-dark.png" alt="NLTC" style={{ height:44, marginBottom:12, margin:'0 auto 12px' }} />
           <h1 className="setup-title">CBT Exam Practice</h1>
           <p className="setup-sub">Choose your exam mode to get started</p>
         </div>
@@ -103,6 +127,32 @@ function SetupScreen({ onStart, initialMode, initialSubject }) {
               </div>
             ))}
           </div>
+
+          {mode === 'jamb' && (
+            <div className="jamb-subject-picker">
+              <div className="section-label">📖 English (Required)</div>
+              <div className="jamb-english-chip">
+                <span>📖 English Language</span>
+                <span className="jamb-chip-lock"><i className="fas fa-lock" /></span>
+              </div>
+              <div className="section-label" style={{ marginTop:12 }}>
+                Pick up to 3 more subjects ({jambExtra.length}/3)
+              </div>
+              <div className="jamb-subject-grid">
+                {JAMB_OPTIONAL_SUBJECTS.map(s => (
+                  <button
+                    key={s.key}
+                    className={`jamb-subj-chip${jambExtra.includes(s.key) ? ' selected' : ''}`}
+                    onClick={() => toggleJambSubject(s.key)}
+                    disabled={!jambExtra.includes(s.key) && jambExtra.length >= 3}
+                  >
+                    {s.emoji} {s.name}
+                    {jambExtra.includes(s.key) && <i className="fas fa-check" style={{ marginLeft:4 }} />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {mode !== 'jamb' && (
             <>
@@ -131,7 +181,7 @@ function SetupScreen({ onStart, initialMode, initialSubject }) {
             </div>
           )}
 
-          <button className="start-btn" onClick={() => onStart({ mode, subject, count, examType })}>
+          <button className="start-btn" onClick={handleStart}>
             <i className="fas fa-play" /> Start Exam
           </button>
 
@@ -148,7 +198,7 @@ function SetupScreen({ onStart, initialMode, initialSubject }) {
 function LoadingScreen({ subjects, progress }) {
   return (
     <div className="loading-screen">
-      <div className="loading-logo"><img src="/NLTC.png" alt="NLTC" style={{ height:48 }} /></div>
+      <div className="loading-logo"><img src="/nltc-dark.png" alt="NLTC" style={{ height:48 }} /></div>
       <div className="loading-status-txt">Loading your exam questions…</div>
       <div className="load-subjects">
         {subjects.map((s,i) => {
@@ -183,6 +233,7 @@ function LoadingScreen({ subjects, progress }) {
 function ExamScreen({ subjects, currentSubIdx, currentQIdx, answers, onAnswer, onNav, onSubmit, timeLeft, mode }) {
   const [mapOpen, setMapOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [calcOpen, setCalcOpen] = useState(false);
   const sub = subjects[currentSubIdx];
   if (!sub) return null;
   const q = sub.questions[currentQIdx];
@@ -240,7 +291,7 @@ function ExamScreen({ subjects, currentSubIdx, currentQIdx, answers, onAnswer, o
       {/* Topbar */}
       <div className="exam-topbar">
         <div className="exam-logo-sm">
-          <img src="/NLTC.png" alt="NLTC" style={{ height:32 }} />
+          <img src="/nltc-light.png" alt="NLTC" style={{ height:32 }} />
         </div>
         <div className="exam-subject-pills">
           {subjects.map((s,si) => {
@@ -266,7 +317,17 @@ function ExamScreen({ subjects, currentSubIdx, currentQIdx, answers, onAnswer, o
           <i className="fas fa-th" />
           <span className="exam-map-badge">{totalAnswered}</span>
         </button>
+        <button className="exam-calc-btn" onClick={() => setCalcOpen(o => !o)} title="Calculator">
+          <i className="fas fa-calculator" />
+        </button>
       </div>
+
+      {/* Floating calculator */}
+      {calcOpen && (
+        <div className="exam-calc-float">
+          <Calculator onClose={() => setCalcOpen(false)} />
+        </div>
+      )}
 
       {/* Progress bar */}
       <div className="exam-progress-bar">
@@ -586,18 +647,17 @@ export default function CBTPage() {
 
   function clearTimer() { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } }
 
-  async function handleStart({ mode, subject, count, examType }) {
+  async function handleStart({ mode, subject, count, examType, jambSubjects }) {
     modeRef.current = mode;
     setPhase('loading');
 
     let queue = [];
     if (mode === 'jamb') {
+      const extras = (jambSubjects || [subject || 'mathematics']).slice(0, 3);
       queue = [
-        { key:'english',     count:60 },
-        { key:subject||'mathematics', count:40 },
-        { key:'mathematics', count:40 },
-        { key:'economics',   count:40 },
-      ].filter((v,i,a)=>a.findIndex(x=>x.key===v.key)===i);
+        { key:'english', count:60 },
+        ...extras.map(k => ({ key:k, count:40 })),
+      ].filter((v,i,a) => a.findIndex(x=>x.key===v.key)===i);
     } else {
       queue = [{ key:subject, count }];
     }

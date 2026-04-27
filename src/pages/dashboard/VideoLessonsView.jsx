@@ -5,12 +5,19 @@ import { useAuth } from '../../contexts/AuthContext';
 import { showToast } from '../../contexts/ToastContext';
 import { SkeletonVideoCard } from '../../components/ui/Skeleton';
 
+function getYouTubeId(url) {
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
 function VideoPlayer({ video, onClose }) {
   const vidRef = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [speed, setSpeed] = useState(1);
   const SPEEDS = [0.5,0.75,1,1.25,1.5,2];
+  const ytId = getYouTubeId(video.url);
 
   function togglePlay() {
     if (!vidRef.current) return;
@@ -41,19 +48,36 @@ function VideoPlayer({ video, onClose }) {
           <button className="vp-close" onClick={onClose}><i className="fas fa-times" /></button>
         </div>
         <div className="vp-stage">
-          <video ref={vidRef} src={video.url} onTimeUpdate={onTimeUpdate} style={{width:'100%',maxHeight:'60vh',background:'#000'}} />
+          {ytId ? (
+            <iframe
+              width="100%" height="100%"
+              src={`https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0`}
+              title={video.title}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              style={{ aspectRatio:'16/9', minHeight:280 }}
+            />
+          ) : (
+            <video ref={vidRef} src={video.url} onTimeUpdate={onTimeUpdate}
+              style={{width:'100%',maxHeight:'60vh',background:'#000'}}
+              controls
+            />
+          )}
         </div>
-        <div className="vp-controls">
-          <div className="vp-progress" onClick={onSeekClick}>
-            <div className="vp-progress-fill" style={{width:`${progress}%`}} />
+        {!ytId && (
+          <div className="vp-controls">
+            <div className="vp-progress" onClick={onSeekClick}>
+              <div className="vp-progress-fill" style={{width:`${progress}%`}} />
+            </div>
+            <div className="vp-btns">
+              <button onClick={() => seek(-10)}><i className="fas fa-redo" style={{transform:'scaleX(-1)'}} />-10s</button>
+              <button onClick={togglePlay}><i className={`fas fa-${playing?'pause':'play'}`} /></button>
+              <button onClick={() => seek(10)}>+10s<i className="fas fa-redo" /></button>
+              <button onClick={cycleSpeed}>{speed}×</button>
+            </div>
           </div>
-          <div className="vp-btns">
-            <button onClick={() => seek(-10)}><i className="fas fa-redo" style={{transform:'scaleX(-1)'}} />-10s</button>
-            <button onClick={togglePlay}><i className={`fas fa-${playing?'pause':'play'}`} /></button>
-            <button onClick={() => seek(10)}>+10s<i className="fas fa-redo" /></button>
-            <button onClick={cycleSpeed}>{speed}×</button>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

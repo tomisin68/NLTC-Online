@@ -54,6 +54,16 @@
 .start-btn:hover { transform:translateY(-2px);box-shadow:0 8px 24px rgba(240,165,0,.4); }
 .powered-by { text-align:center;margin-top:10px;font-size:.7rem;color:var(--text-3); }
 
+/* JAMB subject picker */
+.jamb-subject-picker { margin-bottom:16px; }
+.jamb-english-chip { display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--gold-pale);border:1.5px solid var(--gold);border-radius:var(--r-sm);font-size:.83rem;font-weight:700;color:var(--navy);margin-bottom:4px; }
+.jamb-chip-lock { color:var(--gold);font-size:.75rem; }
+.jamb-subject-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:7px;margin-top:8px; }
+.jamb-subj-chip { padding:8px 12px;border:1.5px solid var(--border-2);border-radius:var(--r-sm);font-size:.78rem;font-weight:600;color:var(--text-2);cursor:pointer;background:white;transition:all .15s;text-align:left;display:flex;align-items:center;gap:4px; }
+.jamb-subj-chip:hover:not(:disabled) { border-color:var(--navy);background:var(--surface); }
+.jamb-subj-chip.selected { border-color:var(--gold);background:var(--gold-pale);color:var(--navy);font-weight:700; }
+.jamb-subj-chip:disabled { opacity:.4;cursor:not-allowed; }
+
 /* ─── Loading ─── */
 .loading-screen {
   min-height: 100vh;
@@ -105,6 +115,9 @@
 .exam-map-btn { position:relative;width:36px;height:36px;border-radius:var(--r-sm);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s; }
 .exam-map-btn:hover { background:rgba(255,255,255,.12); }
 .exam-map-badge { position:absolute;top:-4px;right:-4px;background:var(--gold);color:var(--navy);border-radius:100px;font-size:.52rem;font-weight:800;min-width:14px;height:14px;display:flex;align-items:center;justify-content:center;padding:0 3px; }
+.exam-calc-btn { width:36px;height:36px;border-radius:var(--r-sm);background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.25);color:var(--gold);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s;font-size:.85rem; }
+.exam-calc-btn:hover { background:rgba(245,166,35,.22); }
+.exam-calc-float { position:fixed;bottom:80px;right:16px;z-index:500;animation:slideUp .2s ease; }
 .exam-progress-bar { height:3px;background:rgba(255,255,255,.05); }
 
 .exam-body { flex:1;display:flex;gap:0;padding:16px;max-width:900px;margin:0 auto;width:100%; }

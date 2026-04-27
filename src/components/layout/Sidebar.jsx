@@ -53,9 +53,9 @@ export default function Sidebar({ activeView, onNav, open, onClose }) {
     <>
       <div className={`sb-overlay${open ? ' show' : ''}`} onClick={onClose} />
       <aside className={`sidebar${open ? ' open' : ''}`}>
-        {/* Logo */}
+        {/* Logo — light version on dark sidebar */}
         <div className="sb-logo">
-          <img src="/NLTC.png" alt="NLTC" className="sb-logo-img" />
+          <img src="/nltc-light.png" alt="NLTC Online" className="sb-logo-img" />
         </div>
 
         {/* User info */}
